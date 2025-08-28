@@ -1,5 +1,5 @@
 import { Locator, Page } from '@playwright/test';
-import { CustomerInfo, OrderItem, ShippingDetails, PaymentDetails, OrderData } from '../models/OrderTypes';
+import { CustomerInfo, OrderItem, ShippingDetails, PaymentDetails, OrderData } from '../../models/OrderTypes';
 
 export class AddOrderPage {
     private page: Page;

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { AddOrderPage } from '../../BigCommercePages/addOrderPage';
+import { AddOrderPage } from '../../BigCommercePages/Orders/addOrderPage';
 import { Homepage } from '../../BigCommercePages/homepage';
 import * as testData from '../../data/orderTestData.json';
 
