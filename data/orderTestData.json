@@ -1,0 +1,66 @@
+{
+    "testOrders": [
+        {
+            "description": "New customer with single item",
+            "customer": {
+                "type": "new",
+                "email": "test1@example.com",
+                "firstName": "John",
+                "lastName": "Doe",
+                "phone": "1234567890",
+                "address1": "123 Test St",
+                "city": "Test City",
+                "country": "United States",
+                "state": "CA",
+                "postalCode": "12345"
+            },
+            "items": [
+                {
+                    "productName": "Test Product 1",
+                    "quantity": 1,
+                    "price": 29.99,
+                    "sku": "TP001"
+                }
+            ],
+            "shipping": {
+                "method": "Standard Shipping",
+                "price": 5.99
+            },
+            "payment": {
+                "method": "Credit Card",
+                "amount": 35.98,
+                "status": "Pending"
+            }
+        },
+        {
+            "description": "Existing customer with multiple items",
+            "customer": {
+                "type": "existing",
+                "email": "test2@example.com"
+            },
+            "items": [
+                {
+                    "productName": "Test Product 2",
+                    "quantity": 2,
+                    "price": 19.99,
+                    "sku": "TP002"
+                },
+                {
+                    "productName": "Test Product 3",
+                    "quantity": 1,
+                    "price": 49.99,
+                    "sku": "TP003"
+                }
+            ],
+            "shipping": {
+                "method": "Express Shipping",
+                "price": 15.99
+            },
+            "payment": {
+                "method": "PayPal",
+                "amount": 105.96,
+                "status": "Pending"
+            }
+        }
+    ]
+}
