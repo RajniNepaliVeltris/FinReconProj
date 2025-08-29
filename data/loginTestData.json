@@ -1,0 +1,17 @@
+{
+  "loginTests": [
+    {
+      "description": "Valid login with admin user",
+      "username": "harish.lakkimsetti@pearson.com",
+      "password": "Manasa@123456789",
+      "expectedUrl": "/dashboard",
+      "expectedWelcomeText": "Welcome, harish.lakkimsetti@pearson.com!"
+    },
+    {
+      "description": "Invalid login with wrong password",
+      "username": "harish.lakkimsetti@pearson.com",
+      "password": "wrongpassword",
+      "expectedError": "Invalid email or password."
+    }
+  ]
+}

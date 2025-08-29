@@ -1,132 +1,84 @@
+import { Page } from '@playwright/test';
+
 // This file represents the base page functionality for BigCommerce.
 
-export class BigCommerceBasePage {
-  constructor() {
-    // Initialize common elements and functionality
+export class BasePage {
+  protected page: Page;
+
+  constructor(page: Page) {
+    this.page = page;
   }
 
-  navigateTo(url: string) {
-    // Implementation to navigate to a specific URL
-    window.location.href = url;
+  async navigateTo(url: string): Promise<void> {
+    await this.page.goto(url);
     console.log(`Navigated to: ${url}`);
   }
 
-  waitForElement(locator: string) {
-    // Implementation to wait for an element to be visible
-    const interval = setInterval(() => {
-      const element = document.evaluate(locator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-      if (element && (element as HTMLElement).offsetParent !== null) {
-        clearInterval(interval);
-        console.log(`Element is visible: ${locator}`);
-      }
-    }, 100);
+  async waitForElement(locator: string): Promise<void> {
+    await this.page.waitForSelector(locator);
+    console.log(`Waited for element: ${locator}`);
   }
 
-  clickElement(locator: string) {
-    // Implementation to click on an element
-    const element = document.evaluate(locator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (element) {
-      (element as HTMLElement).click();
-      console.log(`Clicked on element: ${locator}`);
+  async clickElement(locator: string): Promise<void> {
+    await this.page.click(locator);
+    console.log(`Clicked on element: ${locator}`);
+  }
+
+  async enterText(locator: string, text: string): Promise<void> {
+    await this.page.fill(locator, text);
+    console.log(`Entered text: ${text} into element: ${locator}`);
+  }
+
+  async verifyPageTitle(expectedTitle: string): Promise<void> {
+    const actualTitle = await this.page.title();
+    if (actualTitle !== expectedTitle) {
+      throw new Error(`Page title mismatch. Expected: ${expectedTitle}, Found: ${actualTitle}`);
     }
+    console.log(`Page title verified: ${expectedTitle}`);
   }
 
-  enterText(locator: string, text: string) {
-    // Implementation to enter text into an input field
-    const element = document.evaluate(locator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (element && (element as HTMLInputElement).tagName === "INPUT") {
-      const inputElement = element as HTMLInputElement;
-      inputElement.value = text;
-      inputElement.dispatchEvent(new Event("input"));
-      console.log(`Entered text: ${text} into element: ${locator}`);
-    }
-  }
-
-  navigateToDashboard() {
-    // Implementation to navigate to the BigCommerce dashboard
-    const dashboardUrl = "https://www.bigcommerce.com/dashboard"; // Example URL
-    window.location.href = dashboardUrl;
-    console.log("Navigated to BigCommerce dashboard");
-  }
-
-  verifyPageTitle(expectedTitle: string) {
-    // Implementation to verify the page title matches the expected title
-    const actualTitle = document.title;
-    if (actualTitle === expectedTitle) {
-      console.log(`Page title verified: ${expectedTitle}`);
-    } else {
-      console.error(`Page title mismatch. Expected: ${expectedTitle}, Found: ${actualTitle}`);
-    }
-  }
-
-  logout() {
-    // Implementation to log out from the BigCommerce account
+  async logout(): Promise<void> {
     const logoutButtonLocator = "//button[@id='logout']"; // Example locator
-    const logoutButton = document.evaluate(logoutButtonLocator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (logoutButton) {
-      (logoutButton as HTMLElement).click();
+    const logoutButton = this.page.locator(logoutButtonLocator);
+    if (await logoutButton.isVisible()) {
+      await logoutButton.click();
       console.log("Logged out from BigCommerce");
     }
   }
 
-  isElementVisible(locator: string): boolean {
-    // Implementation to check if an element is visible
-    const element = document.evaluate(locator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (element) {
-      const rect = (element as HTMLElement).getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    }
-    return false;
+  async isElementVisible(locator: string): Promise<boolean> {
+    return await this.page.isVisible(locator);
   }
 
-  getElementText(locator: string): string {
-    // Implementation to get the text of an element
-    const element = document.evaluate(locator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    return element ? (element as HTMLElement).innerText : "";
+  async getElementText(locator: string): Promise<string> {
+    return await this.page.textContent(locator) || '';
   }
 
-  selectDropdownOption(locator: string, option: string) {
-    // Implementation to select an option from a dropdown
-    const element = document.evaluate(locator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (element && (element as HTMLElement).tagName === "SELECT") {
-      const selectElement = element as HTMLSelectElement;
-      const options = Array.from(selectElement.options);
-      const targetOption = options.find(opt => opt.text === option);
-      if (targetOption) {
-        selectElement.value = targetOption.value;
-        selectElement.dispatchEvent(new Event("change"));
-      }
+  async selectDropdownOption(locator: string, option: string): Promise<void> {
+    await this.page.selectOption(locator, { label: option });
+  }
+
+  async scrollToElement(locator: string): Promise<void> {
+    await this.page.locator(locator).scrollIntoViewIfNeeded();
+  }
+
+  async takeScreenshot(fileName: string): Promise<void> {
+    await this.page.screenshot({ path: fileName });
+  }
+
+  async expandSideMenuOption(locator: string): Promise<void> {
+    const element = this.page.locator(locator);
+    const classAttribute = await element.getAttribute('class');
+    if (classAttribute && classAttribute.includes('collapsed')) {
+      await element.click();
     }
   }
 
-  scrollToElement(locator: string) {
-    // Implementation to scroll to a specific element
-    const element = document.evaluate(locator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (element) {
-      (element as HTMLElement).scrollIntoView({ behavior: "smooth" });
-    }
-  }
-
-  takeScreenshot(fileName: string) {
-    // Implementation to take a screenshot
-    console.log(`Taking screenshot is not directly supported in plain JavaScript. Use a testing framework like Playwright or Puppeteer.`);
-  }
-
-  expandSideMenuOption(locator: string) {
-    // Implementation to expand a side menu option
-    const element = document.evaluate(locator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (element && (element as HTMLElement).classList.contains("collapsed")) {
-      (element as HTMLElement).click();
-      console.log(`Expanded side menu option: ${locator}`);
-    }
-  }
-
-  collapseSideMenuOption(locator: string) {
-    // Implementation to collapse a side menu option
-    const element = document.evaluate(locator, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (element && !(element as HTMLElement).classList.contains("collapsed")) {
-      (element as HTMLElement).click();
-      console.log(`Collapsed side menu option: ${locator}`);
+  async collapseSideMenuOption(locator: string): Promise<void> {
+    const element = this.page.locator(locator);
+    const classAttribute = await element.getAttribute('class');
+    if (classAttribute && !classAttribute.includes('collapsed')) {
+      await element.click();
     }
   }
 }

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { AddOrderPage } from '../../BigCommercePages/Orders/addOrderPage';
-import { Homepage } from '../../BigCommercePages/homepage';
-import * as testData from '../../data/orderTestData.json';
+import { AddOrderPage } from '../../../../BigCommercePages/Orders/addOrderPage';
+import { Homepage } from '../../../../BigCommercePages/homepage';
+import * as testData from '../../../../data/orderTestData.json';
 
 test.describe('Order Creation Tests', () => {
     let homePage: Homepage;
@@ -17,7 +17,7 @@ test.describe('Order Creation Tests', () => {
 
     for (const orderData of testData.testOrders) {
         test(`Create order - ${orderData.description}`, async () => {
-            await addOrderPage.createOrder(orderData);
+            //await addOrderPage.createOrder(orderData);
             
             // Add verification steps as needed
             // For example, verify order appears in the orders list

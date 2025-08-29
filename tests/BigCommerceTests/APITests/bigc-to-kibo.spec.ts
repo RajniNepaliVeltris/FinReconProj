@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { convertBigCtoKibo } from '../../utils/helpers';
-import { insertEventStatus } from '../../utils/db';
+import { convertBigCtoKibo } from '../../../utils/helpers';
+import { insertEventStatus } from '../../../utils/db';
 
 test.describe('BigC to Kibo API', () => {
   test('should validate API conversion and database insertion', async ({ request }) => {
