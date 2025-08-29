@@ -4,7 +4,7 @@
       "description": "Valid login with admin user",
       "username": "harish.lakkimsetti@pearson.com",
       "password": "Manasa@123456789",
-      "expectedUrl": "/dashboard",
+      "expectedUrl": "https://store-5nfoomf2b4.mybigcommerce.com/manage/dashboard",
       "expectedWelcomeText": "Welcome, harish.lakkimsetti@pearson.com!"
     },
     {

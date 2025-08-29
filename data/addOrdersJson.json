@@ -1,0 +1,12 @@
+{
+  "orderProducts": [
+    {
+      "productName": "CompTIA Project+ Practice Tests",
+      "quantity": 1
+    },
+    {
+      "productName": "AWS Certified Solutions Architect",
+      "quantity": 2
+    }
+  ]
+}

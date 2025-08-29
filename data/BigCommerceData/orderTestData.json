@@ -9,14 +9,19 @@
                 "lastName": "Doe",
                 "phone": "1234567890",
                 "address1": "123 Test St",
+                "address2": "Apt 101",
                 "city": "Test City",
                 "country": "United States",
                 "state": "CA",
-                "postalCode": "12345"
+                "postalCode": "12345",
+                "exclusiveOffers": true,
+                "lineOfCredit": "5000",
+                "paymentTerms": "30 Days Payment Terms",
+                "customerGroup": "VIP"
             },
             "items": [
                 {
-                    "productName": "Test Product 1",
+                    "productName": "CompTIA Project+ Practice Tests",
                     "quantity": 1,
                     "price": 29.99,
                     "sku": "TP001"
@@ -40,7 +45,7 @@
             },
             "items": [
                 {
-                    "productName": "Test Product 2",
+                    "productName": "AWS Certified Solutions Architect",
                     "quantity": 2,
                     "price": 19.99,
                     "sku": "TP002"
