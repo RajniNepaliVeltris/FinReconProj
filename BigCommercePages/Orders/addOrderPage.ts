@@ -15,6 +15,9 @@ export class AddOrderPage {
     private countrySelect: Locator;
     private stateSelect: Locator;
     private postalCodeInput: Locator;
+    private passwordInput: Locator;
+    private confirmPasswordInput: Locator;
+    private lineOfCreditInput: Locator;
     
     // Product Selection Locators
     private addProductButton: Locator;
@@ -32,23 +35,26 @@ export class AddOrderPage {
         this.page = page;
         
         // Initialize all locators
-        this.customerTypeRadio = {
-            'existing': page.locator('//input[@name="customerType" and @value="existing"]'),
-            'new': page.locator('//input[@name="customerType" and @value="new"]')
+         this.customerTypeRadio = {
+            'existing': page.locator('#check-search-customer'),
+            'new': page.locator('#check-new-customer')
         };
-        this.emailInput = page.locator('//input[@aria-label="Email"]');
-        this.firstNameInput = page.locator('//input[@aria-label="First Name"]');
-        this.lastNameInput = page.locator('//input[@aria-label="Last Name"]');
-        this.phoneInput = page.locator('//input[@aria-label="Phone"]');
-        this.address1Input = page.locator('//input[@aria-label="Address"]');
-        this.cityInput = page.locator('//input[@aria-label="City"]');
-        this.countrySelect = page.locator('//select[@aria-label="Country"]');
-        this.stateSelect = page.locator('//select[@aria-label="State"]');
-        this.postalCodeInput = page.locator('//input[@aria-label="Postal Code"]');
+        this.emailInput = page.locator('#FormField_1');
+        this.firstNameInput = page.locator('#FormField_4');
+        this.lastNameInput = page.locator('#FormField_5');
+        this.phoneInput = page.locator('#FormField_7');
+        this.address1Input = page.locator('#FormField_8');
+        this.cityInput = page.locator('#FormField_10');
+        this.countrySelect = page.locator('#FormField_9');
+        this.stateSelect = page.locator('#FormField_12');
+        this.postalCodeInput = page.locator('#FormField_13');
+        this.passwordInput = page.locator('#FormField_2');
+        this.confirmPasswordInput = page.locator('#FormField_3');
+        this.lineOfCreditInput = page.locator('#FormField_26');
         
-        this.addProductButton = page.locator('//button[contains(text(), "Add Product")]');
-        this.productSearchInput = page.locator('//input[@aria-label="Search Products"]');
-        this.quantityInput = page.locator('//input[@aria-label="Quantity"]');
+        this.addProductButton = page.locator('#dialog-options-submit');
+        this.productSearchInput = page.locator('#quote-item-search');
+        this.quantityInput = page.locator('#qty');
         
         this.shippingMethodSelect = page.locator('//select[@aria-label="Shipping Method"]');
         
