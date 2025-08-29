@@ -10,7 +10,9 @@
     "paths": {
       "*": ["node_modules/*"]
     },
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "outDir": "./dist", // Compiled files go here
+    "rootDir": "./", // Source files are here
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]
