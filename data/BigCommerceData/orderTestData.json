@@ -19,7 +19,8 @@
                 "paymentTerms": "30 Days Payment Terms",
                 "customerGroup": "VIP",
                 "password": "DefaultPassword123",
-                "confirmPassword": "DefaultPassword123"
+                "confirmPassword": "DefaultPassword123",
+                "companyName":"exampleComapany"
             },
             "items": [
                 {
@@ -38,7 +39,17 @@
                 "amount": 35.98,
                 "status": "Pending"
             },
-            "expectedProductSubtotal": "29.99"
+            "expectedProductSubtotal": "29.99",
+            "expectedBillingDetails": {
+                "Name": "Harish Lakkimsetti",
+                "Company": "E-zewest Tech",
+                "Phone": "3453434534",
+                "Address": "624 near Pawan Hardware store Uttamnagar NDA Road",
+                "Suburb/City": "Pune",
+                "State/Province": "Maharashtra",
+                "Country": "India",
+                "ZIP/Postcode": "411023"
+            }
         },
         {
             "description": "Existing customer with multiple items",

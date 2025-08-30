@@ -57,7 +57,7 @@ test.describe('Create Order Flow', () => {
         const billingInfo = {
             firstName: orderData.customer.firstName || '',
             lastName: orderData.customer.lastName || '',
-            companyName: '',
+            companyName: orderData.customer.companyName || '',
             phoneNumber: orderData.customer.phone || '',
             addressLine1: orderData.customer.address1 || '',
             addressLine2: orderData.customer.address2 || '',
@@ -108,11 +108,44 @@ test.describe('Create Order Flow', () => {
         // Verify the subtotal
         await addOrderPage.verifySubtotal(orderData.expectedProductSubtotal || '');
 
-        //click on next for the shipping details
+        //click on next for the fulfillmentScreen
         await addOrderPage.clickNextButton();
+        //add the code fro verifying the Billing details 
 
-        // Submit the order
-        await page.locator('//button[contains(text(), "Create Order")]').click();
-        await expect(page.locator('//div[contains(text(), "Order created successfully")]')).toBeVisible();
-    });
+        // Verify billing address details
+        const expectedBillingDetails = {
+            Name: orderData.expectedBillingDetails?.Name || '',
+            Company: orderData.expectedBillingDetails?.Company || '',
+            Phone: orderData.expectedBillingDetails?.Phone || '',
+            Address: orderData.expectedBillingDetails?.Address || '',
+            "Suburb/City": orderData.expectedBillingDetails?.["Suburb/City"] || '',
+            "State/Province": orderData.expectedBillingDetails?.["State/Province"] || '',
+            Country: orderData.expectedBillingDetails?.Country || '',
+            "ZIP/Postcode": orderData.expectedBillingDetails?.["ZIP/Postcode"] || ''
+        };
+        await addOrderPage.verifyBillingAddressDetails(expectedBillingDetails);
+        // Select shipping method
+        await addOrderPage.selectShippingMethod('Custom');
+
+        // Set custom shipping details
+        const customShippingDetails = {
+            method: orderData.shipping.method || 'Custom Shipping',
+            cost: orderData.shipping.price?.toString() || '0.00'
+        };
+        await addOrderPage.setCustomShippingDetails(customShippingDetails);
+
+        await addOrderPage.clickNextButton();
+        // Implement the verification at the payment stage to verify the customer billing and shipping details
+        await addOrderPage.verifyPaymentCustomerBillingDetails(expectedBillingDetails);
+        await addOrderPage.verifyFulfillmentShippingDetails(expectedBillingDetails);
+        //verify the product items added at the payment stage
+        const expectedProducts = orderData.items.map(item => ({
+            name: item.productName,
+            quantity: item.quantity.toString(),
+            price: `$${item.price.toFixed(2)}`,
+            total: `$${(item.price * item.quantity).toFixed(2)}`
+        }));
+        await addOrderPage.verifyFulfillmentProductTable(expectedProducts);
+
+      });
 });

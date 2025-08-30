@@ -7,6 +7,8 @@ export class AddOrderPage {
 
     // Shipping Locators
     private shippingMethodSelect: Locator;
+    private shippingMethodInput: Locator;
+    private shippingCostInput: Locator;
     
     // Payment Locators
     private paymentMethodSelect: Locator;
@@ -73,6 +75,25 @@ export class AddOrderPage {
 
     // Subtotal Locator
     private subtotalPrice: Locator;
+
+    // Fulfillment Section Locators
+    private billingAddressRadio: Locator;
+    private newSingleAddressRadio: Locator;
+    private newMultipleAddressRadio: Locator;
+    private billingAddressDetails: Locator;
+    private fetchShippingQuotesLink: Locator;
+    private chooseShippingMethodSelect: Locator;
+
+    // Payment Section Locators
+    private customerBillingDetails: Locator;
+    private changeBillingDetailsLink: Locator;
+
+    // Fulfillment Details Locators
+    private shippingDetails: Locator;
+    private changeShippingDetailsLink: Locator;
+    private changeShippingMethodLink: Locator;
+    private fulfillmentProductTable: Locator;
+    private fulfillmentProductTableRows: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -146,6 +167,33 @@ export class AddOrderPage {
 
         // Initialize Subtotal Locator
         this.subtotalPrice = page.locator("//div[@id='itemSubtotal']//span");
+
+        // Initialize Fulfillment Section Locators
+        const fulfillmentBaseXPath = "//div[@class='orderMachineStateShipping']";
+        this.billingAddressRadio = page.locator(`${fulfillmentBaseXPath}//input[@id='shipping-billing']`);
+        this.newSingleAddressRadio = page.locator(`${fulfillmentBaseXPath}//input[@value='shipping-single']`);
+        this.newMultipleAddressRadio = page.locator(`${fulfillmentBaseXPath}//input[@value='shipping-multiple']`);
+        this.billingAddressDetails = page.locator(`${fulfillmentBaseXPath}//div[@id='shipItemsToBillingAddress']//div[@class='order-details']`);
+        this.fetchShippingQuotesLink = page.locator(`${fulfillmentBaseXPath}//fieldset[@class='shipping-method-form']//a[@class='fetchShippingQuotesLink']`);
+        this.chooseShippingMethodSelect = page.locator(`${fulfillmentBaseXPath}//fieldset[@class='shipping-method-form']//select[@id='chooseProvider']`);
+
+        // Initialize Shipping Method Locators
+        const shippingMethodBaseXPath = "//fieldset[@class='shipping-method-form']";
+        this.shippingMethodInput = page.locator(`${shippingMethodBaseXPath}//input[@id='customShippingMethod']`);
+        this.shippingCostInput = page.locator(`${shippingMethodBaseXPath}//input[@id='customShippingPrice']`);
+
+        // Initialize Payment Section Locators
+        const paymentCustomerBillingSectionXPath = "//div[@class='orderFormSummaryBillingDetailsContainer']";
+        this.customerBillingDetails = page.locator(`${paymentCustomerBillingSectionXPath}//div[@class='order-details']`);
+        this.changeBillingDetailsLink = page.locator(`${paymentCustomerBillingSectionXPath}//div[@class='order-details']//a[contains(@class,'orderFormChangeBillingDetailsLink')]`);
+
+        // Initialize Fulfillment Details Locators
+        const fulfillmentDetailsXPath = "//div[@class='orderFormSummaryShippingDetailsContainer']";
+        this.shippingDetails = page.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//dl`);
+        this.changeShippingDetailsLink = page.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//h3[contains(text(),'Shipping to:')]/following-sibling::a[contains(@class,'orderFormChangeShippingDetailsLink')]`);
+       this.changeShippingMethodLink = page.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//h3[contains(text(),'Shipping method:')]/following-sibling::a[contains(@class,'orderFormChangeShippingDetailsLink')]`);
+        this.fulfillmentProductTable = page.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid ')]//table`);
+        this.fulfillmentProductTableRows = page.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid ')]//table//tbody/tr`);
     }
 
     async setShippingDetails(shipping: ShippingDetails) {
@@ -160,16 +208,16 @@ export class AddOrderPage {
     async fillBillingInformation(billingInfo: {
         firstName: string;
         lastName: string;
-        companyName?: string;
-        phoneNumber?: string;
+        companyName: string;
+        phoneNumber: string;
         addressLine1: string;
-        addressLine2?: string;
+        addressLine2: string;
         suburbCity: string;
         country: string;
         stateProvince: string;
         zipPostcode: string;
-        poNumber?: string;
-        taxID?: string;
+        poNumber: string;
+        taxID: string;
         saveToAddressBook: boolean;
     }) {
         await this.billingFirstNameInput.fill(billingInfo.firstName);
@@ -339,6 +387,105 @@ export class AddOrderPage {
         console.log(`Subtotal '${expectedSubtotal}' is verified successfully.`);
     }
 
-  
-    
+    async selectBillingAddress() {
+        await this.billingAddressRadio.check();
+    }
+
+    async selectNewSingleAddress() {
+        await this.newSingleAddressRadio.check();
+    }
+
+    async selectNewMultipleAddress() {
+        await this.newMultipleAddressRadio.check();
+    }
+
+    async verifyBillingAddressDetails(expectedDetails: Record<string, string>) {
+        const actualDetails = await this.billingAddressDetails.locator("dl").allTextContents();
+        const actualDetailsMap: Record<string, string> = actualDetails.reduce((acc: Record<string, string>, detail: string) => {
+            const [key, value] = detail.split(":");
+            acc[key.trim()] = value.trim();
+            return acc;
+        }, {});
+
+        for (const [key, value] of Object.entries(expectedDetails)) {
+            if (actualDetailsMap[key] !== value) {
+                throw new Error(`Billing address detail mismatch for '${key}'. Expected: '${value}', Found: '${actualDetailsMap[key]}'`);
+            }
+        }
+        console.log("Billing address details are verified successfully.");
+    }
+
+    async fetchShippingQuotes() {
+        await this.fetchShippingQuotesLink.click();
+    }
+
+    //None or Custom
+    async selectShippingMethod(method: string) {
+        await this.chooseShippingMethodSelect.selectOption(method);
+    }
+
+    async setCustomShippingDetails(details: { method: string; cost: string }) {
+        await this.shippingMethodInput.fill(details.method);
+        await this.shippingCostInput.fill(details.cost);
+    }
+
+     async verifyPaymentCustomerBillingDetails(expectedDetails: Record<string, string>) {
+        const actualDetails = await this.customerBillingDetails.locator("dl").allTextContents();
+        const actualDetailsMap: Record<string, string> = actualDetails.reduce((acc: Record<string, string>, detail: string) => {
+            const [key, value] = detail.split(":");
+            acc[key.trim()] = value.trim();
+            return acc;
+        }, {});
+
+        for (const [key, value] of Object.entries(expectedDetails)) {
+            if (actualDetailsMap[key] !== value) {
+                throw new Error(`Billing detail mismatch for '${key}'. Expected: '${value}', Found: '${actualDetailsMap[key]}'`);
+            }
+        }
+        console.log("Billing details are verified successfully.");
+    }
+
+
+    async verifyFulfillmentShippingDetails(expectedDetails: Record<string, string>) {
+        const actualDetails = await this.shippingDetails.locator("dl").allTextContents();
+        const actualDetailsMap: Record<string, string> = actualDetails.reduce((acc: Record<string, string>, detail: string) => {
+            const [key, value] = detail.split(":");
+            acc[key.trim()] = value.trim();
+            return acc;
+        }, {});
+
+        for (const [key, value] of Object.entries(expectedDetails)) {
+            if (actualDetailsMap[key] !== value) {
+                throw new Error(`Shipping detail mismatch for '${key}'. Expected: '${value}', Found: '${actualDetailsMap[key]}'`);
+            }
+        }
+        console.log("Shipping details are verified successfully.");
+    }
+
+    async changeShippingDetails() {
+        await this.changeShippingDetailsLink.click();
+    }
+
+    async changeShippingMethod() {
+        await this.changeShippingMethodLink.click();
+    }
+
+
+    async verifyFulfillmentProductTable(expectedProducts: Array<{ name: string; quantity: string; price: string; total: string }>) {
+        for (const product of expectedProducts) {
+            const productRow = this.fulfillmentProductTableRows.locator(`text=${product.name}`);
+            if (await productRow.isVisible()) {
+                const quantity = await productRow.locator("td.quantity").textContent();
+                const price = await productRow.locator("td.price").textContent();
+                const total = await productRow.locator("td.total").textContent();
+
+                if (quantity?.trim() !== product.quantity || price?.trim() !== product.price || total?.trim() !== product.total) {
+                    throw new Error(`Product details mismatch for '${product.name}'. Expected: ${JSON.stringify(product)}, Found: { quantity: ${quantity}, price: ${price}, total: ${total} }`);
+                }
+                console.log(`Product '${product.name}' details are verified successfully.`);
+            } else {
+                throw new Error(`Product '${product.name}' is not found in the table.`);
+            }
+        }
+    }
 }
