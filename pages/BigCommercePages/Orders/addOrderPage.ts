@@ -95,6 +95,20 @@ export class AddOrderPage {
     private fulfillmentProductTable: Locator;
     private fulfillmentProductTableRows: Locator;
 
+    // Payment and Summary Section Locators
+    private paymentDropdown: Locator;
+    private manualDiscountInput: Locator;
+    private applyDiscountButton: Locator;
+    private couponInput: Locator;
+    private applyCouponButton: Locator;
+    private subtotalText: Locator;
+    private shippingText: Locator;
+    private grandTotalText: Locator;
+
+    // Comments and Notes Section Locators
+    private commentsInput: Locator;
+    private staffNotesInput: Locator;
+
     constructor(page: Page) {
         this.page = page;
         
@@ -194,6 +208,22 @@ export class AddOrderPage {
        this.changeShippingMethodLink = page.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//h3[contains(text(),'Shipping method:')]/following-sibling::a[contains(@class,'orderFormChangeShippingDetailsLink')]`);
         this.fulfillmentProductTable = page.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid ')]//table`);
         this.fulfillmentProductTableRows = page.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid ')]//table//tbody/tr`);
+
+        //PaymentMethod
+        this.paymentDropdown = page.locator(`//div[@class='payment-form']//select[@id='paymentMethod']`);
+        
+        const summarySectionXPath = "//div[contains(@class,'orderSummaryContainer')]";
+        this.subtotalText = page.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-subtotal')]/td`);
+        this.shippingText = page.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-shipping')]/td`);
+        this.grandTotalText = page.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-total')]/td/strong`);
+        this.manualDiscountInput = page.locator(`${summarySectionXPath}//div[contains(@class,'applyDiscountContainer')]//input[@id='discountAmount']`);
+        this.applyDiscountButton = page.locator(`${summarySectionXPath}//div[contains(@class,'applyDiscountContainer')]//button[contains(@class,'orderMachineApplyDiscountButton')]`);
+        this.couponInput = page.locator(`${summarySectionXPath}//div[contains(@class,'couponGiftCertificateContainer')]//input[contains(@id,'couponGiftCertificate')]`);
+        this.applyCouponButton = page.locator(`${summarySectionXPath}//div[contains(@class,'couponGiftCertificateContainer')]//button[contains(@class,'orderMachineCouponButton')]`);
+
+        
+        this.commentsInput = page.locator(`//textarea[@id="order-comment"]`);
+        this.staffNotesInput = page.locator(`//textarea[@id="staff-note"]`);
     }
 
     async setShippingDetails(shipping: ShippingDetails) {
@@ -487,5 +517,45 @@ export class AddOrderPage {
                 throw new Error(`Product '${product.name}' is not found in the table.`);
             }
         }
+    }
+
+    async selectPaymentMethod(method: string) {
+        await this.paymentDropdown.selectOption(method);
+    }
+
+    async applyManualDiscount(discount: string) {
+        await this.manualDiscountInput.fill(discount);
+        await this.applyDiscountButton.click();
+    }
+
+    async applyCoupon(couponCode: string) {
+        await this.couponInput.fill(couponCode);
+        await this.applyCouponButton.click();
+    }
+
+    async fillComments(comments: string) {
+        await this.commentsInput.fill(comments);
+    }
+
+    async fillStaffNotes(notes: string) {
+        await this.staffNotesInput.fill(notes);
+    }
+
+    async verifySummaryDetails(expectedSummary: { subtotal: string; shipping: string; grandTotal: string }) {
+        const actualSubtotal = await this.subtotalText.textContent();
+        const actualShipping = await this.shippingText.textContent();
+        const actualGrandTotal = await this.grandTotalText.textContent();
+
+        if (actualSubtotal?.trim() !== expectedSummary.subtotal.trim()) {
+            throw new Error(`Subtotal mismatch. Expected: ${expectedSummary.subtotal}, Found: ${actualSubtotal}`);
+        }
+        if (actualShipping?.trim() !== expectedSummary.shipping.trim()) {
+            throw new Error(`Shipping mismatch. Expected: ${expectedSummary.shipping}, Found: ${actualShipping}`);
+        }
+        if (actualGrandTotal?.trim() !== expectedSummary.grandTotal.trim()) {
+            throw new Error(`Grand Total mismatch. Expected: ${expectedSummary.grandTotal}, Found: ${actualGrandTotal}`);
+        }
+
+        console.log("Summary details verified successfully.");
     }
 }

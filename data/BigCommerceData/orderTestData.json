@@ -4,82 +4,91 @@
             "description": "New customer with single item",
             "customer": {
                 "type": "new",
-                "email": "test1@example.com",
-                "firstName": "John",
-                "lastName": "Doe",
-                "phone": "1234567890",
-                "address1": "123 Test St",
-                "address2": "Apt 101",
-                "city": "Test City",
+                "email": "newcustomer@TechCorp.com",
+                "firstName": "Alice",
+                "lastName": "Smith",
+                "phone": "9876543210",
+                "address1": "456 Elm Street",
+                "address2": "Suite 200",
+                "city": "Metropolis",
                 "country": "United States",
-                "state": "CA",
-                "postalCode": "12345",
+                "state": "NY",
+                "postalCode": "54321",
                 "exclusiveOffers": true,
-                "lineOfCredit": "5000",
-                "paymentTerms": "30 Days Payment Terms",
-                "customerGroup": "VIP",
-                "password": "DefaultPassword123",
-                "confirmPassword": "DefaultPassword123",
-                "companyName":"exampleComapany"
+                "lineOfCredit": "10000",
+                "paymentTerms": "Net 60",
+                "customerGroup": "Premium",
+                "password": "SecurePassword123@#$",
+                "confirmPassword": "SecurePassword123@#$",
+                "companyName": "TechCorp"
             },
             "items": [
                 {
-                    "productName": "CompTIA Project+ Practice Tests",
-                    "quantity": 1,
-                    "price": 29.99,
-                    "sku": "TP001"
+                    "productName": "Advanced Networking Guide",
+                    "quantity": 2,
+                    "price": 49.99,
+                    "sku": "ANG001"
                 }
             ],
             "shipping": {
-                "method": "Standard Shipping",
-                "price": 5.99
+                "method": "Priority Shipping",
+                "price": 9.99
             },
             "payment": {
-                "method": "Credit Card",
-                "amount": 35.98,
-                "status": "Pending"
+                "method": "PayPal",
+                "amount": 109.97,
+                "status": "Completed"
             },
-            "expectedProductSubtotal": "29.99",
+            "expectedProductSubtotal": "99.98",
             "expectedBillingDetails": {
-                "Name": "Harish Lakkimsetti",
-                "Company": "E-zewest Tech",
-                "Phone": "3453434534",
-                "Address": "624 near Pawan Hardware store Uttamnagar NDA Road",
-                "Suburb/City": "Pune",
-                "State/Province": "Maharashtra",
-                "Country": "India",
-                "ZIP/Postcode": "411023"
-            }
+                "Name": "Alice Smith",
+                "Company": "TechCorp",
+                "Phone": "9876543210",
+                "Address": "456 Elm Street Suite 200",
+                "Suburb/City": "Metropolis",
+                "State/Province": "NY",
+                "Country": "United States",
+                "ZIP/Postcode": "54321"
+            },
+            "comments": "Deliver to the front desk.",
+            "staffNotes": "Customer requested expedited processing."
         },
         {
             "description": "Existing customer with multiple items",
             "customer": {
                 "type": "existing",
-                "email": "test2@example.com"
+                "email": "existingcustomer@example.com"
             },
             "items": [
                 {
-                    "productName": "AWS Certified Solutions Architect",
-                    "quantity": 2,
-                    "price": 19.99,
-                    "sku": "TP002"
+                    "productName": "Cloud Computing Essentials",
+                    "quantity": 3,
+                    "price": 29.99,
+                    "sku": "CCE002"
                 },
                 {
-                    "productName": "Test Product 3",
+                    "productName": "Data Science Handbook",
                     "quantity": 1,
-                    "price": 49.99,
-                    "sku": "TP003"
+                    "price": 59.99,
+                    "sku": "DSH003"
                 }
             ],
             "shipping": {
-                "method": "Express Shipping",
-                "price": 15.99
+                "method": "Standard Shipping",
+                "price": 12.99
             },
             "payment": {
-                "method": "PayPal",
-                "amount": 105.96,
+                "method": "Bank Transfer",
+                "amount": 162.95,
                 "status": "Pending"
-            }
+            },
+            "expectedPaymentSummary": {
+                "subtotal": "149.96",
+                "shipping": "12.99",
+                "grandTotal": "162.95"
+            },
+            "comments": "Leave package at the back door.",
+            "staffNotes": "Customer prefers evening delivery."
         }
     ]
 }

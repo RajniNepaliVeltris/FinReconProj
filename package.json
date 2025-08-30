@@ -14,5 +14,23 @@
     "test:api": "npx playwright test --grep @service",
     "test:smoke": "npx playwright test --grep @smoke",
     "test:regression": "npx playwright test --grep @regression"
-  }
+  },
+  "name": "finreconautomation",
+  "version": "1.0.0",
+  "description": "This repository contains a modular and extendable QA automation framework built with TypeScript and Playwright. It supports UI, API, Smoke, and Regression testing.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RajniNepaliVeltris/FinReconProj.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RajniNepaliVeltris/FinReconProj/issues"
+  },
+  "homepage": "https://github.com/RajniNepaliVeltris/FinReconProj#readme"
 }

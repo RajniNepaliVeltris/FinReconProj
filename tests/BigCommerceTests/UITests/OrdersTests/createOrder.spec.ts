@@ -5,7 +5,10 @@ import { AddOrderPage } from '../../../../pages/BigCommercePages/Orders/addOrder
 import orderTestData from '../../../../data/BigCommerceData/orderTestData.json';
 import loginTestData from '../../../../data/BigCommerceData/loginTestData.json';
 
+// Test Suite: Create Order Flow
 test.describe('Create Order Flow', () => {
+
+    // Precondition: Login as admin user
     test.beforeEach(async ({ page }) => {
         const loginPage = new LoginPage(page);
         await loginPage.navigateToLoginPage();
@@ -15,15 +18,18 @@ test.describe('Create Order Flow', () => {
         if (!loginData) {
             throw new Error("Login data not found for description: Valid login with admin user");
         }
+
+        // Perform login
         await loginPage.login(loginData.username, loginData.password);
 
-        // Ensure expectedUrl is defined before using it
+        // Verify successful login
         if (!loginData.expectedUrl) {
             throw new Error("Expected URL is not defined for the login data.");
         }
         await expect(page).toHaveURL(loginData.expectedUrl);
     });
 
+    // Test Case: Create a new order with Standard Product for a new customer
     test('Create a new order with Standard Product for a new customer', async ({ page }) => {
         const addOrderPage = new AddOrderPage(page);
 
@@ -33,16 +39,16 @@ test.describe('Create Order Flow', () => {
             throw new Error("Order data not found for description: New customer with single item");
         }
 
-        // Navigate to Orders - Add Order
+        // Step 1: Navigate to Orders - Add Order
         const homepage = new Homepage(page);
         await homepage.navigateToSideMenuOption('Orders', 'Add');
         await expect(page).toHaveURL('/manage/orders/add-order');
         await expect(page.locator('//h1')).toHaveText('Add an Order');
 
-        // Select New Customer
+        // Step 2: Select New Customer
         await addOrderPage.selectNewCustomer();
 
-        // Fill new customer details
+        // Step 3: Fill new customer details
         await addOrderPage.fillNewCustomerDetails({
             email: orderData.customer.email,
             password: orderData.customer.password || "DefaultPassword123",
@@ -52,8 +58,8 @@ test.describe('Create Order Flow', () => {
             paymentTerms: orderData.customer.paymentTerms || '',
             customerGroup: orderData.customer.customerGroup || ''
         });
-        
-        // Create an order using fetched data
+
+        // Step 4: Fill billing information
         const billingInfo = {
             firstName: orderData.customer.firstName || '',
             lastName: orderData.customer.lastName || '',
@@ -71,22 +77,17 @@ test.describe('Create Order Flow', () => {
         };
         await addOrderPage.fillBillingInformation(billingInfo);
 
-        //click on Next to proceed with Add items page
+        // Step 5: Proceed to Add Items page
         await addOrderPage.clickNextButton();
-        
-        
-        // Add a specific number of products from JSON
+
+        // Step 6: Add products
         const productCount = 1; // Specify the number of products to add
         for (let i = 0; i < Math.min(productCount, orderData.items.length); i++) {
             const customProductDetails = orderData.items[i];
 
-            // Click on add custom product
+            // Add custom product
             await addOrderPage.clickAddCustomProductLink();
-
-            // Verify the add custom dialogue is open
             await addOrderPage.verifyCustomProductDialogOpen();
-
-            // Add the product details
             await addOrderPage.addCustomProductDetails({
                 name: customProductDetails.productName,
                 sku: customProductDetails.sku,
@@ -95,7 +96,7 @@ test.describe('Create Order Flow', () => {
             });
         }
 
-        //Verify the Products Items records are added
+        // Step 7: Verify added products
         for (const item of orderData.items.slice(0, productCount)) {
             await addOrderPage.verifyProductInTable({
                 name: item.productName,
@@ -105,14 +106,13 @@ test.describe('Create Order Flow', () => {
             });
         }
 
-        // Verify the subtotal
+        // Step 8: Verify subtotal
         await addOrderPage.verifySubtotal(orderData.expectedProductSubtotal || '');
 
-        //click on next for the fulfillmentScreen
+        // Step 9: Proceed to Fulfillment page
         await addOrderPage.clickNextButton();
-        //add the code fro verifying the Billing details 
 
-        // Verify billing address details
+        // Step 10: Verify billing address details
         const expectedBillingDetails = {
             Name: orderData.expectedBillingDetails?.Name || '',
             Company: orderData.expectedBillingDetails?.Company || '',
@@ -124,21 +124,25 @@ test.describe('Create Order Flow', () => {
             "ZIP/Postcode": orderData.expectedBillingDetails?.["ZIP/Postcode"] || ''
         };
         await addOrderPage.verifyBillingAddressDetails(expectedBillingDetails);
-        // Select shipping method
+
+        // Step 11: Select shipping method
         await addOrderPage.selectShippingMethod('Custom');
 
-        // Set custom shipping details
+        // Step 12: Set custom shipping details
         const customShippingDetails = {
             method: orderData.shipping.method || 'Custom Shipping',
             cost: orderData.shipping.price?.toString() || '0.00'
         };
         await addOrderPage.setCustomShippingDetails(customShippingDetails);
 
+        // Step 13: Proceed to Payment page
         await addOrderPage.clickNextButton();
-        // Implement the verification at the payment stage to verify the customer billing and shipping details
+
+        // Step 14: Verify payment and fulfillment details
         await addOrderPage.verifyPaymentCustomerBillingDetails(expectedBillingDetails);
         await addOrderPage.verifyFulfillmentShippingDetails(expectedBillingDetails);
-        //verify the product items added at the payment stage
+
+        // Step 15: Verify product items at payment stage
         const expectedProducts = orderData.items.map(item => ({
             name: item.productName,
             quantity: item.quantity.toString(),
@@ -147,5 +151,16 @@ test.describe('Create Order Flow', () => {
         }));
         await addOrderPage.verifyFulfillmentProductTable(expectedProducts);
 
-      });
+        // Step 16: Add order comments and staff notes
+        await addOrderPage.fillComments(orderData.comments || 'Default customer comment');
+        await addOrderPage.fillStaffNotes(orderData.staffNotes || 'Default staff note');
+
+        // Step 17: Select payment method and verify summary details
+        await addOrderPage.selectPaymentMethod(orderData.payment.method || '');
+        await addOrderPage.verifySummaryDetails({
+            subtotal: orderData.expectedPaymentSummary?.subtotal || '',
+            shipping: orderData.expectedPaymentSummary?.shipping || '',
+            grandTotal: orderData.expectedPaymentSummary?.grandTotal || ''
+        });
+    });
 });
