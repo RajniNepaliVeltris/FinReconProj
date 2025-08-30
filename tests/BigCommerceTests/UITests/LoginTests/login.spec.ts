@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../../../BigCommercePages/loginPage';
-import loginTestData from '../../../../data/loginTestData.json';
+import { LoginPage } from '../../../../pages/BigCommercePages/Login/loginPage';
+import loginTestData from '../../../../data/BigCommerceData/loginTestData.json';
 
 type LoginTest = {
   description: string;
