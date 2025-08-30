@@ -1,15 +1,10 @@
-import { Locator, Page } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 import { CustomerInfo, OrderItem, ShippingDetails, PaymentDetails, OrderData } from '../../../models/OrderTypes';
 
 export class AddOrderPage {
     private page: Page;
 
-    
-    // Product Selection Locators
-    private addProductButton: Locator;
-    private productSearchInput: Locator;
-    private quantityInput: Locator;
-    
+
     // Shipping Locators
     private shippingMethodSelect: Locator;
     
@@ -32,7 +27,6 @@ export class AddOrderPage {
     private billingTaxIDInput: Locator;
     private billingSaveToAddressBookCheckbox: Locator;
 
-
     // Dynamic UI for New Customer Locators
     private newCustomerEmailInput: Locator;
     private newCustomerPasswordInput: Locator;
@@ -53,15 +47,38 @@ export class AddOrderPage {
     private productSearchResultItem: Locator;
     private productViewLink: Locator;
 
+    // Customer Information Locators
+    private existingCustomerRadio: Locator;
+    private newCustomerRadio: Locator;
+    private customerSearchInput: Locator;
+    private selectedCustomerLabel: Locator;
+
+    // Button Locators
+    private cancelButton: Locator;
+    private backButton: Locator;
+    private nextButton: Locator;
+    private saveButton: Locator;
+
+    // Custom Product Dialog Locators
+    private customProductNameInput: Locator;
+    private customProductSKUInput: Locator;
+    private customProductPriceInput: Locator;
+    private customProductQuantityInput: Locator;
+    private customProductAddItemButton: Locator;
+    private customProductCloseButton: Locator;
+
+    // Table Locators
+    private productTable: Locator;
+    private productTableRows: Locator;
+
+    // Subtotal Locator
+    private subtotalPrice: Locator;
+
     constructor(page: Page) {
         this.page = page;
         
         // Initialize all locators
-        
-        this.addProductButton = page.locator('#dialog-options-submit');
-        this.productSearchInput = page.locator('#quote-item-search');
-        this.quantityInput = page.locator('#qty');
-        
+
         this.shippingMethodSelect = page.locator('//select[@aria-label="Shipping Method"]');
         
         this.paymentMethodSelect = page.locator('//select[@aria-label="Payment Method"]');
@@ -81,7 +98,7 @@ export class AddOrderPage {
         this.billingPONumberInput = page.locator(`${billingBaseXPath}//input[contains(@class,'po-field')]`);
         this.billingTaxIDInput = page.locator(`${billingBaseXPath}//input[contains(@class,'tax-id')]`);
         this.billingSaveToAddressBookCheckbox = page.locator("//input[@id='saveBillingAddress']");
-
+        //AccountDeatils for new customer information
         const customerInfoBaseXPath = "//fieldset//span[text()='Customer information']//..//..";
         this.newCustomerEmailInput = page.locator(`${customerInfoBaseXPath}//input[@value='EmailAddress']/following-sibling::input`);
         this.newCustomerPasswordInput = page.locator(`${customerInfoBaseXPath}//input[@value='Password']/following-sibling::input`);
@@ -99,14 +116,36 @@ export class AddOrderPage {
         this.productSearchResultsList = page.locator("//div[@id='productAutocompleteResults']//ul");
         this.productSearchResultItem = page.locator("//div[@id='productAutocompleteResults']//li[contains(@class, 'ui-menu-item')]//strong");
         this.productViewLink = page.locator("//div[@id='productAutocompleteResults']//li[contains(@class, 'ui-menu-item')]//a[text()='View product']");
-    }
 
-    async addOrderItem(item: OrderItem) {
-        await this.addProductButton.click();
-        await this.productSearchInput.fill(item.productName);
-        await this.page.waitForTimeout(500); // Wait for search results
-        await this.page.locator(`//div[contains(text(), "${item.productName}")]`).click();
-        await this.quantityInput.fill(item.quantity.toString());
+        // Initialize Customer Information Locators
+        this.existingCustomerRadio = page.locator(`${customerInfoBaseXPath}//input[@type='radio'][@id='check-search-customer']`);
+        this.newCustomerRadio = page.locator(`${customerInfoBaseXPath}//input[@type='radio'][@id='check-new-customer']`);
+        this.customerSearchInput = page.locator(`${customerInfoBaseXPath}//fieldset//span[text()='Customer information']//..//..//input[@id='orderForSearch']`);
+        this.selectedCustomerLabel = page.locator(`${customerInfoBaseXPath}//div[@id='selected-customer-form']/div`);
+
+        // Initialize Button Locators
+        const buttonBaseXPath = "//div[@class='field-group']//ul[@class='field-action']";
+        this.cancelButton = page.locator(`${buttonBaseXPath}//a[contains(@class,'orderMachineCancelButton')]`);
+        this.backButton = page.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineBackButton')]`);
+        this.nextButton = page.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineNextButton')]`);
+        this.saveButton = page.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineSaveButton')]`);
+
+        // Initialize Custom Product Dialog Locators
+        const customProductDialogXPath = "//div[@id='dialog-options']//div[@id='orderCustomizeItemTabs']";
+        this.customProductNameInput = page.locator(`${customProductDialogXPath}//input[@id='product-name']`);
+        this.customProductSKUInput = page.locator(`${customProductDialogXPath}//input[@id='product-sku']`);
+        this.customProductPriceInput = page.locator(`${customProductDialogXPath}//input[@name='price']`);
+        this.customProductQuantityInput = page.locator(`${customProductDialogXPath}//input[@id='product-quantity']`);
+        this.customProductAddItemButton = page.locator(`//div[@id='dialog-options']//button[@id='dialog-options-submit']`);
+        this.customProductCloseButton = page.locator(`//div[@id='dialog-options']//button[@class='btn-dialog-close']`);
+
+        // Initialize Product Table Locators
+        const tableBaseXPath = "//div[@class='orderItemsGrid']//table";
+        this.productTable = page.locator(`${tableBaseXPath}`);
+        this.productTableRows = page.locator(`${tableBaseXPath}//tr`);
+
+        // Initialize Subtotal Locator
+        this.subtotalPrice = page.locator("//div[@id='itemSubtotal']//span");
     }
 
     async setShippingDetails(shipping: ShippingDetails) {
@@ -181,6 +220,8 @@ export class AddOrderPage {
     async addCustomProduct() {
         await this.addCustomProductLink.click();
         console.log("Adding a custom product.");
+        await this.page.waitForTimeout(500); // Wait for any animations
+        
     }
 
     async selectProductFromSearchResults(productName: string) {
@@ -203,23 +244,101 @@ export class AddOrderPage {
         }
     }
 
-    async createOrder(orderData: OrderData) {
-        // Existin or New
-        //Set Billing Address
-        //Add Product existing product by search or add a custom product or by browsing a product category
-
-        
-        for (const item of orderData.items) {
-            await this.addOrderItem(item);
-        }
-        
-        await this.setShippingDetails(orderData.shipping);
-        await this.setPaymentDetails(orderData.payment);
-        
-        // Click submit button
-        await this.page.locator('//button[contains(text(), "Create Order")]').click();
-        
-        // Wait for order creation confirmation
-        await this.page.waitForSelector('//div[contains(text(), "Order created successfully")]');
+    async selectExistingCustomer() {
+        await this.existingCustomerRadio.check();
     }
+
+    async selectNewCustomer() {
+        await this.newCustomerRadio.check();
+    }
+
+    async searchCustomer(customerName: string) {
+        await this.customerSearchInput.fill(customerName);
+        await this.page.waitForTimeout(500); // Wait for search results
+    }
+
+    async getSelectedCustomer() {
+        return await this.selectedCustomerLabel.textContent();
+    }
+
+    async clickCancelButton() {
+        await this.cancelButton.click();
+    }
+
+    async clickBackButton() {
+        await this.backButton.click();
+    }
+
+    async clickNextButton() {
+        await this.nextButton.click();
+    }
+
+    async clickSaveButton() {
+        await this.saveButton.click();
+    }
+
+    async addCustomProductDetails(productDetails: {
+        name: string;
+        sku: string;
+        price: string;
+        quantity: string;
+    }) {
+        await this.customProductNameInput.fill(productDetails.name);
+        await this.customProductSKUInput.fill(productDetails.sku);
+        await this.customProductPriceInput.fill(productDetails.price);
+        await this.customProductQuantityInput.fill(productDetails.quantity);
+        await this.customProductAddItemButton.click();
+    }
+
+    async closeCustomProductDialog() {
+        await this.customProductCloseButton.click();
+    }
+
+    async clickAddCustomProductLink() {
+        await this.addCustomProductLink.click();
+    }
+
+    async verifyCustomProductDialogOpen() {
+        await expect(this.customProductNameInput).toBeVisible();
+    }
+
+    async verifyProductInTable(productDetails: {
+        name: string;
+        sku?: string;
+        price?: string;
+        quantity?: string;
+    }) {
+        const productRow = this.productTableRows.locator(`text=${productDetails.name}`);
+        if (await productRow.isVisible()) {
+            console.log(`Product '${productDetails.name}' is displayed in the table.`);
+
+            if (productDetails.sku || productDetails.price || productDetails.quantity) {
+                const sku = await productRow.locator(".quoteItemSku").textContent();
+                const price = await productRow.locator("input[name='price']").getAttribute("value");
+                const quantity = await productRow.locator("input[name='quantity']").getAttribute("value");
+
+                if (
+                    (productDetails.sku && sku !== productDetails.sku) ||
+                    (productDetails.price && price !== productDetails.price) ||
+                    (productDetails.quantity && quantity !== productDetails.quantity)
+                ) {
+                    throw new Error(`Product details do not match. Expected: ${JSON.stringify(productDetails)}, Found: { sku: ${sku}, price: ${price}, quantity: ${quantity} }`);
+                }
+                console.log(`Product '${productDetails.name}' details are verified successfully.`);
+            }
+        } else {
+            throw new Error(`Product '${productDetails.name}' is not found in the table.`);
+        }
+    }
+
+    async verifySubtotal(expectedSubtotal: string) {
+        const actualSubtotal = await this.subtotalPrice.textContent();
+        if (actualSubtotal?.trim() !== expectedSubtotal.trim()) {
+            throw new Error(`Subtotal does not match. Expected: ${expectedSubtotal}, Found: ${actualSubtotal}`);
+        }
+        console.log(`Subtotal '${expectedSubtotal}' is verified successfully.`);
+    }
+
+  
+    
 }

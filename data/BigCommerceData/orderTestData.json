@@ -17,7 +17,9 @@
                 "exclusiveOffers": true,
                 "lineOfCredit": "5000",
                 "paymentTerms": "30 Days Payment Terms",
-                "customerGroup": "VIP"
+                "customerGroup": "VIP",
+                "password": "DefaultPassword123",
+                "confirmPassword": "DefaultPassword123"
             },
             "items": [
                 {
@@ -35,7 +37,8 @@
                 "method": "Credit Card",
                 "amount": 35.98,
                 "status": "Pending"
-            }
+            },
+            "expectedProductSubtotal": "29.99"
         },
         {
             "description": "Existing customer with multiple items",

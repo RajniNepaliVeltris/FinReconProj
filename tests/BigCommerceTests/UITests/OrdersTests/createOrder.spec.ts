@@ -16,6 +16,8 @@ test.describe('Create Order Flow', () => {
             throw new Error("Login data not found for description: Valid login with admin user");
         }
         await loginPage.login(loginData.username, loginData.password);
+
+        // Ensure expectedUrl is defined before using it
         if (!loginData.expectedUrl) {
             throw new Error("Expected URL is not defined for the login data.");
         }
@@ -35,7 +37,22 @@ test.describe('Create Order Flow', () => {
         const homepage = new Homepage(page);
         await homepage.navigateToSideMenuOption('Orders', 'Add');
         await expect(page).toHaveURL('/manage/orders/add-order');
+        await expect(page.locator('//h1')).toHaveText('Add an Order');
 
+        // Select New Customer
+        await addOrderPage.selectNewCustomer();
+
+        // Fill new customer details
+        await addOrderPage.fillNewCustomerDetails({
+            email: orderData.customer.email,
+            password: orderData.customer.password || "DefaultPassword123",
+            confirmPassword: orderData.customer.confirmPassword || "DefaultPassword123",
+            exclusiveOffers: orderData.customer.exclusiveOffers || false,
+            lineOfCredit: orderData.customer.lineOfCredit || '',
+            paymentTerms: orderData.customer.paymentTerms || '',
+            customerGroup: orderData.customer.customerGroup || ''
+        });
+        
         // Create an order using fetched data
         const billingInfo = {
             firstName: orderData.customer.firstName || '',
@@ -54,12 +71,45 @@ test.describe('Create Order Flow', () => {
         };
         await addOrderPage.fillBillingInformation(billingInfo);
 
-        for (const item of orderData.items) {
-            await addOrderPage.addOrderItem(item);
+        //click on Next to proceed with Add items page
+        await addOrderPage.clickNextButton();
+        
+        
+        // Add a specific number of products from JSON
+        const productCount = 1; // Specify the number of products to add
+        for (let i = 0; i < Math.min(productCount, orderData.items.length); i++) {
+            const customProductDetails = orderData.items[i];
+
+            // Click on add custom product
+            await addOrderPage.clickAddCustomProductLink();
+
+            // Verify the add custom dialogue is open
+            await addOrderPage.verifyCustomProductDialogOpen();
+
+            // Add the product details
+            await addOrderPage.addCustomProductDetails({
+                name: customProductDetails.productName,
+                sku: customProductDetails.sku,
+                price: customProductDetails.price.toString(),
+                quantity: customProductDetails.quantity.toString()
+            });
         }
 
-        await addOrderPage.setShippingDetails(orderData.shipping);
-        await addOrderPage.setPaymentDetails(orderData.payment);
+        //Verify the Products Items records are added
+        for (const item of orderData.items.slice(0, productCount)) {
+            await addOrderPage.verifyProductInTable({
+                name: item.productName,
+                sku: item.sku,
+                price: item.price?.toString(),
+                quantity: item.quantity?.toString()
+            });
+        }
+
+        // Verify the subtotal
+        await addOrderPage.verifySubtotal(orderData.expectedProductSubtotal || '');
+
+        //click on next for the shipping details
+        await addOrderPage.clickNextButton();
 
         // Submit the order
         await page.locator('//button[contains(text(), "Create Order")]').click();
