@@ -6,22 +6,38 @@ This repository contains a modular and extendable QA automation framework built 
 
 ```
 ├── tests/
-│   ├── ui/                # UI tests
-│   │   └── login.spec.ts  # Sample UI test
-│   ├── api/               # API tests
-│   │   └── bigc-to-kibo.spec.ts  # Sample API test
-│   ├── smoke/             # Smoke tests
-│   ├── regression/        # Regression tests
-├── mocks/                 # Mockoon configs for fake BigC API
-├── postman/               # Postman collections + Newman runner config
-├── utils/                 # Utility functions
-│   ├── db.ts              # SQL Server DB utility
-│   ├── apiUtils.ts        # Helpers for API calls
-│   └── helpers.ts         # Common utilities
-├── playwright.config.ts   # Playwright configuration
-├── package.json           # NPM scripts and dependencies
-├── .env                   # Environment variables (DB + API credentials)
-├── README.md              # Project documentation
+│   ├── BigCommerceTests/
+│   │   ├── APITests/          # API tests for BigCommerce
+│   │   ├── UITests/           # UI tests for BigCommerce
+│   │   │   ├── LoginTests/    # Login-related tests
+│   │   │   ├── OrdersTests/   # Order-related tests
+│   ├── PearsonVuesTests/      # Tests for Pearson Vue
+├── pages/
+│   ├── BigCommercePages/      # BigCommerce-specific pages
+│   │   ├── Base/              # Base page classes
+│   │   ├── Dashboard/         # Dashboard-related pages
+│   │   ├── Login/             # Login-related pages
+│   │   ├── Orders/            # Order-related pages
+│   ├── PerasonVuewPages/      # Pages for Pearson Vue
+│   ├── abc/                   # Miscellaneous pages
+├── data/
+│   ├── BigCommerceData/       # Data for BigCommerce tests
+│   ├── PersonVueData/         # Data for Pearson Vue tests
+│   ├── addOrdersJson.json     # Additional order data
+├── mocks/                     # Mockoon configs for fake APIs
+├── postman/                   # Postman collections + Newman runner config
+├── utils/                     # Utility functions
+│   ├── db.ts                  # SQL Server DB utility
+│   ├── apiUtils.ts            # Helpers for API calls
+│   └── helpers.ts             # Common utilities
+├── test-results/              # Test result reports
+│   ├── index.html             # HTML report
+│   └── report.json            # JSON report
+├── playwright.config.ts       # Playwright configuration
+├── package.json               # NPM scripts and dependencies
+├── tsconfig.json              # TypeScript configuration
+├── .env                       # Environment variables (DB + API credentials)
+├── README.md                  # Project documentation
 ```
 
 ## Features
@@ -29,10 +45,12 @@ This repository contains a modular and extendable QA automation framework built 
 1. **UI Testing**: Built with Playwright and Page Object Model.
 2. **API Testing**: Uses Playwright's request API.
 3. **Postman Integration**: Run collections in CI/CD pipelines.
-4. **Mockoon Integration**: Consume fake BigC API.
+4. **Mockoon Integration**: Consume fake APIs.
 5. **Database Utility**: SQL Server operations using `mssql` library.
 6. **Test Tagging**: Run specific test categories using tags.
 7. **Reporting**: HTML and JSON reports with screenshots and videos on failure.
+8. **Data-Driven Testing**: Test data stored in JSON files for flexibility.
+9. **Page Object Model**: Encapsulates UI interactions in reusable classes.
 
 ## Setup
 
