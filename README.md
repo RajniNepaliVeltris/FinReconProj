@@ -105,6 +105,48 @@ This repository contains a modular and extendable QA automation framework built 
 
 Test results are available in the `test-results` folder. Open `test-results/index.html` to view the HTML report.
 
+## Using Existing Chrome Instance for Tests
+
+### Overview
+You can run tests using an existing Chrome instance with preserved login state. This is useful when:
+- You need to maintain login sessions between test runs
+- You want to debug tests with the same browser state
+- You want faster test execution by reusing the browser instance
+
+### Setup Steps
+
+1. **Launch Chrome with Remote Debugging**
+   ```powershell
+   # Run the provided PowerShell script
+   .\start-chrome-debug.ps1
+   ```
+   This starts Chrome with:
+   - Remote debugging port: 9222
+   - User data directory: C:\ChromeDebug
+
+2. **Manual Login**
+   - Use the launched Chrome instance
+   - Log into your application
+   - Keep the Chrome window open
+
+3. **Run Tests**
+   ```powershell
+   # Run tests with existing Chrome instance
+   npx playwright test --project=existing-chrome
+   ```
+
+### Important Notes
+- Keep the Chrome instance running during test execution
+- Chrome debug profile is saved at `C:\ChromeDebug`
+- Login session persists between test runs
+- Do not close the Chrome window between test runs
+- Port 9222 must be available
+
+### Restarting Later
+1. Run `start-chrome-debug.ps1`
+2. Log in once
+3. Run your tests
+
 ## License
 
 This project is licensed under the MIT License.
