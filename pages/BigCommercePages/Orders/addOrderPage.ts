@@ -109,6 +109,9 @@ export class AddOrderPage {
     private commentsInput: Locator;
     private staffNotesInput: Locator;
 
+    //Save and Process Payment Button
+    private saveAndProcessPaymentButton: Locator;
+
     constructor(page: Page) {
         this.page = page;
         
@@ -224,6 +227,7 @@ export class AddOrderPage {
         
         this.commentsInput = page.locator(`//textarea[@id="order-comment"]`);
         this.staffNotesInput = page.locator(`//textarea[@id="staff-note"]`);
+        this.saveAndProcessPaymentButton = page.locator("//button[@data-saveandprocesspayment='Save & process payment »']");
     }
 
     async setShippingDetails(shipping: ShippingDetails) {

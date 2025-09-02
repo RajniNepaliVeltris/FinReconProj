@@ -1,0 +1,10 @@
+{
+  "user": "pearsonadmin",
+  "password": "Fall@2020",
+  "server": "vue-dv-bpkdb.database.windows.net",
+  "database": "devdb-BigC",
+  "options": {
+    "encrypt": true,
+    "trustServerCertificate": true
+  }
+}

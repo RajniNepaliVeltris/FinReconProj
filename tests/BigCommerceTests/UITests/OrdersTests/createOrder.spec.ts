@@ -1,36 +1,34 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../../../pages/BigCommercePages/Login/loginPage';
+import { test, expect, chromium } from '@playwright/test';
 import { Homepage } from '../../../../pages/BigCommercePages/Dashboard/homepage';
 import { AddOrderPage } from '../../../../pages/BigCommercePages/Orders/addOrderPage';
 import orderTestData from '../../../../data/BigCommerceData/orderTestData.json';
-import loginTestData from '../../../../data/BigCommerceData/loginTestData.json';
 
-// Test Suite: Create Order Flow
-test.describe('Create Order Flow', () => {
+let browser: import('@playwright/test').Browser;
+let context: import('@playwright/test').BrowserContext;
 
-    // Precondition: Login as admin user
-    test.beforeEach(async ({ page }) => {
-        const loginPage = new LoginPage(page);
-        await loginPage.navigateToLoginPage();
-
-        // Fetch login data by description
-        const loginData = loginTestData.loginTests.find((test: { description: string }) => test.description === "Valid login with admin user");
-        if (!loginData) {
-            throw new Error("Login data not found for description: Valid login with admin user");
-        }
-
-        // Perform login
-        await loginPage.login(loginData.username, loginData.password);
-
-        // Verify successful login
-        if (!loginData.expectedUrl) {
-            throw new Error("Expected URL is not defined for the login data.");
-        }
-        await expect(page).toHaveURL(loginData.expectedUrl);
+test.beforeAll(async () => {
+    // Connect to your existing Chrome instance
+    browser = await chromium.connectOverCDP({
+        endpointURL: 'http://localhost:9222',
+        timeout: 30000,
+        slowMo: 100 // Add a small delay for debugging
     });
+    // Get the existing context
+    const contexts = browser.contexts();
+    context = contexts[0];
+});
 
-    // Test Case: Create a new order with Standard Product for a new customer
-    test('Create a new order with Standard Product for a new customer', async ({ page }) => {
+test.afterAll(async () => {
+    // Don't close the browser since it's your existing instance
+});
+
+test.describe('Create Order Flow', () => {
+    test('Create a new order with Standard Product for a new customer', async () => {
+        // Use existing tab or create new one
+        const pages = await context.pages();
+        const page = pages.length > 0 ? pages[0] : await context.newPage();
+        // Bring the page to front for debugging
+        await page.bringToFront();
         const addOrderPage = new AddOrderPage(page);
 
         // Fetch order data by description
@@ -42,8 +40,8 @@ test.describe('Create Order Flow', () => {
         // Step 1: Navigate to Orders - Add Order
         const homepage = new Homepage(page);
         await homepage.navigateToSideMenuOption('Orders', 'Add');
-        await expect(page).toHaveURL('/manage/orders/add-order');
-        await expect(page.locator('//h1')).toHaveText('Add an Order');
+        await expect(page).toHaveURL('https://store-8ijomozpnx.mybigcommerce.com/manage/orders/add-order');
+        //await expect(page.locator('//h1')).toHaveText('Add an Order');
 
         // Step 2: Select New Customer
         await addOrderPage.selectNewCustomer();

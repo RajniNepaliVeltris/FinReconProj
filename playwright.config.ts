@@ -23,6 +23,17 @@ export default defineConfig({
   },
   projects: [
     {
+      name: 'existing-chrome',
+      use: {
+        browserName: 'chromium',
+        channel: 'chrome',
+        connectOptions: {
+          timeout: 30000,
+          wsEndpoint: 'http://localhost:9222'
+        }
+      },
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
