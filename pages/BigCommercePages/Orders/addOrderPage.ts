@@ -1,6 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 import { CustomerInfo, OrderItem, ShippingDetails, PaymentDetails, OrderData } from '../../../models/OrderTypes';
 import { log } from 'console';
+import { UIInteractions } from '../../../utils/uiInteractions';
 
 export class AddOrderPage {
     private page: Page;
@@ -276,29 +277,50 @@ export class AddOrderPage {
         await this.billingZipPostcodeInput.fill(billingInfo.zipPostcode);
         if (billingInfo.poNumber) await this.billingPONumberInput.fill(billingInfo.poNumber);
         if (billingInfo.taxID) await this.billingTaxIDInput.fill(billingInfo.taxID);
-        if (billingInfo.saveToAddressBook) await this.billingSaveToAddressBookCheckbox.check();
+        if (billingInfo.saveToAddressBook) {
+            await UIInteractions.checkElement(
+                this.billingSaveToAddressBookCheckbox, 
+                {
+                    description: 'Save to Address Book checkbox',
+                    timeout: 5000,
+                    page: this.page,
+                    iframe: 'content-iframe'
+                }
+            );
+        }
     }
 
     async fillNewCustomerDetails(newCustomerDetails: {
-        email: string;
-        password: string;
-        confirmPassword: string;
-        exclusiveOffers: boolean;
-        lineOfCredit: string;
-        paymentTerms: string;
-        customerGroup: string;
-    }) {
-        await this.newCustomerEmailInput.fill(newCustomerDetails.email);
-        await this.newCustomerPasswordInput.fill(newCustomerDetails.password);
-        await this.newCustomerConfirmPasswordInput.fill(newCustomerDetails.confirmPassword);
-        if (newCustomerDetails.exclusiveOffers) {
-            await this.newCustomerExclusiveOffersCheckbox.check();
-        }
-        await this.newCustomerLineOfCreditInput.fill(newCustomerDetails.lineOfCredit);
-        await this.newCustomerPaymentTermsSelect.selectOption(newCustomerDetails.paymentTerms);
-        await this.newCustomerGroupSelect.selectOption(newCustomerDetails.customerGroup);
+    email: string;
+    password: string;
+    confirmPassword: string;
+    exclusiveOffers: boolean;
+    lineOfCredit: string;
+    paymentTerms: string;
+    customerGroup: string;
+}) {
+    await this.newCustomerEmailInput.fill(newCustomerDetails.email);
+    await this.newCustomerPasswordInput.fill(newCustomerDetails.password);
+    await this.newCustomerConfirmPasswordInput.fill(newCustomerDetails.confirmPassword);
+    
+    if (newCustomerDetails.exclusiveOffers) {
+        // Use our utility method for reliable checkbox interaction
+        // But DON'T pass the iframe parameter since the locator already has it
+        await UIInteractions.checkElement(
+            this.newCustomerExclusiveOffersCheckbox, 
+            {
+                description: 'I would like to receive updates and offers.',
+                timeout: 5000,
+                page: this.page
+                // Remove the iframe parameter here
+            }
+        );
     }
-
+    
+    await this.newCustomerLineOfCreditInput.fill(newCustomerDetails.lineOfCredit);
+    await this.newCustomerPaymentTermsSelect.selectOption(newCustomerDetails.paymentTerms);
+    await this.newCustomerGroupSelect.selectOption(newCustomerDetails.customerGroup);
+}
     async searchProduct(productName: string) {
         await this.addProductsSearchInput.fill(productName);
         console.log(`Searching for product: ${productName}`);
@@ -337,20 +359,40 @@ export class AddOrderPage {
     }
 
     async selectExistingCustomer() {
-        await this.existingCustomerRadio.check();
+        await UIInteractions.checkElement(
+            this.existingCustomerRadio, 
+            {
+                description: 'Existing Customer radio button',
+                timeout: 5000,
+                page: this.page,
+                iframe: 'content-iframe'
+            }
+        );
     }
 
     async selectNewCustomer() {
-        try {
-            // Use the direct iframe locator approach that's known to work
+        const success = await UIInteractions.checkElement(
+            this.newCustomerRadio, 
+            {
+                description: 'New Customer radio button',
+                timeout: 5000,
+                page: this.page,
+                iframe: 'content-iframe'
+            }
+        );
+        
+        if (!success) {
+            console.error('Failed to select New Customer radio button after multiple attempts');
+            // As a last resort, try with a direct selector
             const directRadioLocator = this.page.frameLocator('#content-iframe')
                 .locator('input[type="radio"][id="check-new-customer"]');
-            
-            await directRadioLocator.waitFor({ state: 'visible', timeout: 3000 });
-            await directRadioLocator.check({ force: true });
-            return;
-        } catch (error) {
-            console.error('Failed to select New Customer radio button:', error);
+            await directRadioLocator.waitFor({ state: 'visible', timeout: 5000 })
+                .catch(() => {});
+            await directRadioLocator.check({ force: true })
+                .catch((error) => {
+                    console.error('Failed with direct selector too:', error);
+                    throw new Error('Unable to select New Customer radio button');
+                });
         }
     }
 
@@ -442,15 +484,39 @@ export class AddOrderPage {
     }
 
     async selectBillingAddress() {
-        await this.billingAddressRadio.check();
+        await UIInteractions.checkElement(
+            this.billingAddressRadio, 
+            {
+                description: 'Billing Address radio button',
+                timeout: 5000,
+                page: this.page,
+                iframe: 'content-iframe'
+            }
+        );
     }
 
     async selectNewSingleAddress() {
-        await this.newSingleAddressRadio.check();
+        await UIInteractions.checkElement(
+            this.newSingleAddressRadio, 
+            {
+                description: 'New Single Address radio button',
+                timeout: 5000,
+                page: this.page,
+                iframe: 'content-iframe'
+            }
+        );
     }
 
     async selectNewMultipleAddress() {
-        await this.newMultipleAddressRadio.check();
+        await UIInteractions.checkElement(
+            this.newMultipleAddressRadio, 
+            {
+                description: 'New Multiple Address radio button',
+                timeout: 5000,
+                page: this.page,
+                iframe: 'content-iframe'
+            }
+        );
     }
 
     async verifyBillingAddressDetails(expectedDetails: Record<string, string>) {

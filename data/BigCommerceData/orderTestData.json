@@ -17,10 +17,12 @@
                 "exclusiveOffers": true,
                 "lineOfCredit": "10000",
                 "paymentTerms": "60 Days Payment Terms",
-                "customerGroup": "Premium",
+                "customerGroup": "AUD",
                 "password": "SecurePassword123@#$",
                 "confirmPassword": "SecurePassword123@#$",
-                "companyName": "TechCorp"
+                "companyName": "TechCorp",
+                "pearsonUID": "TC12345",
+                "termsandconditions": "Agreed"
             },
             "items": [
                 {
