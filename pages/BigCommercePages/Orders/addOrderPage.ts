@@ -1,5 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 import { CustomerInfo, OrderItem, ShippingDetails, PaymentDetails, OrderData } from '../../../models/OrderTypes';
+import { log } from 'console';
 
 export class AddOrderPage {
     private page: Page;
@@ -115,119 +116,128 @@ export class AddOrderPage {
     constructor(page: Page) {
         this.page = page;
         
-        // Initialize all locators
+        // Switch to the iframe before initializing locators
+        const iframe = this.page.frameLocator('#content-iframe');
+        if (!iframe) {
+            console.error('Iframe with id "content-iframe" not found');
+            throw new Error('Iframe not found. Ensure the iframe is loaded and accessible.');
+        }
+        console.log('Successfully switched to iframe: content-iframe');
 
-        this.shippingMethodSelect = page.locator('//select[@aria-label="Shipping Method"]');
+        // Shipping Method Locators
+        this.shippingMethodSelect = iframe.locator('//select[@aria-label="Shipping Method"]');
         
-        this.paymentMethodSelect = page.locator('//select[@aria-label="Payment Method"]');
-        this.amountInput = page.locator('//input[@aria-label="Amount"]');
+        // Payment Locators
+        this.paymentMethodSelect = iframe.locator('//select[@aria-label="Payment Method"]');
+        this.amountInput = iframe.locator('//input[@aria-label="Amount"]');
 
+        // Billing Information Locators
         const billingBaseXPath = "//fieldset//span[text()='Billing information']//..//..";
-        this.billingFirstNameInput = page.locator(`${billingBaseXPath}//input[@value='FirstName']/following-sibling::input`);
-        this.billingLastNameInput = page.locator(`${billingBaseXPath}//input[@value='LastName']/following-sibling::input`);
-        this.billingCompanyNameInput = page.locator(`${billingBaseXPath}//input[@value='CompanyName']/following-sibling::input`);
-        this.billingPhoneNumberInput = page.locator(`${billingBaseXPath}//input[@value='Phone']/following-sibling::input`);
-        this.billingAddressLine1Input = page.locator(`${billingBaseXPath}//input[@value='AddressLine1']/following-sibling::input`);
-        this.billingAddressLine2Input = page.locator(`${billingBaseXPath}//input[@value='AddressLine2']/following-sibling::input`);
-        this.billingSuburbCityInput = page.locator(`${billingBaseXPath}//input[@value='City']/following-sibling::input`);
-        this.billingCountrySelect = page.locator(`${billingBaseXPath}//input[@value='Country']/following-sibling::select`);
-        this.billingStateProvinceSelect = page.locator(`${billingBaseXPath}//input[@value='State']/following-sibling::input`);
-        this.billingZipPostcodeInput = page.locator(`${billingBaseXPath}//input[@value='Zip']/following-sibling::input`);
-        this.billingPONumberInput = page.locator(`${billingBaseXPath}//input[contains(@class,'po-field')]`);
-        this.billingTaxIDInput = page.locator(`${billingBaseXPath}//input[contains(@class,'tax-id')]`);
-        this.billingSaveToAddressBookCheckbox = page.locator("//input[@id='saveBillingAddress']");
+        this.billingFirstNameInput = iframe.locator(`${billingBaseXPath}//input[@value='FirstName']/following-sibling::input`);
+        this.billingLastNameInput = iframe.locator(`${billingBaseXPath}//input[@value='LastName']/following-sibling::input`);
+        this.billingCompanyNameInput = iframe.locator(`${billingBaseXPath}//input[@value='CompanyName']/following-sibling::input`);
+        this.billingPhoneNumberInput = iframe.locator(`${billingBaseXPath}//input[@value='Phone']/following-sibling::input`);
+        this.billingAddressLine1Input = iframe.locator(`${billingBaseXPath}//input[@value='AddressLine1']/following-sibling::input`);
+        this.billingAddressLine2Input = iframe.locator(`${billingBaseXPath}//input[@value='AddressLine2']/following-sibling::input`);
+        this.billingSuburbCityInput = iframe.locator(`${billingBaseXPath}//input[@value='City']/following-sibling::input`);
+        this.billingCountrySelect = iframe.locator(`${billingBaseXPath}//input[@value='Country']/following-sibling::select`);
+        this.billingStateProvinceSelect = iframe.locator(`${billingBaseXPath}//input[@value='State']/following-sibling::input`);
+        this.billingZipPostcodeInput = iframe.locator(`${billingBaseXPath}//input[@value='Zip']/following-sibling::input`);
+        this.billingPONumberInput = iframe.locator(`${billingBaseXPath}//input[contains(@class,'po-field')]`);
+        this.billingTaxIDInput = iframe.locator(`${billingBaseXPath}//input[contains(@class,'tax-id')]`);
+        this.billingSaveToAddressBookCheckbox = iframe.locator("//input[@id='saveBillingAddress']");
         //AccountDeatils for new customer information
         const customerInfoBaseXPath = "//fieldset//span[text()='Customer information']//..//..";
-        this.newCustomerEmailInput = page.locator(`${customerInfoBaseXPath}//input[@value='EmailAddress']/following-sibling::input`);
-        this.newCustomerPasswordInput = page.locator(`${customerInfoBaseXPath}//input[@value='Password']/following-sibling::input`);
-        this.newCustomerConfirmPasswordInput = page.locator(`${customerInfoBaseXPath}//input[@value='ConfirmPassword']/following-sibling::input`);
-        this.newCustomerExclusiveOffersCheckbox = page.locator(`${customerInfoBaseXPath}//input[@value='ReceiveMarketingEmails']/following-sibling::div/input`);
-        this.newCustomerLineOfCreditInput = page.locator(`${customerInfoBaseXPath}//input[contains(@class,'line-of-credit')]`);
-        this.newCustomerPaymentTermsSelect = page.locator(`${customerInfoBaseXPath}//input[@value='Please choose a Term']/following-sibling::select`);
-        this.newCustomerGroupSelect = page.locator(`${customerInfoBaseXPath}//select[@id='accountCustomerGroup']`);
+        this.newCustomerEmailInput = iframe.locator(`${customerInfoBaseXPath}//input[@value='EmailAddress']/following-sibling::input`);
+        this.newCustomerPasswordInput = iframe.locator(`//input[@value='Password']/following-sibling::input`);
+        this.newCustomerConfirmPasswordInput = iframe.locator(`//input[@value='ConfirmPassword']/following-sibling::input`);
+        this.newCustomerExclusiveOffersCheckbox = iframe.locator(`//input[@value='ReceiveMarketingEmails']/following-sibling::div/input`);
+        this.newCustomerLineOfCreditInput = iframe.locator(`//input[contains(@class,'line-of-credit')]`);
+        this.newCustomerPaymentTermsSelect = iframe.locator(`//input[@value='Please choose a Term']/following-sibling::select`);
+        this.newCustomerGroupSelect = iframe.locator(`//select[@id='accountCustomerGroup']`);
 
-        this.addProductsSearchInput = page.locator("//input[@id='quote-item-search']");
-        this.browseCategoriesButton = page.locator("//button[@id='browse-categories']");
-        this.addCustomProductLink = page.locator("//a[@id='add-custom-product']");
-        this.emptyOrderMessage = page.locator("//div[@class='orderNoItemsMessage']/div");
+        this.addProductsSearchInput = iframe.locator("//input[@id='quote-item-search']");
+        this.browseCategoriesButton = iframe.locator("//button[@id='browse-categories']");
+        this.addCustomProductLink = iframe.locator("//a[@id='add-custom-product']");
+        this.emptyOrderMessage = iframe.locator("//div[@class='orderNoItemsMessage']/div");
 
-        this.productSearchResultsList = page.locator("//div[@id='productAutocompleteResults']//ul");
-        this.productSearchResultItem = page.locator("//div[@id='productAutocompleteResults']//li[contains(@class, 'ui-menu-item')]//strong");
-        this.productViewLink = page.locator("//div[@id='productAutocompleteResults']//li[contains(@class, 'ui-menu-item')]//a[text()='View product']");
+        this.productSearchResultsList = iframe.locator("//div[@id='productAutocompleteResults']//ul");
+        this.productSearchResultItem = iframe.locator("//div[@id='productAutocompleteResults']//li[contains(@class, 'ui-menu-item')]//strong");
+        this.productViewLink = iframe.locator("//div[@id='productAutocompleteResults']//li[contains(@class, 'ui-menu-item')]//a[text()='View product']");
 
         // Initialize Customer Information Locators
-        this.existingCustomerRadio = page.locator(`${customerInfoBaseXPath}//input[@type='radio'][@id='check-search-customer']`);
-        this.newCustomerRadio = page.locator(`${customerInfoBaseXPath}//input[@type='radio'][@id='check-new-customer']`);
-        this.customerSearchInput = page.locator(`${customerInfoBaseXPath}//fieldset//span[text()='Customer information']//..//..//input[@id='orderForSearch']`);
-        this.selectedCustomerLabel = page.locator(`${customerInfoBaseXPath}//div[@id='selected-customer-form']/div`);
+        this.existingCustomerRadio = iframe.locator(`${customerInfoBaseXPath}//input[@type='radio'][@id='check-search-customer']`);
+        this.newCustomerRadio = iframe.locator(`${customerInfoBaseXPath}//input[@type='radio'][@id='check-new-customer']`);
+        this.customerSearchInput = iframe.locator(`${customerInfoBaseXPath}//fieldset//span[text()='Customer information']//..//..//input[@id='orderForSearch']`);
+        this.selectedCustomerLabel = iframe.locator(`${customerInfoBaseXPath}//div[@id='selected-customer-form']/div`);
 
         // Initialize Button Locators
         const buttonBaseXPath = "//div[@class='field-group']//ul[@class='field-action']";
-        this.cancelButton = page.locator(`${buttonBaseXPath}//a[contains(@class,'orderMachineCancelButton')]`);
-        this.backButton = page.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineBackButton')]`);
-        this.nextButton = page.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineNextButton')]`);
-        this.saveButton = page.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineSaveButton')]`);
+        this.cancelButton = iframe.locator(`${buttonBaseXPath}//a[contains(@class,'orderMachineCancelButton')]`);
+        this.backButton = iframe.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineBackButton')]`);
+        this.nextButton = iframe.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineNextButton')]`);
+        this.saveButton = iframe.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineSaveButton')]`);
 
         // Initialize Custom Product Dialog Locators
         const customProductDialogXPath = "//div[@id='dialog-options']//div[@id='orderCustomizeItemTabs']";
-        this.customProductNameInput = page.locator(`${customProductDialogXPath}//input[@id='product-name']`);
-        this.customProductSKUInput = page.locator(`${customProductDialogXPath}//input[@id='product-sku']`);
-        this.customProductPriceInput = page.locator(`${customProductDialogXPath}//input[@name='price']`);
-        this.customProductQuantityInput = page.locator(`${customProductDialogXPath}//input[@id='product-quantity']`);
-        this.customProductAddItemButton = page.locator(`//div[@id='dialog-options']//button[@id='dialog-options-submit']`);
-        this.customProductCloseButton = page.locator(`//div[@id='dialog-options']//button[@class='btn-dialog-close']`);
+        this.customProductNameInput = iframe.locator(`${customProductDialogXPath}//input[@id='product-name']`);
+        this.customProductSKUInput = iframe.locator(`${customProductDialogXPath}//input[@id='product-sku']`);
+        this.customProductPriceInput = iframe.locator(`${customProductDialogXPath}//input[@name='price']`);
+        this.customProductQuantityInput = iframe.locator(`${customProductDialogXPath}//input[@id='product-quantity']`);
+        this.customProductAddItemButton = iframe.locator(`//div[@id='dialog-options']//button[@id='dialog-options-submit']`);
+        this.customProductCloseButton = iframe.locator(`//div[@id='dialog-options']//button[@class='btn-dialog-close']`);
 
         // Initialize Product Table Locators
         const tableBaseXPath = "//div[@class='orderItemsGrid']//table";
-        this.productTable = page.locator(`${tableBaseXPath}`);
-        this.productTableRows = page.locator(`${tableBaseXPath}//tr`);
+        this.productTable = iframe.locator(`${tableBaseXPath}`);
+        this.productTableRows = iframe.locator(`${tableBaseXPath}//tr`);
 
         // Initialize Subtotal Locator
-        this.subtotalPrice = page.locator("//div[@id='itemSubtotal']//span");
+        this.subtotalPrice = iframe.locator("//div[@id='itemSubtotal']//span");
 
         // Initialize Fulfillment Section Locators
         const fulfillmentBaseXPath = "//div[@class='orderMachineStateShipping']";
-        this.billingAddressRadio = page.locator(`${fulfillmentBaseXPath}//input[@id='shipping-billing']`);
-        this.newSingleAddressRadio = page.locator(`${fulfillmentBaseXPath}//input[@value='shipping-single']`);
-        this.newMultipleAddressRadio = page.locator(`${fulfillmentBaseXPath}//input[@value='shipping-multiple']`);
-        this.billingAddressDetails = page.locator(`${fulfillmentBaseXPath}//div[@id='shipItemsToBillingAddress']//div[@class='order-details']`);
-        this.fetchShippingQuotesLink = page.locator(`${fulfillmentBaseXPath}//fieldset[@class='shipping-method-form']//a[@class='fetchShippingQuotesLink']`);
-        this.chooseShippingMethodSelect = page.locator(`${fulfillmentBaseXPath}//fieldset[@class='shipping-method-form']//select[@id='chooseProvider']`);
+        this.billingAddressRadio = iframe.locator(`${fulfillmentBaseXPath}//input[@id='shipping-billing']`);
+        this.newSingleAddressRadio = iframe.locator(`${fulfillmentBaseXPath}//input[@value='shipping-single']`);
+        this.newMultipleAddressRadio = iframe.locator(`${fulfillmentBaseXPath}//input[@value='shipping-multiple']`);
+        this.billingAddressDetails = iframe.locator(`${fulfillmentBaseXPath}//div[@id='shipItemsToBillingAddress']//div[@class='order-details']`);
+        this.fetchShippingQuotesLink = iframe.locator(`${fulfillmentBaseXPath}//fieldset[@class='shipping-method-form']//a[@class='fetchShippingQuotesLink']`);
+        this.chooseShippingMethodSelect = iframe.locator(`${fulfillmentBaseXPath}//fieldset[@class='shipping-method-form']//select[@id='chooseProvider']`);
 
         // Initialize Shipping Method Locators
         const shippingMethodBaseXPath = "//fieldset[@class='shipping-method-form']";
-        this.shippingMethodInput = page.locator(`${shippingMethodBaseXPath}//input[@id='customShippingMethod']`);
-        this.shippingCostInput = page.locator(`${shippingMethodBaseXPath}//input[@id='customShippingPrice']`);
+        this.shippingMethodInput = iframe.locator(`${shippingMethodBaseXPath}//input[@id='customShippingMethod']`);
+        this.shippingCostInput = iframe.locator(`${shippingMethodBaseXPath}//input[@id='customShippingPrice']`);
 
         // Initialize Payment Section Locators
         const paymentCustomerBillingSectionXPath = "//div[@class='orderFormSummaryBillingDetailsContainer']";
-        this.customerBillingDetails = page.locator(`${paymentCustomerBillingSectionXPath}//div[@class='order-details']`);
-        this.changeBillingDetailsLink = page.locator(`${paymentCustomerBillingSectionXPath}//div[@class='order-details']//a[contains(@class,'orderFormChangeBillingDetailsLink')]`);
+        this.customerBillingDetails = iframe.locator(`${paymentCustomerBillingSectionXPath}//div[@class='order-details']`);
+        this.changeBillingDetailsLink = iframe.locator(`${paymentCustomerBillingSectionXPath}//div[@class='order-details']//a[contains(@class,'orderFormChangeBillingDetailsLink')]`);
 
         // Initialize Fulfillment Details Locators
         const fulfillmentDetailsXPath = "//div[@class='orderFormSummaryShippingDetailsContainer']";
-        this.shippingDetails = page.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//dl`);
-        this.changeShippingDetailsLink = page.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//h3[contains(text(),'Shipping to:')]/following-sibling::a[contains(@class,'orderFormChangeShippingDetailsLink')]`);
-       this.changeShippingMethodLink = page.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//h3[contains(text(),'Shipping method:')]/following-sibling::a[contains(@class,'orderFormChangeShippingDetailsLink')]`);
-        this.fulfillmentProductTable = page.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid ')]//table`);
-        this.fulfillmentProductTableRows = page.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid ')]//table//tbody/tr`);
+        this.shippingDetails = iframe.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//dl`);
+        this.changeShippingDetailsLink = iframe.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//h3[contains(text(),'Shipping to:')]/following-sibling::a[contains(@class,'orderFormChangeShippingDetailsLink')]`);
+       this.changeShippingMethodLink = iframe.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//h3[contains(text(),'Shipping method:')]/following-sibling::a[contains(@class,'orderFormChangeShippingDetailsLink')]`);
+        this.fulfillmentProductTable = iframe.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid ')]//table`);
+        this.fulfillmentProductTableRows = iframe.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid ')]//table//tbody/tr`);
 
         //PaymentMethod
-        this.paymentDropdown = page.locator(`//div[@class='payment-form']//select[@id='paymentMethod']`);
+        this.paymentDropdown = iframe.locator(`//div[@class='payment-form']//select[@id='paymentMethod']`);
         
         const summarySectionXPath = "//div[contains(@class,'orderSummaryContainer')]";
-        this.subtotalText = page.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-subtotal')]/td`);
-        this.shippingText = page.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-shipping')]/td`);
-        this.grandTotalText = page.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-total')]/td/strong`);
-        this.manualDiscountInput = page.locator(`${summarySectionXPath}//div[contains(@class,'applyDiscountContainer')]//input[@id='discountAmount']`);
-        this.applyDiscountButton = page.locator(`${summarySectionXPath}//div[contains(@class,'applyDiscountContainer')]//button[contains(@class,'orderMachineApplyDiscountButton')]`);
-        this.couponInput = page.locator(`${summarySectionXPath}//div[contains(@class,'couponGiftCertificateContainer')]//input[contains(@id,'couponGiftCertificate')]`);
-        this.applyCouponButton = page.locator(`${summarySectionXPath}//div[contains(@class,'couponGiftCertificateContainer')]//button[contains(@class,'orderMachineCouponButton')]`);
+        this.subtotalText = iframe.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-subtotal')]/td`);
+        this.shippingText = iframe.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-shipping')]/td`);
+        this.grandTotalText = iframe.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-total')]/td/strong`);
+        this.manualDiscountInput = iframe.locator(`${summarySectionXPath}//div[contains(@class,'applyDiscountContainer')]//input[@id='discountAmount']`);
+        this.applyDiscountButton = iframe.locator(`${summarySectionXPath}//div[contains(@class,'applyDiscountContainer')]//button[contains(@class,'orderMachineApplyDiscountButton')]`);
+        this.couponInput = iframe.locator(`${summarySectionXPath}//div[contains(@class,'couponGiftCertificateContainer')]//input[contains(@id,'couponGiftCertificate')]`);
+        this.applyCouponButton = iframe.locator(`${summarySectionXPath}//div[contains(@class,'couponGiftCertificateContainer')]//button[contains(@class,'orderMachineCouponButton')]`);
 
         
-        this.commentsInput = page.locator(`//textarea[@id="order-comment"]`);
-        this.staffNotesInput = page.locator(`//textarea[@id="staff-note"]`);
-        this.saveAndProcessPaymentButton = page.locator("//button[@data-saveandprocesspayment='Save & process payment »']");
+        this.commentsInput = iframe.locator(`//textarea[@id="order-comment"]`);
+        this.staffNotesInput = iframe.locator(`//textarea[@id="staff-note"]`);
+        this.saveAndProcessPaymentButton = iframe.locator("//button[@data-saveandprocesspayment='Save & process payment »']");
     }
 
     async setShippingDetails(shipping: ShippingDetails) {
@@ -331,7 +341,17 @@ export class AddOrderPage {
     }
 
     async selectNewCustomer() {
-        await this.newCustomerRadio.check();
+        try {
+            // Use the direct iframe locator approach that's known to work
+            const directRadioLocator = this.page.frameLocator('#content-iframe')
+                .locator('input[type="radio"][id="check-new-customer"]');
+            
+            await directRadioLocator.waitFor({ state: 'visible', timeout: 3000 });
+            await directRadioLocator.check({ force: true });
+            return;
+        } catch (error) {
+            console.error('Failed to select New Customer radio button:', error);
+        }
     }
 
     async searchCustomer(customerName: string) {

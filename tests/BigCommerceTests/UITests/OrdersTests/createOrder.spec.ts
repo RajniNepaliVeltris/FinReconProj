@@ -29,7 +29,7 @@ test.describe('Create Order Flow', () => {
         const page = pages.length > 0 ? pages[0] : await context.newPage();
         // Bring the page to front for debugging
         await page.bringToFront();
-        const addOrderPage = new AddOrderPage(page);
+        
 
         // Fetch order data by description
         const orderData = orderTestData.testOrders.find(order => order.description === "New customer with single item");
@@ -41,8 +41,23 @@ test.describe('Create Order Flow', () => {
         const homepage = new Homepage(page);
         await homepage.navigateToSideMenuOption('Orders', 'Add');
         await expect(page).toHaveURL('https://store-8ijomozpnx.mybigcommerce.com/manage/orders/add-order');
-        //await expect(page.locator('//h1')).toHaveText('Add an Order');
-
+        
+        // // Wait for iframe to be ready
+        // await page.waitForSelector('#content-iframe', { state: 'visible', timeout: 30000 });
+        // console.log('Iframe is visible');
+        
+        // // Make sure the form is loaded inside the iframe
+        // await page.frameLocator('#content-iframe')
+        //     .locator('form[class*="orderMachine"]')
+        //     .waitFor({ state: 'visible', timeout: 30000 })
+        //     .catch(e => console.log('Warning: Could not confirm form visibility:', e));
+            
+        // console.log('Order form should be visible inside iframe');
+        
+        // Allow some time for the page to stabilize
+        await page.waitForTimeout(2000);
+        
+        const addOrderPage = new AddOrderPage(page);
         // Step 2: Select New Customer
         await addOrderPage.selectNewCustomer();
 
