@@ -51,6 +51,8 @@ This repository contains a modular and extendable QA automation framework built 
 7. **Reporting**: HTML and JSON reports with screenshots and videos on failure.
 8. **Data-Driven Testing**: Test data stored in JSON files for flexibility.
 9. **Page Object Model**: Encapsulates UI interactions in reusable classes.
+10. **Robust UI Interactions**: Enhanced interaction utilities with fallback strategies for troublesome UI elements.
+11. **Advanced Table Verification**: Support for comparing both input values and highlighted/displayed values in tables, with smart formatting capabilities.
 
 ## Setup
 
@@ -146,6 +148,57 @@ You can run tests using an existing Chrome instance with preserved login state. 
 1. Run `start-chrome-debug.ps1`
 2. Log in once
 3. Run your tests
+
+## Advanced UI Interaction & Table Verification
+
+### UIInteractions Utility
+
+The framework includes a robust `UIInteractions` utility class for handling problematic UI elements with fallback strategies:
+
+```typescript
+// Example: Working with checkboxes that might be in iframes or have interaction issues
+await UIInteractions.checkElement(
+    checkboxLocator, 
+    {
+        description: 'Terms checkbox',
+        timeout: 5000,
+        page: this.page,
+        iframe: 'content-iframe' // Optional iframe context
+    }
+);
+```
+
+### Table Value Verification
+
+The framework provides enhanced table verification capabilities:
+
+1. **Verify both input values and displayed/highlighted values**:
+```typescript
+// Verify values in input fields
+await addOrderPage.verifyProductInTable(productDetails, { 
+    checkHighlightedValues: false 
+});
+
+// Verify highlighted/displayed text values
+await addOrderPage.verifyProductInTable(productDetails, { 
+    checkHighlightedValues: true 
+});
+```
+
+2. **Smart format matching for numerical and currency values**:
+```typescript
+// These will match with format normalization
+"$49.99" === "49.99"  // Currency symbols ignored
+"1,234.56" === "1234.56"  // Separators ignored
+"49.990" === "49.99"  // Trailing zeros ignored
+```
+
+3. **Detailed error reporting**:
+```
+Product details validation failed for 'Test Product':
+Product price does not match the expected value. Expected: "$49.99", Found: "$50.00"
+Product quantity does not match the expected value. Expected: "2", Found: "1"
+```
 
 ## License
 

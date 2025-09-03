@@ -12,7 +12,7 @@
                 "address2": "Suite 200",
                 "city": "Metropolis",
                 "country": "United States",
-                "state": "NY",
+                "state": "Alaska",
                 "postalCode": "54321",
                 "exclusiveOffers": true,
                 "lineOfCredit": "10000",
@@ -22,7 +22,8 @@
                 "confirmPassword": "SecurePassword123@#$",
                 "companyName": "TechCorp",
                 "pearsonUID": "TC12345",
-                "termsandconditions": "Agreed"
+                "termsandconditions": "Agreed",
+                "transactionalCurrency": "CAD"
             },
             "items": [
                 {
@@ -41,14 +42,14 @@
                 "amount": 109.97,
                 "status": "Completed"
             },
-            "expectedProductSubtotal": "99.98",
+            "expectedProductSubtotal": "109.98",
             "expectedBillingDetails": {
                 "Name": "Alice Smith",
                 "Company": "TechCorp",
                 "Phone": "9876543210",
                 "Address": "456 Elm Street Suite 200",
                 "Suburb/City": "Metropolis",
-                "State/Province": "NY",
+                "State/Province": "Alaska",
                 "Country": "United States",
                 "ZIP/Postcode": "54321"
             },

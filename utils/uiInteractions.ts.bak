@@ -45,7 +45,7 @@ export class UIInteractions {
      * Verifies text content in tables, supporting various formats and handling highlighted values
      * @param tableRow - The Playwright locator for the table row
      * @param options - Configuration options for verification
-     * @returns Promise<{ success: boolean, actual: string | null, message: string }>
+     * @returns Promise<{ success: boolean, actual: Record<string, string | null>, message: string }>
      */
     static async verifyTableValues(
         tableRow: Locator,
@@ -258,6 +258,7 @@ export class UIInteractions {
             };
         }
     }
+    }
 
     /**
      * Robust method to check a checkbox or radio button with multiple fallback approaches
@@ -315,6 +316,7 @@ export class UIInteractions {
                         element.click();
                         return true;
                     }
+                    return false;
                 });
                 console.log(`Successfully used JS to check ${description}`);
                 return true;
