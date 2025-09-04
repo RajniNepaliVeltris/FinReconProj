@@ -4,7 +4,7 @@
             "description": "New customer with single item",
             "customer": {
                 "type": "new",
-                "email": "newcustomer@TechCorp.com",
+                "email": "new1customer@TechCorp.com",
                 "firstName": "Alice",
                 "lastName": "Smith",
                 "phone": "9876543210",
@@ -42,7 +42,7 @@
                 "amount": 109.97,
                 "status": "Completed"
             },
-            "expectedProductSubtotal": "109.98",
+            "expectedProductSubtotal": "$109.98",
             "expectedBillingDetails": {
                 "Name": "Alice Smith",
                 "Company": "TechCorp",
@@ -53,6 +53,7 @@
                 "Country": "United States",
                 "ZIP/Postcode": "54321"
             },
+            "ShippingMethod": "Custom",
             "comments": "Deliver to the front desk.",
             "staffNotes": "Customer requested expedited processing."
         },

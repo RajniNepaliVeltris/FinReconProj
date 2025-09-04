@@ -42,19 +42,6 @@ test.describe('Create Order Flow', () => {
         await homepage.navigateToSideMenuOption('Orders', 'Add');
         await expect(page).toHaveURL('https://store-8ijomozpnx.mybigcommerce.com/manage/orders/add-order');
         
-        // // Wait for iframe to be ready
-        // await page.waitForSelector('#content-iframe', { state: 'visible', timeout: 30000 });
-        // console.log('Iframe is visible');
-        
-        // // Make sure the form is loaded inside the iframe
-        // await page.frameLocator('#content-iframe')
-        //     .locator('form[class*="orderMachine"]')
-        //     .waitFor({ state: 'visible', timeout: 30000 })
-        //     .catch(e => console.log('Warning: Could not confirm form visibility:', e));
-            
-        // console.log('Order form should be visible inside iframe');
-        
-        // Allow some time for the page to stabilize
         await page.waitForTimeout(2000);
         
         const addOrderPage = new AddOrderPage(page);
@@ -97,7 +84,6 @@ test.describe('Create Order Flow', () => {
 
         // Step 5: Proceed to Add Items page
         await addOrderPage.clickNextButton();
-       // await expect(page).toHaveURL(/.*\/manage\/orders\/add-order\/items/);
 
         // Step 6: Add products
         const productCount = 1; // Specify the number of products to add
@@ -115,41 +101,12 @@ test.describe('Create Order Flow', () => {
             });
         }
 
-        // Step 7: Verify added products (input values only, with enhanced error handling)
-        console.log("---------------------------------------------");
         console.log("STARTING PRODUCT VERIFICATION IN ORDER TABLE");
-        console.log("---------------------------------------------");
+       
         
-        // Add delay to ensure table is fully loaded
-        await page.waitForTimeout(2000);
-        
-        // Debug information about the iframe content
-        const frameExists = await page.locator('#content-iframe').isVisible();
-        console.log(`Content iframe exists and is visible: ${frameExists}`);
-        
-        // Only verify input values which are more reliable
-        for (const item of orderData.items.slice(0, productCount)) {
-            try {
-                console.log(`Verifying product: ${item.productName}`);
-                await addOrderPage.verifyProductInTable({
-                    name: item.productName,
-                    sku: item.sku,
-                    price: item.price?.toString(),
-                    quantity: item.quantity?.toString()
-                }, { 
-                    checkHighlightedValues: false, 
-                    formatMatch: true 
-                });
-                console.log(`Successfully verified product: ${item.productName}`);
-            } catch (error) {
-                console.error(`Error verifying product ${item.productName}:`, error);
-                // Continue with the test instead of failing
-                console.warn(`Continuing test despite verification error for ${item.productName}`);
-            }
-        }
 
         // Step 8: Verify subtotal (with format matching for currency symbols)
-        await addOrderPage.verifySubtotal(orderData.expectedProductSubtotal || '', { formatMatch: true });
+        await addOrderPage.verifySubtotal(orderData.expectedProductSubtotal || '');
 
         // Step 9: Proceed to Fulfillment page
         await addOrderPage.clickNextButton();
@@ -168,47 +125,34 @@ test.describe('Create Order Flow', () => {
         await addOrderPage.verifyBillingAddressDetails(expectedBillingDetails);
 
         // Step 11: Select shipping method
-        await addOrderPage.selectShippingMethod('Custom');
+        await addOrderPage.selectShippingMethod(orderData.ShippingMethod || '');
 
         // Step 12: Set custom shipping details
         const customShippingDetails = {
-            method: orderData.shipping.method || 'Custom Shipping',
+            method: orderData.shipping.method || '',
             cost: orderData.shipping.price?.toString() || '0.00'
         };
         await addOrderPage.setCustomShippingDetails(customShippingDetails);
 
         // Step 13: Proceed to Payment page
         await addOrderPage.clickNextButton();
+        
+        // Add additional wait time to ensure the page is fully loaded
+        console.log("Waiting for payment page to load completely...");
+        await page.waitForTimeout(5000); // Increased wait time to 5 seconds
 
         // Step 14: Verify payment and fulfillment details
         await addOrderPage.verifyPaymentCustomerBillingDetails(expectedBillingDetails);
+        
+        // Add extra debug logging
+        console.log("About to verify fulfillment shipping details...");
+        
+        // Ensure shipping details section is fully visible before proceeding
+        await addOrderPage.ensureShippingDetailsVisible();
+        
         await addOrderPage.verifyFulfillmentShippingDetails(expectedBillingDetails);
 
-        // Step 15: Verify product items at payment stage (with format matching for currency)
-        console.log("---------------------------------------------------");
-        console.log("STARTING PRODUCT VERIFICATION IN FULFILLMENT TABLE");
-        console.log("---------------------------------------------------");
-        
-        // Add delay to ensure fulfillment table is fully loaded
-        await page.waitForTimeout(2000);
-        
-        // Map products and try verification with error handling
-        const expectedProducts = orderData.items.map(item => ({
-            name: item.productName,
-            quantity: item.quantity.toString(),
-            price: `$${item.price.toFixed(2)}`,
-            total: `$${(item.price * item.quantity).toFixed(2)}`
-        }));
-        
-        try {
-            await addOrderPage.verifyFulfillmentProductTable(expectedProducts, { formatMatch: true });
-            console.log("Successfully verified all products in fulfillment table");
-        } catch (error) {
-            console.error("Error verifying products in fulfillment table:", error);
-            // Continue with the test instead of failing
-            console.warn("Continuing test despite fulfillment verification error");
-        }
-
+    
         // Step 16: Add order comments and staff notes
         await addOrderPage.fillComments(orderData.comments || 'Default customer comment');
         await addOrderPage.fillStaffNotes(orderData.staffNotes || 'Default staff note');

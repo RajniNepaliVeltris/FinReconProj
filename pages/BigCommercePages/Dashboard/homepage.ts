@@ -1,8 +1,9 @@
 import { Locator, Page } from '@playwright/test';
+import { BasePage } from '../Base/basePage';
 
 // This file represents the homepage functionality for BigCommerce.
 
-export class Homepage {
+export class Homepage extends BasePage {
   private searchInputLocator: Locator;
   private sideMenuLocators: Record<string, Locator>;
   private ordersSubMenuLocators: Record<string, Locator>;
@@ -12,10 +13,9 @@ export class Homepage {
   private marketingSubMenuLocators: Record<string, Locator>;
   private analyticsSubMenuLocators: Record<string, Locator>;
   private appsSubMenuLocators: Record<string, Locator>;
-  private page: Page;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
 
     // Define locators at the top
     this.searchInputLocator = page.locator("//input[@aria-label='Search']");
