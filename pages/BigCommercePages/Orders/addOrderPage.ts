@@ -26,6 +26,12 @@ export class AddOrderPage extends Homepage {
     private billingTaxIDInput: Locator;
     private billingSaveToAddressBookCheckbox: Locator;
 
+    //Billing Information for Existing Cutomer
+   
+    private existingCustomerAddressCardsText: Locator;
+    private existingCustomerUseAddressLink: Locator;
+
+
     //Transactional Currency
     private transactionalCurrencySelect: Locator;
 
@@ -187,6 +193,11 @@ export class AddOrderPage extends Homepage {
         this.customProductAddItemButton = iframe.locator(`//div[@id='dialog-options']//button[@id='dialog-options-submit']`);
         this.customProductCloseButton = iframe.locator(`//div[@id='dialog-options']//button[@class='btn-dialog-close']`);
 
+        // Initialize Existing Customer Billing Details Locators
+        const existingCustomerBillingDetailsBaseXpath = "//div[@class='orderMachineStateCustomerDetails']";
+        this.existingCustomerAddressCardsText = iframe.locator(`${existingCustomerBillingDetailsBaseXpath}//ul[contains(@class,'address-group')]//div[@class="media-body"]/p`);
+        this.existingCustomerUseAddressLink = iframe.locator(`${existingCustomerBillingDetailsBaseXpath}//ul[contains(@class,'address-group')]//div[@class="media-body"]/button[@class='action use-exist-address']`);
+        
         // Initialize Product Table Locators
         const tableBaseXPath = "//div[contains(@class,'orderItemsGrid')]//table";
         this.productTable = iframe.locator(`${tableBaseXPath}`);
@@ -221,12 +232,7 @@ export class AddOrderPage extends Homepage {
        this.changeShippingMethodLink = iframe.locator(`${fulfillmentDetailsXPath}//div[@class='order-details']//h3[contains(text(),'Shipping method:')]/following-sibling::a[contains(@class,'orderFormChangeShippingDetailsLink')]`);
         this.fulfillmentProductTable = iframe.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid')]//table`);
         this.fulfillmentProductTableRows = iframe.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid')]//table//tr`);
-        
-        // // Add additional debug information about the fulfillment table existence
-        // this.page.frameLocator('#content-iframe').locator("//div[contains(@class,'quoteItemsGrid')]").count()
-        //     .then(count => console.log(`Found ${count} quoteItemsGrid elements`))
-        //     .catch(e => console.error(`Error checking quoteItemsGrid count: ${e}`));
-
+      
         //PaymentMethod
         this.paymentDropdown = iframe.locator(`//div[@class='payment-form']//select[@id='paymentMethod']`);
         
@@ -322,6 +328,9 @@ export class AddOrderPage extends Homepage {
     async selectAndFillExistingCustomerDetails(customerEmail: string) {
         await this.selectExistingCustomer();
         await this.searchCustomer(customerEmail);
+        //select the address cards
+
+
     }
 
     async setTransactionalCurrency(currencyCode: string) {
