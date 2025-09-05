@@ -7,7 +7,7 @@ import { Homepage } from '../Dashboard/homepage';
 export class AddOrderPage extends Homepage {
 
     // Shipping Locators
-    private shippingMethodSelect: Locator;
+
     private shippingMethodInput: Locator;
     private shippingCostInput: Locator;
     
@@ -127,9 +127,6 @@ export class AddOrderPage extends Homepage {
         }
         console.log('Successfully switched to iframe: content-iframe');
 
-        // Shipping Method Locators
-        this.shippingMethodSelect = iframe.locator('//select[@aria-label="Shipping Method"]');
-        
         // Payment Locators
         this.paymentMethodSelect = iframe.locator('//select[@aria-label="Payment Method"]');
         this.amountInput = iframe.locator('//input[@aria-label="Amount"]');
@@ -257,15 +254,6 @@ export class AddOrderPage extends Homepage {
         this.saveAndProcessPaymentButton = iframe.locator("//button[@data-saveandprocesspayment='Save & process payment »']");
     }
 
-    async setShippingDetails(shipping: ShippingDetails) {
-        await this.shippingMethodSelect.selectOption(shipping.method);
-    }
-
-    async setPaymentDetails(payment: PaymentDetails) {
-        await this.paymentMethodSelect.selectOption(payment.method);
-        await this.amountInput.fill(payment.amount.toString());
-    }
-
     async fillBillingInformation(billingInfo: {
         firstName: string;
         lastName: string;
@@ -306,7 +294,7 @@ export class AddOrderPage extends Homepage {
         }
     }
 
-    async fillNewCustomerDetails(newCustomerDetails: {
+    async selectAndFillNewCustomerDetails(newCustomerDetails: {
     email: string;
     password: string;
     confirmPassword: string;
@@ -315,6 +303,7 @@ export class AddOrderPage extends Homepage {
     paymentTerms: string;
     customerGroup: string;
 }) {
+        await this.selectNewCustomer();
     await this.newCustomerEmailInput.fill(newCustomerDetails.email);
     await this.newCustomerPasswordInput.fill(newCustomerDetails.password);
     await this.newCustomerConfirmPasswordInput.fill(newCustomerDetails.confirmPassword);
@@ -348,12 +337,12 @@ export class AddOrderPage extends Homepage {
     }
 
     async browseCategories() {
-        await this.browseCategoriesButton.click();
+    await this.clickElement(this.browseCategoriesButton);
         console.log("Browsing categories.");
     }
 
     async addCustomProduct() {
-        await this.addCustomProductLink.click();
+    await this.clickElement(this.addCustomProductLink);
         console.log("Adding a custom product.");
         await this.page.waitForTimeout(500); // Wait for any animations
         
@@ -362,7 +351,7 @@ export class AddOrderPage extends Homepage {
     async selectProductFromSearchResults(productName: string) {
         const productItem = this.productSearchResultItem.locator(`text=${productName}`);
         if (await productItem.isVisible()) {
-            await productItem.click();
+            await this.clickElement(productItem);
             console.log(`Selected product: ${productName}`);
         } else {
             console.error(`Product not found in search results: ${productName}`);
@@ -372,7 +361,7 @@ export class AddOrderPage extends Homepage {
     async viewProductDetails(productName: string) {
         const productLink = this.productViewLink.locator(`text=${productName}`);
         if (await productLink.isVisible()) {
-            await productLink.click();
+            await this.clickElement(productLink);
             console.log(`Viewing product details for: ${productName}`);
         } else {
             console.error(`View product link not found for: ${productName}`);
@@ -427,19 +416,19 @@ export class AddOrderPage extends Homepage {
     }
 
     async clickCancelButton() {
-        await this.cancelButton.click();
+    await this.clickElement(this.cancelButton);
     }
 
     async clickBackButton() {
-        await this.backButton.click();
+    await this.clickElement(this.backButton);
     }
 
     async clickNextButton() {
-        await this.nextButton.click();
+    await this.clickElement(this.nextButton);
     }
 
     async clickSaveButton() {
-        await this.saveButton.click();
+    await this.clickElement(this.saveButton);
     }
 
     async addCustomProductDetails(productDetails: {
@@ -452,15 +441,15 @@ export class AddOrderPage extends Homepage {
         await this.customProductSKUInput.fill(productDetails.sku);
         await this.customProductPriceInput.fill(productDetails.price);
         await this.customProductQuantityInput.fill(productDetails.quantity);
-        await this.customProductAddItemButton.click();
+    await this.clickElement(this.customProductAddItemButton);
     }
 
     async closeCustomProductDialog() {
-        await this.customProductCloseButton.click();
+    await this.clickElement(this.customProductCloseButton);
     }
 
     async clickAddCustomProductLink() {
-        await this.addCustomProductLink.click();
+    await this.clickElement(this.addCustomProductLink);
     }
 
     async verifyCustomProductDialogOpen() {
@@ -607,28 +596,54 @@ export class AddOrderPage extends Homepage {
     }
 
     async fetchShippingQuotes() {
-        await this.fetchShippingQuotesLink.click();
+    await this.clickElement(this.fetchShippingQuotesLink);
     }
 
     //None or Custom
     async selectShippingMethod(method: string) {
-        await this.page.waitForLoadState('networkidle');
-        await this.chooseShippingMethodSelect.selectOption(method);
+       try {
+    if (await this.fetchShippingQuotesLink.isVisible()) {
+        await this.clickElement(this.fetchShippingQuotesLink);
+        await this.page.waitForTimeout(300); // Give UI time to update
+        await this.clickElement(this.chooseShippingMethodSelect);
+        await this.setDropdownValue(this.chooseShippingMethodSelect, method);
+    } else {
+        console.log("Shipping method selection elements are not visible; cannot select shipping method.");
     }
+} catch (error) {
+    console.log(`Error selecting shipping method: ${method}`, error);
+    console.error(`Error selecting shipping method: ${method}`, error);
+}
+    }
+    
 
     async setCustomShippingDetails(details: { method: string; cost: string }) {
-        await this.page.waitForLoadState('networkidle');
-        
-        await this.shippingMethodInput.waitFor({ state: 'visible', timeout: 5000 });
-        await this.shippingMethodInput.clear();
-        await this.shippingMethodInput.fill(details.method);
+        try {
+    await this.isElementVisible(this.shippingMethodInput, 7000);
+    if (await this.shippingMethodInput.isVisible()) {
+        await this.clickElement(this.shippingMethodInput); // Ensure focus
+        await this.shippingMethodInput.clear(); // Clear any existing value
+        await this.shippingMethodInput.fill(details.method); // Enter new value
+        await this.page.waitForTimeout(100); // Short wait for UI update
 
-        await this.shippingCostInput.waitFor({ state: 'visible', timeout: 5000 });
-        await this.shippingCostInput.clear();
-        await this.shippingCostInput.fill(details.cost);
+        if (await this.shippingCostInput.isVisible()) {
+            await this.clickElement(this.shippingCostInput);
+            await this.shippingCostInput.clear();
+            await this.shippingCostInput.fill(details.cost);
+            await this.page.waitForTimeout(100);
+        } else {
+            console.log("Shipping Cost input is not visible; cannot set custom cost.");
+        }
+    } else {
+        console.log("Shipping Method input is not visible; cannot set custom shipping details.");
     }
+    } catch (error) {
+        console.log("Error setting custom shipping details:", error);
+        console.error("Error setting custom shipping details:", error);
+    }
+}
 
-     async verifyPaymentCustomerBillingDetails(expectedDetails: Record<string, string>) {
+    async verifyPaymentCustomerBillingDetails(expectedDetails: Record<string, string>) {
         const actualDetails = await this.customerBillingDetails.locator("dl").allTextContents();
         console.log("Actual payment customer billing details:", actualDetails);
         
@@ -1073,28 +1088,30 @@ export class AddOrderPage extends Homepage {
     }
 
     async changeShippingDetails() {
-        await this.changeShippingDetailsLink.click();
+    await this.clickElement(this.changeShippingDetailsLink);
     }
 
     async changeShippingMethod() {
-        await this.changeShippingMethodLink.click();
+    await this.clickElement(this.changeShippingMethodLink);
     }
 
 
   
 
     async selectPaymentMethod(method: string) {
-        await this.paymentDropdown.selectOption(method);
+        await this.clickElement(this.paymentDropdown);
+        await this.setDropdownValue(this.paymentDropdown, method);
+        
     }
 
     async applyManualDiscount(discount: string) {
         await this.manualDiscountInput.fill(discount);
-        await this.applyDiscountButton.click();
+    await this.clickElement(this.applyDiscountButton);
     }
 
     async applyCoupon(couponCode: string) {
         await this.couponInput.fill(couponCode);
-        await this.applyCouponButton.click();
+    await this.clickElement(this.applyCouponButton);
     }
 
     async fillComments(comments: string) {

@@ -38,6 +38,8 @@
                 "price": 9.99
             },
             "payment": {
+                "paymentCategory": "Manual payment",
+                "description": "Paid via PayPal",
                 "method": "PayPal",
                 "amount": 109.97,
                 "status": "Completed"
@@ -82,6 +84,8 @@
                 "price": 12.99
             },
             "payment": {
+                "paymentCategory": "Manual payment",
+                "description": "Cash on Delivery",
                 "method": "Bank Transfer",
                 "amount": 162.95,
                 "status": "Pending"

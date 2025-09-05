@@ -41,15 +41,13 @@ test.describe('Create Order Flow', () => {
         const homepage = new Homepage(page);
         await homepage.navigateToSideMenuOption('Orders', 'Add');
         await expect(page).toHaveURL('https://store-8ijomozpnx.mybigcommerce.com/manage/orders/add-order');
-        
-        await page.waitForTimeout(2000);
-        
-        const addOrderPage = new AddOrderPage(page);
-        // Step 2: Select New Customer
-        await addOrderPage.selectNewCustomer();
 
-        // Step 3: Fill new customer details
-        await addOrderPage.fillNewCustomerDetails({
+        await page.waitForLoadState('domcontentloaded', { timeout: 10000 }); // Ensure the page is fully loaded
+
+        const addOrderPage = new AddOrderPage(page);
+       
+        // Fill new Customer Details"
+        await addOrderPage.selectAndFillNewCustomerDetails({
             email: orderData.customer.email,
             password: orderData.customer.password || "DefaultPassword123",
             confirmPassword: orderData.customer.confirmPassword || "DefaultPassword123",
@@ -64,7 +62,7 @@ test.describe('Create Order Flow', () => {
             await addOrderPage.setTransactionalCurrency(orderData.customer.transactionalCurrency);
         }
 
-        // Step 4: Fill billing information
+        // Fill billing information
         const billingInfo = {
             firstName: orderData.customer.firstName || '',
             lastName: orderData.customer.lastName || '',
@@ -130,7 +128,7 @@ test.describe('Create Order Flow', () => {
         // Step 12: Set custom shipping details
         const customShippingDetails = {
             method: orderData.shipping.method || '',
-            cost: orderData.shipping.price?.toString() || '0.00'
+            cost: orderData.shipping.price?.toString() || ''
         };
         await addOrderPage.setCustomShippingDetails(customShippingDetails);
 
@@ -158,7 +156,7 @@ test.describe('Create Order Flow', () => {
         await addOrderPage.fillStaffNotes(orderData.staffNotes || 'Default staff note');
 
         // Step 17: Select payment method and verify summary details
-        await addOrderPage.selectPaymentMethod(orderData.payment.method || '');
+        await addOrderPage.selectPaymentMethod(orderData.payment.paymentCategory || '');
         await addOrderPage.verifySummaryDetails({
             subtotal: orderData.expectedPaymentSummary?.subtotal || '',
             shipping: orderData.expectedPaymentSummary?.shipping || '',

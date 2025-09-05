@@ -9,6 +9,85 @@ export class BasePage {
     this.page = page;
   }
 
+  /**
+   * Handles dropdowns that can be either <select> or <input> elements.
+   * If locator points to a <select>, selects the option. If <input>, fills the value.
+   * @param locator - Locator for the dropdown element
+   * @param value - value to select or fill
+   */
+async setDropdownValue(locator: Locator, value: string): Promise<void> {
+  try {
+   // await this.isElementVisible(locator, 5000);
+
+    const tagName = await locator.evaluate(el => el.tagName.toLowerCase());
+
+    if (tagName === 'select') {
+      let selected = false;
+      let optionLocator: Locator | null = null;
+
+      // Attempt to select by label
+      try {
+        await locator.selectOption({ label: value });
+        optionLocator = locator.locator(`option[label='${value}'], option:has-text("${value}")`);
+        console.log(`Selected by label: '${value}'`);
+        selected = true;
+      } catch {}
+
+      // Attempt to select by value
+      if (!selected) {
+        try {
+          await locator.selectOption({ value });
+          optionLocator = locator.locator(`option[value='${value}']`);
+          console.log(`Selected by value: '${value}'`);
+          selected = true;
+        } catch {}
+      }
+
+      // Attempt to select by index (if numeric)
+      if (!selected && !isNaN(Number(value))) {
+        const index = Number(value);
+        try {
+          await locator.selectOption({ index });
+          optionLocator = locator.locator(`option:nth-child(${index + 1})`);
+          console.log(`Selected by index: '${index}'`);
+          selected = true;
+        } catch {}
+      }
+
+      // If still not selected, throw an error
+      if (!selected) {
+        throw new Error(`Option '${value}' not found in <select> dropdown.`);
+      }
+
+      // Try clicking the option to ensure visual selection (if needed)
+      if (optionLocator) {
+        try {
+          await optionLocator.waitFor({ state: 'visible', timeout: 2000 });
+          if (await optionLocator.isVisible()) {
+            await this.clickElement(optionLocator);
+            console.log(`Clicked on option '${value}' to ensure selection.`);
+          } else {
+            console.log(`Option '${value}' not visible after selection.`);
+          }
+        } catch (clickErr) {
+          console.warn(`Could not click option '${value}' directly:`, clickErr);
+        }
+      }
+
+    } else if (tagName === 'input') {
+      await locator.fill(value);
+      console.log(`Filled input with value: '${value}'`);
+    } else {
+      throw new Error(`Element is not a <select> or <input>, found: <${tagName}>`);
+    }
+
+  } catch (error) {
+    console.error(`Failed to set dropdown value '${value}':`, error);
+    throw error;
+  }
+}
+
+
   async navigateTo(url: string): Promise<void> {
     try {
       await this.page.goto(url);
@@ -32,7 +111,8 @@ export class BasePage {
   async clickElement(locator: Locator, options = { force: false, timeout: 30000 }): Promise<void> {
     try {
       await locator.waitFor({ state: 'visible', timeout: options.timeout });
-      await locator.click({ force: options.force });
+     //wait locator.click({ force: options.force });
+     await locator.click({ force: options.force });
       console.log(`Clicked on element: ${locator}`);
     } catch (error) {
       console.error(`Failed to click element: ${locator}`, error);
@@ -43,8 +123,11 @@ export class BasePage {
   async enterText(locator: Locator, text: string): Promise<void> {
     try {
       await locator.waitFor({ state: 'visible', timeout: 5000 });
-      await locator.fill(text);
-      console.log(`Entered text: ${text} into element: ${locator}`);
+      if (await locator.isVisible()) {
+        await locator.click();
+        await locator.fill(text);
+        console.log(`Entered text: ${text} into element: ${locator}`);
+      }
     } catch (error) {
       console.error(`Failed to enter text into element: ${locator}`, error);
       throw new Error(`Enter text failed: ${error}`);
@@ -98,6 +181,8 @@ export class BasePage {
       await locator.waitFor({ state: 'visible', timeout });
       return true;
     } catch (error) {
+      console.log(`Element not visible: ${locator}`, error);
+      console.error(`Element not visible: ${locator}`, error);
       return false;
     }
   }
