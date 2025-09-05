@@ -1,4 +1,5 @@
 import { Locator, Page } from '@playwright/test';
+import { error } from 'console';
 
 // This file represents the base page functionality for BigCommerce.
 
@@ -17,7 +18,6 @@ export class BasePage {
    */
 async setDropdownValue(locator: Locator, value: string): Promise<void> {
   try {
-   // await this.isElementVisible(locator, 5000);
 
     const tagName = await locator.evaluate(el => el.tagName.toLowerCase());
 
@@ -31,107 +31,93 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
         optionLocator = locator.locator(`option[label='${value}'], option:has-text("${value}")`);
         console.log(`Selected by label: '${value}'`);
         selected = true;
-      } catch {}
-
-      // Attempt to select by value
-      if (!selected) {
-        try {
-          await locator.selectOption({ value });
-          optionLocator = locator.locator(`option[value='${value}']`);
-          console.log(`Selected by value: '${value}'`);
-          selected = true;
-        } catch {}
+      } catch (error) {
+          console.error(`Failed to set dropdown value '${value}':`, error);
+          throw error;
       }
 
-      // Attempt to select by index (if numeric)
-      if (!selected && !isNaN(Number(value))) {
-        const index = Number(value);
-        try {
-          await locator.selectOption({ index });
-          optionLocator = locator.locator(`option:nth-child(${index + 1})`);
-          console.log(`Selected by index: '${index}'`);
-          selected = true;
-        } catch {}
-      }
-
-      // If still not selected, throw an error
-      if (!selected) {
-        throw new Error(`Option '${value}' not found in <select> dropdown.`);
-      }
-
-      // Try clicking the option to ensure visual selection (if needed)
-      if (optionLocator) {
-        try {
-          await optionLocator.waitFor({ state: 'visible', timeout: 2000 });
-          if (await optionLocator.isVisible()) {
-            await this.clickElement(optionLocator);
-            console.log(`Clicked on option '${value}' to ensure selection.`);
-          } else {
-            console.log(`Option '${value}' not visible after selection.`);
+        // Attempt to select by value
+        if (!selected) {
+          try {
+            await locator.selectOption({ value });
+            optionLocator = locator.locator(`option[value='${value}']`);
+            console.log(`Selected by value: '${value}'`);
+            selected = true;
+          } catch (error) {
+              console.error(`Failed to set dropdown value '${value}':`, error);
+              throw error;
           }
-        } catch (clickErr) {
-          console.warn(`Could not click option '${value}' directly:`, clickErr);
+        }
+
+        // Attempt to select by index (if numeric)
+        if (!selected && !isNaN(Number(value))) {
+          const index = Number(value);
+          try {
+            await locator.selectOption({ index });
+            optionLocator = locator.locator(`option:nth-child(${index + 1})`);
+            console.log(`Selected by index: '${index}'`);
+            selected = true;
+          } catch (error) {
+              console.error(`Failed to set dropdown value '${value}':`, error);
+              throw error;
+          }
+        }
+
+        // Attempt to select by index (if numeric)
+        if (!selected && !isNaN(Number(value))) {
+          const index = Number(value);
+          try {
+            await locator.selectOption({ index });
+            optionLocator = locator.locator(`option:nth-child(${index + 1})`);
+            console.log(`Selected by index: '${index}'`);
+            selected = true;
+          } catch (error1) {
+            console.error(`Failed to set dropdown value '${value}':`, error1);
+            throw error1;
+          }
         }
       }
-
-    } else if (tagName === 'input') {
-      await locator.fill(value);
-      console.log(`Filled input with value: '${value}'`);
-    } else {
-      throw new Error(`Element is not a <select> or <input>, found: <${tagName}>`);
-    }
-
-  } catch (error) {
-    console.error(`Failed to set dropdown value '${value}':`, error);
-    throw error;
+    } catch (error1) {
+    console.error(`Error in setDropdownValue for value '${value}':`, error1);
+    throw error1;
   }
 }
 
 
-  async navigateTo(url: string): Promise<void> {
-    try {
-      await this.page.goto(url);
-      console.log(`Navigated to: ${url}`);
-    } catch (error) {
-      console.error(`Failed to navigate to: ${url}`, error);
-      throw new Error(`Navigation failed: ${error}`);
-    }
-  }
-
-  async waitForElement(locator: Locator, timeout: number = 30000): Promise<void> {
-    try {
-      await locator.waitFor({ state: 'visible', timeout });
-      console.log(`Waited for element: ${locator}`);
-    } catch (error) {
-      console.error(`Element not found within timeout: ${locator}`, error);
-      throw new Error(`Wait for element failed: ${error}`);
-    }
-  }
-
-  async clickElement(locator: Locator, options = { force: false, timeout: 30000 }): Promise<void> {
-    try {
-      await locator.waitFor({ state: 'visible', timeout: options.timeout });
-     //wait locator.click({ force: options.force });
-     await locator.click({ force: options.force });
-      console.log(`Clicked on element: ${locator}`);
-    } catch (error) {
-      console.error(`Failed to click element: ${locator}`, error);
-      throw new Error(`Click element failed: ${error}`);
-    }
-  }
-
-  async enterText(locator: Locator, text: string): Promise<void> {
-    try {
-      await locator.waitFor({ state: 'visible', timeout: 5000 });
-      if (await locator.isVisible()) {
-        await locator.click();
-        await locator.fill(text);
-        console.log(`Entered text: ${text} into element: ${locator}`);
+    async waitForElement(locator: Locator, timeout: number = 30000): Promise<void> {
+      try {
+        await locator.waitFor({ state: 'visible', timeout });
+        console.log(`Waited for element: ${locator}`);
+      } catch (error) {
+        console.error(`Element not found within timeout: ${locator}`, error);
+        throw new Error(`Wait for element failed: ${error}`);
       }
-    } catch (error) {
-      console.error(`Failed to enter text into element: ${locator}`, error);
-      throw new Error(`Enter text failed: ${error}`);
     }
+
+    async clickElement(locator: Locator, options = { force: false, timeout: 30000 }): Promise<void> {
+      try {
+        await locator.waitFor({ state: 'visible', timeout: options.timeout });
+      //wait locator.click({ force: options.force });
+      await locator.click({ force: options.force });
+        console.log(`Clicked on element: ${locator}`);
+      } catch (error) {
+        console.error(`Failed to click element: ${locator}`, error);
+        throw new Error(`Click element failed: ${error}`);
+      }
+    }
+
+    async enterText(locator: Locator, text: string): Promise<void> {
+      try {
+        await locator.waitFor({ state: 'visible', timeout: 5000 });
+        if (await locator.isVisible()) {
+          await locator.click();
+          await locator.fill(text);
+          console.log(`Entered text: ${text} into element: ${locator}`);
+        }
+      } catch (error1) {
+        console.error(`Failed to enter text into element: ${locator}`, error1);
+        throw new Error(`Enter text failed: ${error1}`);
+      }
   }
 
   async clearAndEnterText(locator: Locator, text: string): Promise<void> {

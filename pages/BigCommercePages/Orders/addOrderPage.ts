@@ -108,6 +108,7 @@ export class AddOrderPage extends Homepage {
     private subtotalText: Locator;
     private shippingText: Locator;
     private grandTotalText: Locator;
+    private taxIncludedInTotalText: Locator;
 
     // Comments and Notes Section Locators
     private commentsInput: Locator;
@@ -178,7 +179,6 @@ export class AddOrderPage extends Homepage {
         const buttonBaseXPath = "//div[@class='field-group']//ul[@class='field-action']";
         this.cancelButton = iframe.locator(`${buttonBaseXPath}//a[contains(@class,'orderMachineCancelButton')]`);
         this.backButton = iframe.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineBackButton')]`);
-       // this.nextButton = iframe.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineNextButton')]`);
         this.saveButton = iframe.locator(`${buttonBaseXPath}//button[contains(@class,'orderMachineSaveButton')]`);
         this.nextButton = iframe.locator(`//button[contains(text(),'Next')]`);
 
@@ -196,11 +196,6 @@ export class AddOrderPage extends Homepage {
         this.productTable = iframe.locator(`${tableBaseXPath}`);
         this.productTableRows = iframe.locator(`${tableBaseXPath}//tr`);
         
-        // Add additional debug information about the table existence
-        this.page.frameLocator('#content-iframe').locator("//div[contains(@class,'orderItemsGrid')]").count()
-            .then(count => console.log(`Found ${count} orderItemsGrid elements`))
-            .catch(e => console.error(`Error checking orderItemsGrid count: ${e}`));
-
         // Initialize Subtotal Locator
         this.subtotalPrice = iframe.locator("//div[@id='itemSubtotal']//span");
 
@@ -231,10 +226,10 @@ export class AddOrderPage extends Homepage {
         this.fulfillmentProductTable = iframe.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid')]//table`);
         this.fulfillmentProductTableRows = iframe.locator(`${fulfillmentDetailsXPath}//div[contains(@class,'quoteItemsGrid')]//table//tr`);
         
-        // Add additional debug information about the fulfillment table existence
-        this.page.frameLocator('#content-iframe').locator("//div[contains(@class,'quoteItemsGrid')]").count()
-            .then(count => console.log(`Found ${count} quoteItemsGrid elements`))
-            .catch(e => console.error(`Error checking quoteItemsGrid count: ${e}`));
+        // // Add additional debug information about the fulfillment table existence
+        // this.page.frameLocator('#content-iframe').locator("//div[contains(@class,'quoteItemsGrid')]").count()
+        //     .then(count => console.log(`Found ${count} quoteItemsGrid elements`))
+        //     .catch(e => console.error(`Error checking quoteItemsGrid count: ${e}`));
 
         //PaymentMethod
         this.paymentDropdown = iframe.locator(`//div[@class='payment-form']//select[@id='paymentMethod']`);
@@ -243,6 +238,7 @@ export class AddOrderPage extends Homepage {
         this.subtotalText = iframe.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-subtotal')]/td`);
         this.shippingText = iframe.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-shipping')]/td`);
         this.grandTotalText = iframe.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-total')]/td/strong`);
+        this.taxIncludedInTotalText = iframe.locator(`${summarySectionXPath}//tr[contains(@class,'orderFormSummaryTable-tax')]/td`);
         this.manualDiscountInput = iframe.locator(`${summarySectionXPath}//div[contains(@class,'applyDiscountContainer')]//input[@id='discountAmount']`);
         this.applyDiscountButton = iframe.locator(`${summarySectionXPath}//div[contains(@class,'applyDiscountContainer')]//button[contains(@class,'orderMachineApplyDiscountButton')]`);
         this.couponInput = iframe.locator(`${summarySectionXPath}//div[contains(@class,'couponGiftCertificateContainer')]//input[contains(@id,'couponGiftCertificate')]`);
@@ -511,6 +507,7 @@ export class AddOrderPage extends Homepage {
     }
 
     async verifyBillingAddressDetails(expectedDetails: Record<string, string>) {
+        await this.billingAddressDetails.waitFor({ state: 'visible', timeout: 5000 });
         const actualDetails = await this.billingAddressDetails.locator("dl").allTextContents();
         console.log("Actual billing address details:", actualDetails);
         
@@ -1099,9 +1096,21 @@ export class AddOrderPage extends Homepage {
   
 
     async selectPaymentMethod(method: string) {
-        await this.clickElement(this.paymentDropdown);
         await this.setDropdownValue(this.paymentDropdown, method);
         
+    }
+    async verifyPaymentMethodSelected(expectedMethod: string) {
+        let selectedOption = await this.paymentDropdown.inputValue();
+        if(selectedOption === "custom") {
+            //as in the value is shown as custom but the text is Manual Payment
+            selectedOption = "Manual payment";
+        }
+        if (selectedOption !== expectedMethod) {
+            console.error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
+            throw new Error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
+        }
+    
+        console.log("Payment method verified successfully.");
     }
 
     async applyManualDiscount(discount: string) {
@@ -1122,21 +1131,34 @@ export class AddOrderPage extends Homepage {
         await this.staffNotesInput.fill(notes);
     }
 
-    async verifySummaryDetails(expectedSummary: { subtotal: string; shipping: string; grandTotal: string }) {
+    async verifySummaryDetails(expectedSummary: { subtotal: string; shipping: string; grandTotal: string, taxIncludedInTotal: string }) {
+        try{
         const actualSubtotal = await this.subtotalText.textContent();
         const actualShipping = await this.shippingText.textContent();
         const actualGrandTotal = await this.grandTotalText.textContent();
+        const actualTaxIncludedInTotal = await this.taxIncludedInTotalText.textContent();
 
         if (actualSubtotal?.trim() !== expectedSummary.subtotal.trim()) {
+            console.error(`Subtotal mismatch. Expected: ${expectedSummary.subtotal}, Found: ${actualSubtotal}`);
             throw new Error(`Subtotal mismatch. Expected: ${expectedSummary.subtotal}, Found: ${actualSubtotal}`);
         }
         if (actualShipping?.trim() !== expectedSummary.shipping.trim()) {
+            console.error(`Shipping mismatch. Expected: ${expectedSummary.shipping}, Found: ${actualShipping}`);
             throw new Error(`Shipping mismatch. Expected: ${expectedSummary.shipping}, Found: ${actualShipping}`);
         }
         if (actualGrandTotal?.trim() !== expectedSummary.grandTotal.trim()) {
+            console.error(`Grand Total mismatch. Expected: ${expectedSummary.grandTotal}, Found: ${actualGrandTotal}`);
             throw new Error(`Grand Total mismatch. Expected: ${expectedSummary.grandTotal}, Found: ${actualGrandTotal}`);
+        }
+        if (actualTaxIncludedInTotal?.trim() !== expectedSummary.taxIncludedInTotal.trim()) {
+            console.error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
+            throw new Error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
         }
 
         console.log("Summary details verified successfully.");
+    } catch (error) {
+        console.error("Error verifying summary details:", error);
+        throw error;
+    }
     }
 }

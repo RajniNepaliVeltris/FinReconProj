@@ -45,6 +45,12 @@
                 "status": "Completed"
             },
             "expectedProductSubtotal": "$109.98",
+            "expectedPaymentSummary": {
+                "subtotal": "$109.98",
+                "shipping": "$11.99",
+                "grandTotal": "$121.97",
+                "taxIncludedInTotal": "$12.00"
+            },
             "expectedBillingDetails": {
                 "Name": "Alice Smith",
                 "Company": "TechCorp",
@@ -91,9 +97,10 @@
                 "status": "Pending"
             },
             "expectedPaymentSummary": {
-                "subtotal": "149.96",
-                "shipping": "12.99",
-                "grandTotal": "162.95"
+                "subtotal": "$109.98",
+                "shipping": "$11.99",
+                "grandTotal": "$121.97",
+                "taxIncludedInTotal": "$12.00"
             },
             "comments": "Leave package at the back door.",
             "staffNotes": "Customer prefers evening delivery."
