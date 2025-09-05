@@ -69,7 +69,7 @@
             "description": "Existing customer with multiple items",
             "customer": {
                 "type": "existing",
-                "email": "existingcustomer@example.com"
+                "email": "harish.lakkimsetti@pearson.com"
             },
             "items": [
                 {

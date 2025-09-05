@@ -178,4 +178,85 @@ test.describe('Create Order Flow', () => {
                     fs.writeFileSync('test-results/performance-report.html', html);
                 }
         });
+
+        test('Create a new order with Standard Product for an existing customer', async () => {
+            const perf = new PerformanceRecorder();
+            perf.startFlow('Create Order Flow - Existing Customer');
+            let html = '';
+            try {
+                const pages = await context.pages();
+                const page = pages.length > 0 ? pages[0] : await context.newPage();
+                await test.step('Bring page to front', async () => {
+                    await page.bringToFront();
+                });
+                perf.start('Navigate to Add Order');
+
+                const orderData = await test.step('Fetch order data', async () => {
+                    return orderTestData.testOrders.find(order => order.description === "Existing customer with multiple items");
+                });
+                if (!orderData) {
+                    throw new Error("Order data not found for description: Existing customer with multiple items");
+                }
+
+                const homepage = new Homepage(page);
+                await test.step('Navigate to Add Order page', async () => {
+                    await homepage.navigateToSideMenuOption('Orders', 'Add');
+                    await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/orders/add-order');
+                    await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+                });
+
+                const addOrderPage = new AddOrderPage(page);
+                perf.nextAction('Select Existing Customer');
+               await test.step('Select Existing Customer', async () => {
+                   await addOrderPage.selectAndFillExistingCustomerDetails(orderData.customer?.email || '');
+               });
+                perf.nextAction('Proceed to Add Items');
+                await test.step('Proceed to Add Items', async () => {
+                    await addOrderPage.clickNextButton();
+                });
+                perf.nextAction('Add Products');
+                await test.step('Add Products', async () => {
+                    for (let i = 0; i < orderData.items.length; i++) {
+                        const productDetails = orderData.items[i];
+                        await addOrderPage.clickAddCustomProductLink();
+                        await addOrderPage.verifyCustomProductDialogOpen();
+                        await addOrderPage.addCustomProductDetails({
+                            name: productDetails.productName,
+                            sku: productDetails.sku,
+                            price: productDetails.price.toString(),
+                            quantity: productDetails.quantity.toString()
+                        });
+                    }
+                });
+                await test.step('Proceed to Fulfillment', async () => {
+                    await addOrderPage.clickNextButton();
+                });
+                await test.step('Select Shipping Method', async () => {
+                    await addOrderPage.selectShippingMethod(orderData.shipping.method || '');
+                });
+                await test.step('Set Custom Shipping Details', async () => {
+                    const customShippingDetails = {
+                        method: orderData.shipping.method || '',
+                        cost: orderData.shipping.price?.toString() || ''
+                    };
+                    await addOrderPage.setCustomShippingDetails(customShippingDetails);
+                });
+                await test.step('Proceed to Payment', async () => {
+                    await addOrderPage.clickNextButton();
+                });
+                await test.step('Select Payment Method & Verify Summary', async () => {
+                    await addOrderPage.selectPaymentMethod(orderData.payment.paymentCategory || '');
+                    await addOrderPage.verifyPaymentMethodSelected(orderData.payment.paymentCategory || '');
+                    await addOrderPage.verifySummaryDetails(orderData.expectedPaymentSummary || {});
+                });
+                await test.step('Add Comments & Staff Notes', async () => {
+                    await addOrderPage.fillComments(orderData.comments || 'Default customer comment');
+                    await addOrderPage.fillStaffNotes(orderData.staffNotes || 'Default staff note');
+                });
+            } finally {
+                html = generatePerformanceHtmlReport('Create Order Flow - Existing Customer', perf.getLogs());
+                fs.writeFileSync('test-results/performance-report-existing-customer.html', html);
+            }
+        });
+
 });

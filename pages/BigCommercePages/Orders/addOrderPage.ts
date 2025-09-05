@@ -10,10 +10,6 @@ export class AddOrderPage extends Homepage {
 
     private shippingMethodInput: Locator;
     private shippingCostInput: Locator;
-    
-    // Payment Locators
-    private paymentMethodSelect: Locator;
-    private amountInput: Locator;
 
     // Billing Information Locators
     private billingFirstNameInput: Locator;
@@ -58,6 +54,8 @@ export class AddOrderPage extends Homepage {
     private newCustomerRadio: Locator;
     private customerSearchInput: Locator;
     private selectedCustomerLabel: Locator;
+    private autoSearchedCustomersList: Locator;
+    private autoSearchedCustomerDetailsCard: Locator;
 
     // Button Locators
     private cancelButton: Locator;
@@ -128,10 +126,7 @@ export class AddOrderPage extends Homepage {
         }
         console.log('Successfully switched to iframe: content-iframe');
 
-        // Payment Locators
-        this.paymentMethodSelect = iframe.locator('//select[@aria-label="Payment Method"]');
-        this.amountInput = iframe.locator('//input[@aria-label="Amount"]');
-
+       
         // Billing Information Locators
         const billingBaseXPath = "//fieldset//span[text()='Billing information']//..//..";
         this.billingFirstNameInput = iframe.locator(`${billingBaseXPath}//input[@value='FirstName']/following-sibling::input`);
@@ -169,9 +164,10 @@ export class AddOrderPage extends Homepage {
         // Initialize Customer Information Locators
         this.existingCustomerRadio = iframe.locator(`${customerInfoBaseXPath}//input[@type='radio'][@id='check-search-customer']`);
         this.newCustomerRadio = iframe.locator(`${customerInfoBaseXPath}//input[@type='radio'][@id='check-new-customer']`);
-        this.customerSearchInput = iframe.locator(`${customerInfoBaseXPath}//fieldset//span[text()='Customer information']//..//..//input[@id='orderForSearch']`);
+        this.customerSearchInput = iframe.locator(`${customerInfoBaseXPath}//input[@id='orderForSearch']`);
         this.selectedCustomerLabel = iframe.locator(`${customerInfoBaseXPath}//div[@id='selected-customer-form']/div`);
-
+        this.autoSearchedCustomersList = iframe.locator(`//div[@class="orderCustomerSearchResults"]//li//span/strong`);
+        this.autoSearchedCustomerDetailsCard = iframe.locator(`//div[@class="orderCustomerSearchResults"]//li//div[@class="customerDetails"]`);
         //Transactional Currency
         this.transactionalCurrencySelect = iframe.locator(`//select[@id='currencyCode']`);
 
@@ -323,6 +319,11 @@ export class AddOrderPage extends Homepage {
     await this.newCustomerGroupSelect.selectOption(newCustomerDetails.customerGroup);
 }
 
+    async selectAndFillExistingCustomerDetails(customerEmail: string) {
+        await this.selectExistingCustomer();
+        await this.searchCustomer(customerEmail);
+    }
+
     async setTransactionalCurrency(currencyCode: string) {
         await this.transactionalCurrencySelect.selectOption(currencyCode);
     }
@@ -402,9 +403,28 @@ export class AddOrderPage extends Homepage {
         }
     }
 
-    async searchCustomer(customerName: string) {
-        await this.customerSearchInput.fill(customerName);
-        await this.page.waitForTimeout(500); // Wait for search results
+    async searchCustomer(customerEmail: string) {
+         await this.clickElement(this.customerSearchInput);
+        for (const char of customerEmail) {
+    await this.customerSearchInput.type(char);
+    await this.page.waitForTimeout(100); // Adjust delay as needed
+}
+        await this.clickElement(this.customerSearchInput); // Click to trigger search
+        // Wait for the auto list to appear
+        await this.waitForElement(this.autoSearchedCustomersList, 10000);
+        if(await this.autoSearchedCustomersList.count() == 1) {
+            console.log(`Auto-suggest list appeared with ${await this.autoSearchedCustomersList.count()} items.`);
+           const detailsCardText = await this.autoSearchedCustomerDetailsCard.textContent();
+           if(detailsCardText && detailsCardText.includes(customerEmail)) {
+            await this.clickElement(this.autoSearchedCustomerDetailsCard);
+            console.log(`Selected customer from auto list: ${customerEmail}`);
+           }else {
+            console.error(`Customer details card does not match the email: ${customerEmail}`);
+            }
+        } else {
+
+            console.error(`Auto-suggest list did not appear as expected. Count: ${await this.autoSearchedCustomersList.count()}`);
+        }
     }
 
     async getSelectedCustomer() {
