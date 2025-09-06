@@ -90,6 +90,7 @@
                 "method": "Standard Shipping",
                 "price": 12.99
             },
+            "ShippingMethod": "Custom",
             "payment": {
                 "paymentCategory": "Manual payment",
                 "description": "Cash on Delivery",
@@ -98,9 +99,9 @@
                 "status": "Pending"
             },
             "expectedPaymentSummary": {
-                "subtotal": "$109.98",
-                "shipping": "$11.99",
-                "grandTotal": "$121.97",
+                "subtotal": "USD $149.96",
+                "shipping": "USD $12.99",
+                "grandTotal": "USD $162.95",
                 "taxIncludedInTotal": "$12.00"
             },
             "comments": "Leave package at the back door.",

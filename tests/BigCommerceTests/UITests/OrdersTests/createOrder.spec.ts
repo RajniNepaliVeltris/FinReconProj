@@ -39,7 +39,7 @@ test.describe('Create Order Flow', () => {
                     perf.start('Navigate to Add Order');
 
                     const orderData = await test.step('Fetch order data', async () => {
-                        return orderTestData.testOrders.find(order => order.description === "New customer with single item");
+                        return orderTestData.testOrders.find(order => order.description === "New customer with Standard Product");
                     });
                     if (!orderData) {
                         throw new Error("Order data not found for description: New customer with single item");
@@ -172,6 +172,12 @@ test.describe('Create Order Flow', () => {
                             taxIncludedInTotal: orderData.expectedPaymentSummary?.taxIncludedInTotal || ''
                         });
                     });
+                    await test.step('Add Comments & Staff Notes', async () => {
+                    await addOrderPage.fillComments(orderData.comments || 'Default customer comment');
+                    await addOrderPage.fillStaffNotes(orderData.staffNotes || 'Default staff note');
+                });
+
+                    perf.end();
                 } finally {
                     // Generate and save performance HTML report even if test fails
                     html = generatePerformanceHtmlReport('Create Order Flow', perf.getLogs());
@@ -235,7 +241,7 @@ test.describe('Create Order Flow', () => {
                     await addOrderPage.clickNextButton();
                 });
                 await test.step('Select Shipping Method', async () => {
-                    await addOrderPage.selectShippingMethod(orderData.shipping.method || '');
+                    await addOrderPage.selectShippingMethod(orderData.ShippingMethod || '');
                 });
                 await test.step('Set Custom Shipping Details', async () => {
                     const customShippingDetails = {

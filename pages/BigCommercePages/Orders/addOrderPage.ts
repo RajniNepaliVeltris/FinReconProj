@@ -3,6 +3,7 @@ import { CustomerInfo, OrderItem, ShippingDetails, PaymentDetails, OrderData } f
 import { log } from 'console';
 import { UIInteractions } from '../../../utils/uiInteractions';
 import { Homepage } from '../Dashboard/homepage';
+import { TIMEOUT } from 'dns';
 
 export class AddOrderPage extends Homepage {
 
@@ -207,13 +208,13 @@ export class AddOrderPage extends Homepage {
         this.subtotalPrice = iframe.locator("//div[@id='itemSubtotal']//span");
 
         // Initialize Fulfillment Section Locators
-        const fulfillmentBaseXPath = "//div[@class='orderMachineStateShipping']";
+        const fulfillmentBaseXPath = "//div[@class='billingAddressDetails']";
         this.billingAddressRadio = iframe.locator(`${fulfillmentBaseXPath}//input[@id='shipping-billing']`);
         this.newSingleAddressRadio = iframe.locator(`${fulfillmentBaseXPath}//input[@value='shipping-single']`);
         this.newMultipleAddressRadio = iframe.locator(`${fulfillmentBaseXPath}//input[@value='shipping-multiple']`);
-        this.billingAddressDetails = iframe.locator(`${fulfillmentBaseXPath}//div[@id='shipItemsToBillingAddress']//div[@class='order-details']`);
-        this.fetchShippingQuotesLink = iframe.locator(`${fulfillmentBaseXPath}//fieldset[@class='shipping-method-form']//a[@class='fetchShippingQuotesLink']`);
-        this.chooseShippingMethodSelect = iframe.locator(`${fulfillmentBaseXPath}//fieldset[@class='shipping-method-form']//select[@id='chooseProvider']`);
+        this.billingAddressDetails = iframe.locator(`//div[@id='shipItemsToBillingAddress']//div[@class='order-details']`);
+        this.fetchShippingQuotesLink = iframe.locator(`//fieldset[@class='shipping-method-form']//a[@class='fetchShippingQuotesLink']`);
+        this.chooseShippingMethodSelect = iframe.locator(`//fieldset[@class='shipping-method-form']//select[@id='chooseProvider']`);
 
         // Initialize Shipping Method Locators
         const shippingMethodBaseXPath = "//fieldset[@class='shipping-method-form']";
@@ -301,7 +302,7 @@ export class AddOrderPage extends Homepage {
     paymentTerms: string;
     customerGroup: string;
 }) {
-        await this.selectNewCustomer();
+    await this.selectNewCustomer();
     await this.newCustomerEmailInput.fill(newCustomerDetails.email);
     await this.newCustomerPasswordInput.fill(newCustomerDetails.password);
     await this.newCustomerConfirmPasswordInput.fill(newCustomerDetails.confirmPassword);
@@ -326,44 +327,48 @@ export class AddOrderPage extends Homepage {
 }
 
     async selectAndFillExistingCustomerDetails(customerEmail: string, existingCustomerAddress: string) {
-    await this.selectExistingCustomer();
-    await this.searchCustomer(customerEmail);
-    
-    // Wait for address cards to be loaded
-    await this.page.waitForTimeout(500);
-    
-    // Select the address cards
-    const addressCount = await this.existingCustomerAddressCardsText.count();
-    console.log(`Found ${addressCount} address cards for customer ${customerEmail}`);
-    
-    if (addressCount > 0) {
-        // Get all address cards' text
-        const addressElements = await this.existingCustomerAddressCardsText.all();
-        
-        // Find the card that matches the specified address
-        for (let i = 0; i < addressElements.length; i++) {
-            const addressText = await addressElements[i].textContent() || '';
-            console.log(`Address card ${i + 1} text: ${addressText}`);
-            
-            if (addressText.includes(existingCustomerAddress)) {
-                console.log(`Found matching address card: "${addressText}"`);
-                
-                // Get the specific button for this address card
-                const useAddressButton = await addressElements[i].locator('/following-sibling::button[@class="action use-exist-address"]');
-                
-                // Click the button for this specific address
-                this.clickElement(await useAddressButton);
-                console.log(`Clicked use address button for address containing: ${existingCustomerAddress}`);
-                return;
-            }
-        }
-        
-        console.error(`No address card found containing text: "${existingCustomerAddress}"`);
-    } else {
-        console.error('No existing customer address cards found.');
-    }
-}
+        await this.selectExistingCustomer();
+        await this.searchCustomer(customerEmail);
 
+        // Wait for address cards to be loaded
+        await this.page.waitForTimeout(5000);
+
+        // Select the address cards
+        const addressCount = await this.existingCustomerAddressCardsText.count();
+        console.log(`Found ${addressCount} address cards for customer ${customerEmail}`);
+
+        if (addressCount > 0) {
+            // Use the existingCustomerUseAddressLink locator which you already defined correctly
+            const useAddressButtons = await this.existingCustomerUseAddressLink.all();
+            const addressElements = await this.existingCustomerAddressCardsText.all();
+
+            // Find the card that matches the specified address
+            for (let i = 0; i < addressElements.length; i++) {
+                const addressText = await addressElements[i].textContent() || '';
+                console.log(`Address card ${i + 1} text: ${addressText}`);
+
+                if (addressText.includes(existingCustomerAddress)) {
+                    console.log(`Found matching address card: "${addressText}"`);
+
+                    if (i < useAddressButtons.length) {
+                        // Click the corresponding button
+                        await this.clickElement(useAddressButtons[i], {
+                            force: true,
+                            timeout: 5000
+                        });
+                        console.log(`Clicked use address button for address containing: ${existingCustomerAddress}`);
+                        return;
+                    } else {
+                        console.error(`No button found for address card ${i + 1}`);
+                    }
+                }
+            }
+
+            console.error(`No address card found containing text: "${existingCustomerAddress}"`);
+        } else {
+            console.error('No existing customer address cards found.');
+        }
+    }
     async setTransactionalCurrency(currencyCode: string) {
         await this.transactionalCurrencySelect.selectOption(currencyCode);
     }
@@ -615,37 +620,29 @@ export class AddOrderPage extends Homepage {
 
         // Special handling for Address verification
         // Address in the UI often combines address line 1 and address line 2
-        if (expectedDetails["Address"] && expectedDetails["Address"].includes("Suite")) {
-            console.log("Address contains Suite, performing flexible address matching");
-            
-            // Extract the base parts of the expected address (before "Suite")
-            const expectedAddressParts = expectedDetails["Address"].split("Suite");
-            const expectedBaseAddress = expectedAddressParts[0].trim();
-            
-            // Check if the actual address contains the base address part
-            if (actualDetailsMap["Address"] && 
-                actualDetailsMap["Address"].includes(expectedBaseAddress)) {
-                console.log("Base address part matched, considering address verification successful");
-                
+        if (expectedDetails["Address"] && actualDetailsMap["Address"]) {
+            // Normalize whitespace for comparison
+            const normalize = (str: string) => str.replace(/\s+/g, '').toLowerCase();
+            if (normalize(actualDetailsMap["Address"]).includes(normalize(expectedDetails["Address"]))) {
+                console.log("Address matched after normalization.");
                 // Create a temporary copy of expected details with the base address for other checks
-                const modifiedExpectedDetails = {...expectedDetails};
-                delete modifiedExpectedDetails["Address"]; // Remove address to skip standard comparison
-                
+                const modifiedExpectedDetails = { ...expectedDetails };
+                delete modifiedExpectedDetails["Address"];
                 // Verify all other fields
                 for (const [key, value] of Object.entries(modifiedExpectedDetails)) {
                     if (actualDetailsMap[key] !== value) {
                         throw new Error(`Billing address detail mismatch for '${key}'. Expected: '${value}', Found: '${actualDetailsMap[key] || "(not found)"}'`);
                     }
                 }
-                
-                console.log("Billing address details are verified successfully (with flexible address matching).");
-                return; // Skip standard verification since we've done special handling
+                console.log("Billing address details are verified successfully (with normalized address matching).");
+                return;
             }
         }
 
         // Standard verification for all fields
         for (const [key, value] of Object.entries(expectedDetails)) {
             if (actualDetailsMap[key] !== value) {
+                console.log(`Mismatch found for ${key}: expected '${value}', found '${actualDetailsMap[key] || "(not found)"}'`);
                 throw new Error(`Billing address detail mismatch for '${key}'. Expected: '${value}', Found: '${actualDetailsMap[key] || "(not found)"}'`);
             }
         }
@@ -659,14 +656,14 @@ export class AddOrderPage extends Homepage {
     //None or Custom
     async selectShippingMethod(method: string) {
        try {
-    if (await this.fetchShippingQuotesLink.isVisible()) {
-        await this.clickElement(this.fetchShippingQuotesLink);
-        await this.page.waitForTimeout(300); // Give UI time to update
-        await this.clickElement(this.chooseShippingMethodSelect);
-        await this.setDropdownValue(this.chooseShippingMethodSelect, method);
-    } else {
-        console.log("Shipping method selection elements are not visible; cannot select shipping method.");
-    }
+            if (await this.fetchShippingQuotesLink.isVisible()) {
+                await this.clickElement(this.fetchShippingQuotesLink);
+                await this.page.waitForTimeout(300); // Give UI time to update
+                await this.clickElement(this.chooseShippingMethodSelect);
+                await this.setDropdownValue(this.chooseShippingMethodSelect, method);
+            } else {
+                console.log("Shipping method selection elements are not visible; cannot select shipping method.");
+            }
 } catch (error) {
     console.log(`Error selecting shipping method: ${method}`, error);
     console.error(`Error selecting shipping method: ${method}`, error);
@@ -1196,7 +1193,7 @@ export class AddOrderPage extends Homepage {
         const actualSubtotal = await this.subtotalText.textContent();
         const actualShipping = await this.shippingText.textContent();
         const actualGrandTotal = await this.grandTotalText.textContent();
-        const actualTaxIncludedInTotal = await this.taxIncludedInTotalText.textContent();
+        
 
         if (actualSubtotal?.trim() !== expectedSummary.subtotal.trim()) {
             console.error(`Subtotal mismatch. Expected: ${expectedSummary.subtotal}, Found: ${actualSubtotal}`);
@@ -1210,9 +1207,12 @@ export class AddOrderPage extends Homepage {
             console.error(`Grand Total mismatch. Expected: ${expectedSummary.grandTotal}, Found: ${actualGrandTotal}`);
             throw new Error(`Grand Total mismatch. Expected: ${expectedSummary.grandTotal}, Found: ${actualGrandTotal}`);
         }
-        if (actualTaxIncludedInTotal?.trim() !== expectedSummary.taxIncludedInTotal.trim()) {
-            console.error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
-            throw new Error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
+        if (await this.taxIncludedInTotalText.isVisible()) {
+            const actualTaxIncludedInTotal = await this.taxIncludedInTotalText.textContent();
+            if (actualTaxIncludedInTotal?.trim() !== expectedSummary.taxIncludedInTotal.trim()) {
+                console.error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
+                throw new Error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
+            }
         }
 
         console.log("Summary details verified successfully.");

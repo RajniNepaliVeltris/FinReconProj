@@ -78,6 +78,7 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
         }
       }
     } catch (error1) {
+      console.log(`Error determining tag name for locator: ${locator}`, error1);
     console.error(`Error in setDropdownValue for value '${value}':`, error1);
     throw error1;
   }
@@ -101,6 +102,7 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
       await locator.click({ force: options.force });
         console.log(`Clicked on element: ${locator}`);
       } catch (error) {
+        console.log(`Error occurred while clicking element: ${locator}`, error);
         console.error(`Failed to click element: ${locator}`, error);
         throw new Error(`Click element failed: ${error}`);
       }
