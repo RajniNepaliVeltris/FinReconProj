@@ -400,6 +400,28 @@ export class AddOrderPage extends Homepage {
         }
     }
 
+    async searchAndSelectProduct(productName: string) {
+        // Focus and type the product name into the search input
+        await this.clickElement(this.addProductsSearchInput);
+        for (const char of productName) {
+            await this.addProductsSearchInput.type(char);
+            await this.page.waitForTimeout(100); // Simulate typing for autosuggest
+        }
+        await this.clickElement(this.addProductsSearchInput); // Trigger search/autosuggest
+        // Wait for the product search results to appear
+        await this.waitForElement(this.productSearchResultsList, 10000);
+        const resultCount = await this.productSearchResultsList.locator('li').count();
+        console.log(`Product autosuggest list appeared with ${resultCount} items.`);
+        // Try to select the product from the list
+        const productItem = this.productSearchResultItem.locator(`text=${productName}`);
+        if (await productItem.isVisible()) {
+            await this.clickElement(productItem);
+            console.log(`Selected product from autosuggest: ${productName}`);
+        } else {
+            console.error(`Product not found in autosuggest: ${productName}`);
+        }
+    }
+
     async viewProductDetails(productName: string) {
         const productLink = this.productViewLink.locator(`text=${productName}`);
         if (await productLink.isVisible()) {
@@ -451,9 +473,9 @@ export class AddOrderPage extends Homepage {
     async searchCustomer(customerEmail: string) {
          await this.clickElement(this.customerSearchInput);
         for (const char of customerEmail) {
-    await this.customerSearchInput.type(char);
-    await this.page.waitForTimeout(100); // Adjust delay as needed
-}
+                await this.customerSearchInput.type(char);
+                await this.page.waitForTimeout(100); // Adjust delay as needed
+            }
         await this.clickElement(this.customerSearchInput); // Click to trigger search
         // Wait for the auto list to appear
         await this.waitForElement(this.autoSearchedCustomersList, 10000);
@@ -463,6 +485,10 @@ export class AddOrderPage extends Homepage {
            if(detailsCardText && detailsCardText.includes(customerEmail)) {
             await this.clickElement(this.autoSearchedCustomerDetailsCard);
             console.log(`Selected customer from auto list: ${customerEmail}`);
+            if( await this.autoSearchedCustomerDetailsCard.isVisible()) {
+                 await this.clickElement(this.autoSearchedCustomerDetailsCard);
+                    console.log(`Clicked on customer details card for: ${customerEmail} to close the auto-suggest list.`);
+            }
            }else {
             console.error(`Customer details card does not match the email: ${customerEmail}`);
             }

@@ -26,54 +26,59 @@ test.afterAll(async () => {
 // Test: Create a new order with Standard Product for an existing customer
 
 test.describe('Order Creation - Standard Product', () => {
-  test('should create a new order with a standard product for an existing customer', async () => {
-    const perf = new PerformanceRecorder();
-    perf.startFlow('Create Order Flow');
-    let html = '';
-    try {
-      const pages = await context.pages();
-      const page = pages.length > 0 ? pages[0] : await context.newPage();
-      await test.step('Bring page to front', async () => {
-        await page.bringToFront();
-      });
-      perf.start('Navigate to Add Order');
+    test('should create a new order with a standard product for an existing customer', async () => {
+        const perf = new PerformanceRecorder();
+        perf.startFlow('Create Order Flow');
+        let html = '';
+        try {
+            const pages = await context.pages();
+            const page = pages.length > 0 ? pages[0] : await context.newPage();
+            await test.step('Bring page to front', async () => {
+                await page.bringToFront();
+            });
+            perf.start('Navigate to Add Order');
 
-      const orderData = await test.step('Fetch order data', async () => {
-        return orderTestData.testOrders.find(order => order.description === 'Existing customer with Standard Product');
-      });
-      if (!orderData) {
-        throw new Error('Order data not found for description: Existing customer with Standard Product');
-      }
+            const orderData = await test.step('Fetch order data', async () => {
+                return orderTestData.testOrders.find(order => order.description === 'Existing customer with Standard Product');
+            });
+            if (!orderData) {
+                throw new Error('Order data not found for description: Existing customer with Standard Product');
+            }
 
-      const homepage = new Homepage(page);
-      await test.step('Navigate to Add Order page', async () => {
-        await homepage.navigateToSideMenuOption('Orders', 'Add');
-        await expect(page).toHaveURL('https://store-8ijomozpnx.mybigcommerce.com/manage/orders/add-order');
-        await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
-      });
+            const homepage = new Homepage(page);
+            await test.step('Navigate to Add Order page', async () => {
+                await homepage.navigateToSideMenuOption('Orders', 'Add');
+                await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/orders/add-order');
+                await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+            });
 
-      const addOrderPage = new AddOrderPage(page);
-      await test.step('Search and select existing customer', async () => {
-        await addOrderPage.searchCustomer(orderData.customer.email);
-        await addOrderPage.selectAndFillExistingCustomerDetails(orderData.customer.email, orderData.customer.existingCustomerAddressCard || '');
-      });
+             const addOrderPage = new AddOrderPage(page);
+                perf.nextAction('Select Existing Customer');
+                await test.step('Select Existing Customer', async () => {
+                await addOrderPage.selectAndFillExistingCustomerDetails(
+                                    orderData.customer?.email || '',
+                                    orderData.customer?.existingCustomerAddressCard || ''
+                                    );
+                 });
+                perf.nextAction('Proceed to Add Items');
+                await test.step('Proceed to Add Items', async () => {
+                    await addOrderPage.clickNextButton();
+                });
+            await test.step('Add products to order', async () => {
+                for (const item of orderData.items) {
+                    await addOrderPage.searchAndSelectProduct(item.productName);
+                    // If quantity input is needed, add logic here
+                }
+            });
 
-      await test.step('Add products to order', async () => {
-        for (const item of orderData.items) {
-          await addOrderPage.searchProduct(item.productName);
-          await addOrderPage.selectProductFromSearchResults(item.productName);
-          // If quantity input is needed, add logic here
+            await test.step('Complete order creation', async () => {
+                await addOrderPage.clickSaveButton();
+            });
+
+            // Optionally, verify confirmation by checking for a success message or navigation
+            // Example: await expect(page.locator('text=Order created successfully')).toBeVisible();
+        } finally {
+            // Optionally, add performance report generation here
         }
-      });
-
-      await test.step('Complete order creation', async () => {
-        await addOrderPage.clickSaveButton();
-      });
-
-      // Optionally, verify confirmation by checking for a success message or navigation
-      // Example: await expect(page.locator('text=Order created successfully')).toBeVisible();
-    } finally {
-      // Optionally, add performance report generation here
-    }
-  });
+    });
 });

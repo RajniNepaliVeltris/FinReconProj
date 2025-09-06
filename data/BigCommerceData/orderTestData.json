@@ -1,7 +1,7 @@
 {
     "testOrders": [
         {
-            "description": "New customer with Standard Product",
+            "description": "New customer with Custom Product",
             "customer": {
                 "type": "new",
                 "email": "new1customer@TechCorp.com",
@@ -66,7 +66,7 @@
             "staffNotes": "Customer requested expedited processing."
         },
         {
-            "description": "Existing customer with Standard Product",
+            "description": "Existing customer with Custom Product",
             "customer": {
                 "type": "existing",
                 "email": "harish.lakkimsetti@pearson.com",
@@ -106,6 +106,42 @@
             },
             "comments": "Leave package at the back door.",
             "staffNotes": "Customer prefers evening delivery."
+        },
+        {
+            "description": "Existing customer with Standard Product",
+            "customer": {
+                "type": "existing",
+                "email": "harish.lakkimsetti@pearson.com",
+                "existingCustomerAddressCard": "Harish LakkimsettiTest Test New York, New York, 124578United States"
+            },
+            "items": [
+                {
+                    "productName": "IBM 150 Dollar Assessment Voucher",
+                    "quantity": 1,
+                    "price": 39.99,
+                    "sku": "SPE100"
+                }
+            ],
+            "shipping": {
+                "method": "Standard Shipping",
+                "price": 8.99
+            },
+            "ShippingMethod": "Standard",
+            "payment": {
+                "paymentCategory": "Manual payment",
+                "description": "Paid via Credit Card",
+                "method": "Credit Card",
+                "amount": 48.98,
+                "status": "Completed"
+            },
+            "expectedPaymentSummary": {
+                "subtotal": "USD $39.99",
+                "shipping": "USD $8.99",
+                "grandTotal": "USD $48.98",
+                "taxIncludedInTotal": "$0.00"
+            },
+            "comments": "Please deliver during business hours.",
+            "staffNotes": "Standard product order for existing customer."
         }
     ]
 }
