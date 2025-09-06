@@ -325,13 +325,44 @@ export class AddOrderPage extends Homepage {
     await this.newCustomerGroupSelect.selectOption(newCustomerDetails.customerGroup);
 }
 
-    async selectAndFillExistingCustomerDetails(customerEmail: string) {
-        await this.selectExistingCustomer();
-        await this.searchCustomer(customerEmail);
-        //select the address cards
-
-
+    async selectAndFillExistingCustomerDetails(customerEmail: string, existingCustomerAddress: string) {
+    await this.selectExistingCustomer();
+    await this.searchCustomer(customerEmail);
+    
+    // Wait for address cards to be loaded
+    await this.page.waitForTimeout(500);
+    
+    // Select the address cards
+    const addressCount = await this.existingCustomerAddressCardsText.count();
+    console.log(`Found ${addressCount} address cards for customer ${customerEmail}`);
+    
+    if (addressCount > 0) {
+        // Get all address cards' text
+        const addressElements = await this.existingCustomerAddressCardsText.all();
+        
+        // Find the card that matches the specified address
+        for (let i = 0; i < addressElements.length; i++) {
+            const addressText = await addressElements[i].textContent() || '';
+            console.log(`Address card ${i + 1} text: ${addressText}`);
+            
+            if (addressText.includes(existingCustomerAddress)) {
+                console.log(`Found matching address card: "${addressText}"`);
+                
+                // Get the specific button for this address card
+                const useAddressButton = await addressElements[i].locator('/following-sibling::button[@class="action use-exist-address"]');
+                
+                // Click the button for this specific address
+                this.clickElement(await useAddressButton);
+                console.log(`Clicked use address button for address containing: ${existingCustomerAddress}`);
+                return;
+            }
+        }
+        
+        console.error(`No address card found containing text: "${existingCustomerAddress}"`);
+    } else {
+        console.error('No existing customer address cards found.');
     }
+}
 
     async setTransactionalCurrency(currencyCode: string) {
         await this.transactionalCurrencySelect.selectOption(currencyCode);

@@ -1,7 +1,7 @@
 {
     "testOrders": [
         {
-            "description": "New customer with single item",
+            "description": "New customer with Standard Product",
             "customer": {
                 "type": "new",
                 "email": "new1customer@TechCorp.com",
@@ -66,10 +66,11 @@
             "staffNotes": "Customer requested expedited processing."
         },
         {
-            "description": "Existing customer with multiple items",
+            "description": "Existing customer with Standard Product",
             "customer": {
                 "type": "existing",
-                "email": "harish.lakkimsetti@pearson.com"
+                "email": "harish.lakkimsetti@pearson.com",
+                "existingCustomerAddressCard": "Harish LakkimsettiTest Test New York, New York, 124578United States"
             },
             "items": [
                 {

@@ -192,10 +192,10 @@ test.describe('Create Order Flow', () => {
                 perf.start('Navigate to Add Order');
 
                 const orderData = await test.step('Fetch order data', async () => {
-                    return orderTestData.testOrders.find(order => order.description === "Existing customer with multiple items");
+                    return orderTestData.testOrders.find(order => order.description === "Existing customer with Standard Product");
                 });
                 if (!orderData) {
-                    throw new Error("Order data not found for description: Existing customer with multiple items");
+                    throw new Error("Order data not found for description: Existing customer with Standard Product");
                 }
 
                 const homepage = new Homepage(page);
@@ -207,9 +207,12 @@ test.describe('Create Order Flow', () => {
 
                 const addOrderPage = new AddOrderPage(page);
                 perf.nextAction('Select Existing Customer');
-               await test.step('Select Existing Customer', async () => {
-                   await addOrderPage.selectAndFillExistingCustomerDetails(orderData.customer?.email || '');
-               });
+                await test.step('Select Existing Customer', async () => {
+                await addOrderPage.selectAndFillExistingCustomerDetails(
+                                    orderData.customer?.email || '',
+                                    orderData.customer?.existingCustomerAddressCard || ''
+                                    );
+                 });
                 perf.nextAction('Proceed to Add Items');
                 await test.step('Proceed to Add Items', async () => {
                     await addOrderPage.clickNextButton();
