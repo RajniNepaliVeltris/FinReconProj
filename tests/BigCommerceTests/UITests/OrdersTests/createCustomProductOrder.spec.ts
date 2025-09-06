@@ -26,7 +26,7 @@ test.afterAll(async () => {
 });
 
 test.describe('Create Order Flow', () => {
-        test('Create a new order with Standard Product for a new customer', async () => {
+    test('should create a new order with a standard product for a new customer', async () => {
             const perf = new PerformanceRecorder();
             perf.startFlow('Create Order Flow');
             let html = '';
@@ -185,7 +185,7 @@ test.describe('Create Order Flow', () => {
                 }
         });
 
-        test('Create a new order with Standard Product for an existing customer', async () => {
+    test('should create a new order with a standard product for an existing customer and select a specific address', async () => {
             const perf = new PerformanceRecorder();
             perf.startFlow('Create Order Flow - Existing Customer');
             let html = '';
