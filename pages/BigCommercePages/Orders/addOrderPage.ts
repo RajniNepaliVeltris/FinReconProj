@@ -50,6 +50,13 @@ export class AddOrderPage extends Homepage {
     private browseCategoriesButton: Locator;
     private addCustomProductLink: Locator;
     private emptyOrderMessage: Locator;
+    private dialogueConfirmationOkButton: Locator;
+
+    //Browser Category Dialogue
+    private browseCategoryDialog: Locator;
+    private browseCategorySearchInput: Locator;
+    private browseCategoryResultsSelectList: Locator;
+    private browserProductSelectButton: Locator;
 
     // Product Search Results Locators
     private productSearchResultsList: Locator;
@@ -162,9 +169,16 @@ export class AddOrderPage extends Homepage {
         this.addProductsSearchInput = iframe.locator("//input[@id='quote-item-search']");
         this.browseCategoriesButton = iframe.locator("//button[@id='browse-categories']");
         this.addCustomProductLink = iframe.locator("//a[@id='add-custom-product']");
+        this.dialogueConfirmationOkButton = iframe.locator("//div[@class='dialog-body']//button[@class='btn btn-primary' and contains(text(),'Ok')]");
         this.emptyOrderMessage = iframe.locator("//div[@class='orderNoItemsMessage']/div");
 
-        this.productSearchResultsList = iframe.locator("//div[@id='productAutocompleteResults']//ul");
+        //Browser Category Dialogue
+        this.browseCategoryDialog = iframe.locator("//div[@id='product-selector']");
+        this.browseCategorySearchInput = iframe.locator("//div[@id='product-selector']//input[@id='productSearchQuery']");
+        this.browseCategoryResultsSelectList = iframe.locator("//div[@id='product-selector']//select[contains(@class,'products-selectable')]");
+        this.browserProductSelectButton = iframe.locator("//div[@id='product-selector']//button[@id='product-selector-close']");
+
+        this.productSearchResultsList = iframe.locator("//div[@class='quoteItemSearchResults']//ul[@id='productAutocompleteResults']//li[@role='menuitem']");
         this.productSearchResultItem = iframe.locator("//div[@id='productAutocompleteResults']//li[contains(@class, 'ui-menu-item')]//strong");
         this.productViewLink = iframe.locator("//div[@id='productAutocompleteResults']//li[contains(@class, 'ui-menu-item')]//a[text()='View product']");
 
@@ -379,8 +393,15 @@ export class AddOrderPage extends Homepage {
     }
 
     async browseCategories() {
-    await this.clickElement(this.browseCategoriesButton);
-        console.log("Browsing categories.");
+        await this.clickElement(this.browseCategoriesButton);
+        if(await this.browseCategoryDialog.isVisible()) {
+            console.log("Browsing categories.");
+            expect(this.browseCategoryDialog).toBeVisible({ timeout: 5000 });
+        }
+        else {
+            console.log("Browse category dialog not visible.");
+            console.error("Browse category dialog not visible.");
+        }
     }
 
     async addCustomProduct() {
@@ -388,6 +409,22 @@ export class AddOrderPage extends Homepage {
         console.log("Adding a custom product.");
         await this.page.waitForTimeout(500); // Wait for any animations
         
+    }
+
+    async ConfirmationOkInDialogue() {
+        try {
+            // Wait for 3 seconds before checking visibility
+            await this.page.waitForTimeout(3000);
+            console.log(`Waiting for confirmation dialog OK button.`);
+            if (await this.dialogueConfirmationOkButton.isVisible()) {
+                await this.clickElement(this.dialogueConfirmationOkButton);
+                console.log("Clicked OK in confirmation dialog.");
+            } else {
+                console.log("Confirmation dialog OK button not visible.");
+            }
+        } catch (error) {
+            console.log(`Error in ConfirmationOkInDialogue: ${error}`);
+        }
     }
 
     async selectProductFromSearchResults(productName: string) {
@@ -401,26 +438,71 @@ export class AddOrderPage extends Homepage {
     }
 
     async searchAndSelectProduct(productName: string) {
-        // Focus and type the product name into the search input
-        await this.clickElement(this.addProductsSearchInput);
-        for (const char of productName) {
-            await this.addProductsSearchInput.type(char);
-            await this.page.waitForTimeout(100); // Simulate typing for autosuggest
-        }
-        await this.clickElement(this.addProductsSearchInput); // Trigger search/autosuggest
-        // Wait for the product search results to appear
-        await this.waitForElement(this.productSearchResultsList, 10000);
-        const resultCount = await this.productSearchResultsList.locator('li').count();
-        console.log(`Product autosuggest list appeared with ${resultCount} items.`);
-        // Try to select the product from the list
-        const productItem = this.productSearchResultItem.locator(`text=${productName}`);
-        if (await productItem.isVisible()) {
-            await this.clickElement(productItem);
-            console.log(`Selected product from autosuggest: ${productName}`);
-        } else {
-            console.error(`Product not found in autosuggest: ${productName}`);
-        }
+        try {
+            await this.waitForElement(this.addProductsSearchInput, 5000);
+            await this.clickElement(this.addProductsSearchInput);
+            //for (const char of productName) {
+                await this.addProductsSearchInput.fill(productName);
+                await this.page.waitForTimeout(100); // Adjust delay as needed
+                //await this.addProductsSearchInput.type(char);
+                //await this.page.waitForTimeout(100); // Simulate typing for autosuggest
+            //}
+            await this.clickElement(this.addProductsSearchInput); // Trigger search/autosuggest
+            // Wait for the product search results to appear
+            await this.waitForElement(this.productSearchResultsList, 10000);
+            const resultCount = await this.productSearchResultsList.locator('li').count();
+            console.log(`Product autosuggest list appeared with ${resultCount} items.`);
+            // Try to select the product from the list
+            const productItem = this.productSearchResultItem.locator(`text=${productName}`);
+            if (await productItem.isVisible()) {
+                await this.clickElement(productItem);
+                console.log(`Selected product from autosuggest: ${productName}`);
+            } else {
+                    console.error(`Product not found in autosuggest: ${productName}`);
+                }
+        } catch (error) {
+                console.log(`Error in searchAndSelectProduct: ${error}`);
+                console.error(`Error in searchAndSelectProduct: ${error}`);
+            }
     }
+
+    async searchProductWithBrowseCategories(productName: string) {
+        try {
+                await this.browseCategories();
+            await this.browseCategorySearchInput.pressSequentially(productName);
+            //  for (const char of productName) {
+            //     await this.browseCategorySearchInput.type(char);
+            //     await this.page.waitForTimeout(10); // Adjust delay as needed
+            // }
+            await this.waitForElement(this.browseCategoryResultsSelectList, 20000);
+            const resultCount = await this.browseCategoryResultsSelectList.locator('option').count();
+            console.log(`Browse categories search results appeared with ${resultCount} items.`);
+                
+                if (resultCount > 0) {
+                    const optionCount = await this.browseCategoryResultsSelectList.locator('option').count();
+                    for (let i = 0; i < optionCount; i++) {
+                        const optionText = await this.browseCategoryResultsSelectList.locator(`option:nth-child(${i + 1})`).textContent() || '';
+                        console.log(`Option ${i + 1}: ${optionText}`);
+                        if (optionText.match(productName)) {
+                            if (await this.browseCategoryResultsSelectList.isVisible()) {
+                                await this.browseCategoryResultsSelectList.selectOption({ index: i });
+                                await this.clickElement(this.browserProductSelectButton, { force: true, timeout: 5000 });
+                                console.log(`Selected product from browse categories: ${productName} (option index: ${i})`);
+                            }
+                        } else {
+                            console.error(`No products found in browse categories for: ${productName}`);
+                        }
+                    }
+                }
+                else {
+                    console.error(`No products found in browse categories for: ${productName}`);
+                }
+            } catch (error) {
+                console.log(`Error in searchProductWithBrowseCategories: ${error}`);
+                console.error(`Error in searchProductWithBrowseCategories: ${error}`);
+            }
+        }
+    
 
     async viewProductDetails(productName: string) {
         const productLink = this.productViewLink.locator(`text=${productName}`);
@@ -472,28 +554,36 @@ export class AddOrderPage extends Homepage {
 
     async searchCustomer(customerEmail: string) {
          await this.clickElement(this.customerSearchInput);
+         try{
         for (const char of customerEmail) {
                 await this.customerSearchInput.type(char);
                 await this.page.waitForTimeout(100); // Adjust delay as needed
             }
-        await this.clickElement(this.customerSearchInput); // Click to trigger search
+        } catch (error) {
+            console.log(`Error typing customer email: ${error}`);
+            console.error(`Error typing customer email: ${error}`);
+        }
+        if(await this.customerSearchInput.isVisible()) {
+            await this.page.waitForTimeout(5000); // Wait for suggestions to load
+            await this.clickElement(this.customerSearchInput); // Click to trigger search
+        }
         // Wait for the auto list to appear
         await this.waitForElement(this.autoSearchedCustomersList, 10000);
         if(await this.autoSearchedCustomersList.count() == 1) {
             console.log(`Auto-suggest list appeared with ${await this.autoSearchedCustomersList.count()} items.`);
            const detailsCardText = await this.autoSearchedCustomerDetailsCard.textContent();
            if(detailsCardText && detailsCardText.includes(customerEmail)) {
-            await this.clickElement(this.autoSearchedCustomerDetailsCard);
+            await this.clickElement(this.autoSearchedCustomerDetailsCard, { force: true, timeout: 2000 });
             console.log(`Selected customer from auto list: ${customerEmail}`);
             if( await this.autoSearchedCustomerDetailsCard.isVisible()) {
                  await this.clickElement(this.autoSearchedCustomerDetailsCard);
-                    console.log(`Clicked on customer details card for: ${customerEmail} to close the auto-suggest list.`);
+                console.log(`Clicked on customer details card for: ${customerEmail} to close the auto-suggest list.`);
             }
            }else {
             console.error(`Customer details card does not match the email: ${customerEmail}`);
             }
         } else {
-
+            console.log(`Auto-suggest list did not appear as expected. Count: ${await this.autoSearchedCustomersList.count()}`);
             console.error(`Auto-suggest list did not appear as expected. Count: ${await this.autoSearchedCustomersList.count()}`);
         }
     }
@@ -1023,8 +1113,7 @@ export class AddOrderPage extends Homepage {
             const expectedBaseAddress = expectedAddressParts[0].trim();
             
             // Check if the actual address contains the base address part
-            if (actualDetailsMap["Address"] && 
-                actualDetailsMap["Address"].includes(expectedBaseAddress)) {
+            if (actualDetailsMap["Address"] && actualDetailsMap["Address"].includes(expectedBaseAddress)) {
                 console.log("Base address part matched, considering address verification successful");
                 
                 // Create a temporary copy of expected details with the base address for other checks

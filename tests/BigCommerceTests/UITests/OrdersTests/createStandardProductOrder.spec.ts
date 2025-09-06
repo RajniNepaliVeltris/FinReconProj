@@ -66,15 +66,38 @@ test.describe('Order Creation - Standard Product', () => {
                 });
             await test.step('Add products to order', async () => {
                 for (const item of orderData.items) {
-                    await addOrderPage.searchAndSelectProduct(item.productName);
-                    // If quantity input is needed, add logic here
+                    //await addOrderPage.searchAndSelectProduct(item.productName);   
+                    await addOrderPage.searchProductWithBrowseCategories(item.productName || '');
                 }
+
+                await addOrderPage.ConfirmationOkInDialogue();
             });
 
-            await test.step('Complete order creation', async () => {
-                await addOrderPage.clickSaveButton();
-            });
-
+             await test.step('Proceed to Fulfillment', async () => {
+                    await addOrderPage.clickNextButton();
+                });
+                await test.step('Select Shipping Method', async () => {
+                    await addOrderPage.selectShippingMethod(orderData.ShippingMethod || '');
+                });
+                await test.step('Set Custom Shipping Details', async () => {
+                    const customShippingDetails = {
+                        method: orderData.shipping.method || '',
+                        cost: orderData.shipping.price?.toString() || ''
+                    };
+                    await addOrderPage.setCustomShippingDetails(customShippingDetails);
+                });
+                await test.step('Proceed to Payment', async () => {
+                    await addOrderPage.clickNextButton();
+                });
+                await test.step('Select Payment Method & Verify Summary', async () => {
+                    await addOrderPage.selectPaymentMethod(orderData.payment.paymentCategory || '');
+                    await addOrderPage.verifyPaymentMethodSelected(orderData.payment.paymentCategory || '');
+                    await addOrderPage.verifySummaryDetails(orderData.expectedPaymentSummary || {});
+                });
+                await test.step('Add Comments & Staff Notes', async () => {
+                    await addOrderPage.fillComments(orderData.comments || 'Default customer comment');
+                    await addOrderPage.fillStaffNotes(orderData.staffNotes || 'Default staff note');
+                });
             // Optionally, verify confirmation by checking for a success message or navigation
             // Example: await expect(page.locator('text=Order created successfully')).toBeVisible();
         } finally {

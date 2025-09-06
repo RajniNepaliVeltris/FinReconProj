@@ -90,6 +90,7 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
         await locator.waitFor({ state: 'visible', timeout });
         console.log(`Waited for element: ${locator}`);
       } catch (error) {
+        console.log(`Error occurred while waiting for element: ${locator}`, error);
         console.error(`Element not found within timeout: ${locator}`, error);
         throw new Error(`Wait for element failed: ${error}`);
       }
@@ -98,8 +99,7 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
     async clickElement(locator: Locator, options = { force: false, timeout: 30000 }): Promise<void> {
       try {
         await locator.waitFor({ state: 'visible', timeout: options.timeout });
-      //wait locator.click({ force: options.force });
-      await locator.click({ force: options.force });
+        await locator.click({ force: options.force });
         console.log(`Clicked on element: ${locator}`);
       } catch (error) {
         console.log(`Error occurred while clicking element: ${locator}`, error);
