@@ -605,12 +605,12 @@ export class AddOrderPage extends Homepage {
     }
 
     async addCustomProductDetails(productDetails: {
-        name: string;
+        productName: string;
         sku: string;
         price: string;
         quantity: string;
     }) {
-        await this.customProductNameInput.fill(productDetails.name);
+        await this.customProductNameInput.fill(productDetails.productName);
         await this.customProductSKUInput.fill(productDetails.sku);
         await this.customProductPriceInput.fill(productDetails.price);
         await this.customProductQuantityInput.fill(productDetails.quantity);

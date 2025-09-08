@@ -6,7 +6,7 @@ import * as path from 'path';
 test('should read test case and display headers from Custom Product sheet', async () => {
     // First, let's check the headers in the Excel file
     const workbook = new Excel.Workbook();
-    await workbook.xlsx.readFile(path.join(__dirname, '../data/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'));
+    await workbook.xlsx.readFile(path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'));
     const worksheet = workbook.getWorksheet('Custom Product');
     
     console.log('Available headers in Custom Product sheet:');

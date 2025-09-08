@@ -66,7 +66,7 @@ export class ExcelReader {
 
     private async readWorkbook(): Promise<Excel.Workbook> {
         const workbook = new Excel.Workbook();
-        await workbook.xlsx.readFile(path.join(__dirname, '../data/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'));
+        await workbook.xlsx.readFile(path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'));
         return workbook;
     }
 
