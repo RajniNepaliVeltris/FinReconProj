@@ -1,0 +1,20 @@
+{
+    "testCases": [
+        {
+            "Global Test Case ID": "TC0001",
+            "Prefixed Test Case ID": "ST001",
+            "Test Case ID": "TC0193",
+            "Test Scenario": "Order with Standard product - Fulfillment using Billing Address",
+            "Pre-Condition": "Existing customer logged in, existing billing/shipping details",
+            "Product Type": "Standard",
+            "Payment Method": "Cash on Delivery",
+            "Discount Applied": "No Discount",
+            "Coupon Applied": "No Coupon",
+            "Billing/Shipping Details": "Fulfillment using Billing Address",
+            "Expected Result": "Order should be placed and fulfilled successfully with applied rules",
+            "Automation Priority": "High",
+            "Scenario Category": "Standard → Fulfillment:Fulfillment using Billing Address → Payment:Cash on Delivery → Discount:No Discount → Coupon:No Coupon",
+            "Test Case Name": "Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon"
+        }
+    ]
+}

@@ -468,12 +468,8 @@ export class AddOrderPage extends Homepage {
 
     async searchProductWithBrowseCategories(productName: string) {
         try {
-                await this.browseCategories();
+            await this.browseCategories();
             await this.browseCategorySearchInput.pressSequentially(productName);
-            //  for (const char of productName) {
-            //     await this.browseCategorySearchInput.type(char);
-            //     await this.page.waitForTimeout(10); // Adjust delay as needed
-            // }
             await this.waitForElement(this.browseCategoryResultsSelectList, 20000);
             const resultCount = await this.browseCategoryResultsSelectList.locator('option').count();
             console.log(`Browse categories search results appeared with ${resultCount} items.`);
@@ -787,13 +783,13 @@ export class AddOrderPage extends Homepage {
     }
     
 
-    async setCustomShippingDetails(details: { method: string; cost: string }) {
+    async setCustomShippingDetails(details: { provider: string; cost: string }) {
         try {
     await this.isElementVisible(this.shippingMethodInput, 7000);
     if (await this.shippingMethodInput.isVisible()) {
         await this.clickElement(this.shippingMethodInput); // Ensure focus
         await this.shippingMethodInput.clear(); // Clear any existing value
-        await this.shippingMethodInput.fill(details.method); // Enter new value
+        await this.shippingMethodInput.fill(details.provider); // Enter new value
         await this.page.waitForTimeout(100); // Short wait for UI update
 
         if (await this.shippingCostInput.isVisible()) {
@@ -1303,12 +1299,12 @@ export class AddOrderPage extends Homepage {
         await this.staffNotesInput.fill(notes);
     }
 
-    async verifySummaryDetails(expectedSummary: { subtotal: string; shipping: string; grandTotal: string, taxIncludedInTotal: string }) {
-        try{
-        const actualSubtotal = await this.subtotalText.textContent();
-        const actualShipping = await this.shippingText.textContent();
-        const actualGrandTotal = await this.grandTotalText.textContent();
-        
+    async verifySummaryDetails(expectedSummary: { subtotal: string; shipping: string; grandTotal: string; taxIncludedInTotal: string }) {
+        try {
+            const actualSubtotal = await this.subtotalText.textContent();
+            const actualShipping = await this.shippingText.textContent();
+            const actualGrandTotal = await this.grandTotalText.textContent();
+
 
         if (actualSubtotal?.trim() !== expectedSummary.subtotal.trim()) {
             console.error(`Subtotal mismatch. Expected: ${expectedSummary.subtotal}, Found: ${actualSubtotal}`);

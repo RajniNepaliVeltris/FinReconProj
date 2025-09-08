@@ -7,67 +7,104 @@ This repository contains a modular and extendable QA automation framework built 
 ```
 ├── tests/
 │   ├── BigCommerceTests/
-│   │   ├── APITests/          # API tests for BigCommerce
-│   │   ├── UITests/           # UI tests for BigCommerce
-│   │   │   ├── LoginTests/    # Login-related tests
-│   │   │   ├── OrdersTests/   # Order-related tests
-│   ├── PearsonVuesTests/      # Tests for Pearson Vue
+│   │   ├── APITests/
+│   │   │   ├── bigc-to-kibo.spec.ts
+│   │   │   ├── customer-creation-conversion.spec.ts
+│   │   ├── UITests/
+│   │   │   ├── LoginTests/
+│   │   │   │   └── login.spec.ts
+│   │   │   ├── OrdersTests/
+│   │   │   │   ├── createCustomProductOrder.spec.ts
+│   │   │   │   ├── createStandardProductOrder.spec.ts
+│   ├── PearsonVuesTests/
+│   │   ├── UITests/
+│   │   │   └── Reports.spec.ts
+│   ├── excel-reader.test.ts
 ├── pages/
-│   ├── BigCommercePages/      # BigCommerce-specific pages
-│   │   ├── Base/              # Base page classes
-│   │   ├── Dashboard/         # Dashboard-related pages
-│   │   ├── Login/             # Login-related pages
-│   │   ├── Orders/            # Order-related pages
-│   ├── PerasonVuewPages/      # Pages for Pearson Vue
-│   ├── abc/                   # Miscellaneous pages
+│   ├── abc/
+│   ├── BigCommercePages/
+│   │   ├── Base/
+│   │   │   └── basePage.ts
+│   │   ├── Dashboard/
+│   │   │   └── homepage.ts
+│   │   ├── Login/
+│   │   │   └── loginPage.ts
+│   │   ├── Orders/
+│   │   │   ├── addOrderPage.ts
+│   │   │   ├── allOrdersPage.ts
+│   │   ├── Products/
+│   │   │   ├── addProduct.ts
+│   │   │   ├── allProducts.ts
+│   ├── PerasonVuewPages/
+│   │   └── LoginPage.ts
 ├── data/
-│   ├── BigCommerceData/       # Data for BigCommerce tests
-│   ├── PersonVueData/         # Data for Pearson Vue tests
-│   ├── addOrdersJson.json     # Additional order data
-├── mocks/                     # Mockoon configs for fake APIs
-├── postman/                   # Postman collections + Newman runner config
-├── utils/                     # Utility functions
-│   ├── db.ts                  # SQL Server DB utility
-│   ├── apiUtils.ts            # Helpers for API calls
-│   └── helpers.ts             # Common utilities
-├── test-results/              # Test result reports
-│   ├── index.html             # HTML report
-│   └── report.json            # JSON report
-├── playwright.config.ts       # Playwright configuration
-├── package.json               # NPM scripts and dependencies
-├── tsconfig.json              # TypeScript configuration
-├── .env                       # Environment variables (DB + API credentials)
-├── README.md                  # Project documentation
+│   ├── BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx
+│   ├── TestCases.json
+│   ├── APIData/
+│   │   ├── customerPayload.json
+│   │   ├── dbConfig.json
+│   │   ├── webhookSecret.json
+│   ├── BigCommerceData/
+│   │   ├── addOrdersJson.json
+│   │   ├── addProductData.json
+│   │   ├── loginTestData.json
+│   │   ├── orderTestData.json
+│   ├── PersonVueData/
+├── mocks/
+├── models/
+│   └── OrderTypes.ts
+├── postman/
+├── test-results/
+│   ├── index.html
+│   └── report.json
+├── utils/
+│   ├── apiUtils.ts
+│   ├── db.ts
+│   ├── excelReader.ts
+│   ├── helpers.ts
+│   ├── performanceHtmlReport.ts
+│   ├── PerformanceRecorder.ts
+│   ├── uiInteractions.ts
+│   └── uiInteractions.ts.bak
+├── playwright.config.ts
+├── package.json
+├── tsconfig.json
+├── fix-playwright.ps1
+├── start-chrome-debug.ps1
+├── fulfillment-table.png
+├── shipping-details-1.png
+├── README.md
 ```
 
 ## Features
 
-1. **UI Testing**: Built with Playwright and Page Object Model.
-2. **API Testing**: Uses Playwright's request API.
-3. **Postman Integration**: Run collections in CI/CD pipelines.
-4. **Mockoon Integration**: Consume fake APIs.
-5. **Database Utility**: SQL Server operations using `mssql` library.
-6. **Test Tagging**: Run specific test categories using tags.
-7. **Reporting**: HTML and JSON reports with screenshots and videos on failure.
-8. **Data-Driven Testing**: Test data stored in JSON files for flexibility.
-9. **Page Object Model**: Encapsulates UI interactions in reusable classes.
-10. **Robust UI Interactions**: Enhanced interaction utilities with fallback strategies for troublesome UI elements.
-11. **Advanced Table Verification**: Support for comparing both input values and highlighted/displayed values in tables, with smart formatting capabilities.
+1. **Modular UI Testing**: Built with Playwright and a Page Object Model, supporting reusable and maintainable UI test components for BigCommerce and Pearson Vue platforms.
+2. **Comprehensive API Testing**: Utilizes Playwright's request API and custom utilities for robust API validation, including data-driven scenarios.
+3. **Postman & Mockoon Integration**: Supports running Postman collections for API workflows and Mockoon for simulating/faking APIs in test environments.
+4. **Database Utility**: SQL Server operations via the `mssql` library, enabling direct DB validation and test data setup.
+5. **Test Tagging & Categorization**: Easily run targeted test suites (UI, API, Smoke, Regression) using tags and organized folder structure.
+6. **Rich Reporting**: Generates HTML and JSON reports, including screenshots and videos on failure, for easy debugging and sharing results.
+7. **Data-Driven Testing**: Flexible test data management using JSON and Excel files, supporting scalable and maintainable test scenarios.
+8. **Advanced UI Interactions**: Includes a robust `UIInteractions` utility for handling complex or problematic UI elements, with fallback strategies and iframe support.
+9. **Enhanced Table Verification**: Smart comparison of both input and displayed/highlighted values in tables, with normalization for currency, numbers, and detailed error reporting.
+10. **Extensible Utilities**: Utility modules for API, DB, Excel reading, performance recording, and more, making the framework adaptable to new requirements.
+11. **Chrome Debug Session Support**: Ability to run tests using an existing Chrome instance with preserved login state for faster, session-persistent test execution and debugging.
 
 ## Setup
 
-1. Clone the repository:
-   ```bash
+1. **Clone the repository**
+   ```powershell
    git clone <repository-url>
    cd <repository-folder>
    ```
 
-2. Install dependencies:
-   ```bash
+2. **Install dependencies**
+   ```powershell
    npm install
    ```
 
-3. Set up environment variables in `.env`:
+3. **Configure environment variables**
+   - Create a `.env` file in the project root with your DB and app credentials:
    ```env
    DB_USER=<your-db-user>
    DB_PASSWORD=<your-db-password>
@@ -75,130 +112,175 @@ This repository contains a modular and extendable QA automation framework built 
    DB_NAME=<your-db-name>
    BASE_URL=<your-app-url>
    ```
+   - For API and DB config, update files in `data/APIData/` as needed (e.g., `dbConfig.json`, `webhookSecret.json`).
 
-4. Install Playwright browsers:
-   ```bash
+4. **Install Playwright browsers**
+   ```powershell
    npx playwright install
    ```
 
+5. **(Optional) Windows PowerShell scripts**
+   - Use `fix-playwright.ps1` to resolve Playwright issues on Windows if needed.
+   - Use `start-chrome-debug.ps1` to launch Chrome with remote debugging for session-persistent tests.
+
 ## Running Tests
 
-- Run UI tests:
-  ```bash
-  npm run test:ui
-  ```
 
-- Run API tests:
-  ```bash
-  npm run test:api
-  ```
+You can run tests using npm scripts or directly with Playwright. All commands below work in PowerShell on Windows.
 
-- Run Smoke tests:
-  ```bash
-  npm run test:smoke
-  ```
-
-- Run Regression tests:
-  ```bash
-  npm run test:regression
-  ```
-
-## Reporting
-
-Test results are available in the `test-results` folder. Open `test-results/index.html` to view the HTML report.
-
-## Using Existing Chrome Instance for Tests
-
-### Overview
-You can run tests using an existing Chrome instance with preserved login state. This is useful when:
-- You need to maintain login sessions between test runs
-- You want to debug tests with the same browser state
-- You want faster test execution by reusing the browser instance
-
-### Setup Steps
-
-1. **Launch Chrome with Remote Debugging**
+- **Run all UI tests**
    ```powershell
-   # Run the provided PowerShell script
-   .\start-chrome-debug.ps1
+   npm run test:ui
+   # or
+   npx playwright test tests/BigCommerceTests/UITests/ --headed
    ```
-   This starts Chrome with:
-   - Remote debugging port: 9222
-   - User data directory: C:\ChromeDebug
 
-2. **Manual Login**
-   - Use the launched Chrome instance
-   - Log into your application
-   - Keep the Chrome window open
-
-3. **Run Tests**
+- **Run all API tests**
    ```powershell
-   # Run tests with existing Chrome instance
+   npm run test:api
+   # or
+   npx playwright test tests/BigCommerceTests/APITests/
+   ```
+
+- **Run all Smoke tests**
+   ```powershell
+   npm run test:smoke
+   ```
+
+- **Run all Regression tests**
+   ```powershell
+   npm run test:regression
+   ```
+
+- **Run a specific test file**
+   ```powershell
+   npx playwright test tests/BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts
+   ```
+
+- **Run tests with Chrome debug session**
+   ```powershell
+   .\start-chrome-debug.ps1
    npx playwright test --project=existing-chrome
    ```
 
-### Important Notes
-- Keep the Chrome instance running during test execution
-- Chrome debug profile is saved at `C:\ChromeDebug`
-- Login session persists between test runs
-- Do not close the Chrome window between test runs
-- Port 9222 must be available
+Test results and reports will be generated in the `test-results` folder after execution.
+
+## Reporting
+
+
+Test execution generates detailed reports in the `test-results` folder:
+
+- **HTML Report**: Open `test-results/index.html` in your browser for a visual summary of all test runs, including pass/fail status, error details, and links to screenshots/videos.
+- **JSON Report**: For integration or analysis, use `test-results/report.json`.
+- **Screenshots & Videos**: On test failure, screenshots and videos are automatically captured and linked in the HTML report for easy debugging.
+- **Performance Data**: If enabled, performance metrics are recorded and available for review.
+
+You can customize reporting options in `playwright.config.ts` and extend reporting with utilities in `utils/performanceHtmlReport.ts`.
+
+## Using Existing Chrome Instance for Tests
+
+
+### Overview
+Run Playwright tests using an existing Chrome instance with preserved login state for session persistence, faster execution, and easier debugging.
+
+#### When to Use
+- Maintain login sessions between test runs (no repeated logins)
+- Debug tests with the same browser state
+- Speed up test execution by reusing the browser instance
+
+### Step-by-Step Guide
+
+1. **Launch Chrome with Remote Debugging**
+   ```powershell
+   .\start-chrome-debug.ps1
+   ```
+   - Chrome starts with remote debugging on port 9222
+   - User data is stored in `C:\ChromeDebug` (profile persists)
+
+2. **Log In Manually**
+   - Use the opened Chrome window to log into your application
+   - Leave the window open during test runs
+
+3. **Run Playwright Tests**
+   ```powershell
+   npx playwright test --project=existing-chrome
+   ```
+   - Tests will use the running Chrome instance and preserved session
+
+### Tips & Troubleshooting
+- Always keep the Chrome window open while tests run
+- Do not close Chrome between test runs to preserve session
+- Ensure port 9222 is free (close other Chrome debug sessions if needed)
+- If login state is lost, repeat the manual login step
+- Profile data is saved in `C:\ChromeDebug` for future runs
 
 ### Restarting Later
-1. Run `start-chrome-debug.ps1`
-2. Log in once
+1. Run `.\start-chrome-debug.ps1`
+2. Log in once (if needed)
 3. Run your tests
 
 ## Advanced UI Interaction & Table Verification
 
+
 ### UIInteractions Utility
 
-The framework includes a robust `UIInteractions` utility class for handling problematic UI elements with fallback strategies:
+The framework includes a robust `UIInteractions` utility class for handling complex or problematic UI elements. It supports:
+- Fallback strategies for elements that are hard to interact with
+- Automatic handling of iframes and dynamic content
+- Custom timeouts and descriptive error messages
 
+**Example: Interacting with a checkbox (including iframes)**
 ```typescript
-// Example: Working with checkboxes that might be in iframes or have interaction issues
 await UIInteractions.checkElement(
-    checkboxLocator, 
-    {
-        description: 'Terms checkbox',
-        timeout: 5000,
-        page: this.page,
-        iframe: 'content-iframe' // Optional iframe context
-    }
+   checkboxLocator,
+   {
+      description: 'Terms checkbox',
+      timeout: 5000,
+      page: this.page,
+      iframe: 'content-iframe' // Optional iframe context
+   }
 );
 ```
 
+**Tips:**
+- Use descriptive `description` for better error reporting
+- Specify `iframe` if the element is inside an iframe
+- Adjust `timeout` for slow-loading elements
+
 ### Table Value Verification
 
-The framework provides enhanced table verification capabilities:
+Enhanced table verification supports:
+- Comparing both input field values and displayed/highlighted text
+- Smart normalization for currency, numbers, and formatting
+- Detailed error reporting for mismatches
 
-1. **Verify both input values and displayed/highlighted values**:
+**Example: Verify product details in a table**
 ```typescript
-// Verify values in input fields
-await addOrderPage.verifyProductInTable(productDetails, { 
-    checkHighlightedValues: false 
-});
+// Verify input field values
+await addOrderPage.verifyProductInTable(productDetails, { checkHighlightedValues: false });
 
 // Verify highlighted/displayed text values
-await addOrderPage.verifyProductInTable(productDetails, { 
-    checkHighlightedValues: true 
-});
+await addOrderPage.verifyProductInTable(productDetails, { checkHighlightedValues: true });
 ```
 
-2. **Smart format matching for numerical and currency values**:
+**Smart format matching:**
 ```typescript
-// These will match with format normalization
-"$49.99" === "49.99"  // Currency symbols ignored
+"$49.99" === "49.99"      // Currency symbols ignored
 "1,234.56" === "1234.56"  // Separators ignored
-"49.990" === "49.99"  // Trailing zeros ignored
+"49.990" === "49.99"      // Trailing zeros ignored
 ```
 
-3. **Detailed error reporting**:
+**Error reporting example:**
 ```
 Product details validation failed for 'Test Product':
 Product price does not match the expected value. Expected: "$49.99", Found: "$50.00"
 Product quantity does not match the expected value. Expected: "2", Found: "1"
 ```
+
+**Best Practices:**
+- Use table verification for both UI and API-driven tests
+- Review error messages for quick debugging
+- Extend utility methods for custom table formats as needed
 
 ## License
 

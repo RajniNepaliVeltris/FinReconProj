@@ -11,15 +11,28 @@ export default defineConfig({
   },
   fullyParallel: true,
   reporter: [
-    ['html', { outputFolder: 'test-results', open: 'never' }],
-    ['json', { outputFile: 'test-results/report.json' }]
+    ['html', { 
+      outputFolder: 'test-results',
+      open: 'never',
+      attachmentsBaseURL: 'attachments',
+      attachments: true
+    }],
+    ['json', { 
+      outputFile: 'test-results/report.json' 
+    }],
+    ['list', {
+      printSteps: true,
+      printProgress: true
+    }]
   ],
   use: {
     actionTimeout: 0,
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
-    screenshot: 'only-on-failure',
+    screenshot: 'on',
     video: 'retain-on-failure',
+    testIdAttribute: 'data-testid',
+    viewport: { width: 1280, height: 720 },
   },
   projects: [
     {
@@ -27,10 +40,6 @@ export default defineConfig({
       use: {
         browserName: 'chromium',
         channel: 'chrome',
-        connectOptions: {
-          timeout: 30000,
-          wsEndpoint: 'http://localhost:9222'
-        }
       },
     },
     {

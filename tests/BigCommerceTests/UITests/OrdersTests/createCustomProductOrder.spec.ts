@@ -1,9 +1,10 @@
 import { test, expect, chromium } from '@playwright/test';
 import { Homepage } from '../../../../pages/BigCommercePages/Dashboard/homepage';
 import { AddOrderPage } from '../../../../pages/BigCommercePages/Orders/addOrderPage';
-import orderTestData from '../../../../data/BigCommerceData/orderTestData.json';
+import  orderTestData  from '../../../../data/BigCommerceData/orderTestData.json';
 import { PerformanceRecorder } from '../../../../utils/PerformanceRecorder';
 import { generatePerformanceHtmlReport } from '../../../../utils/performanceHtmlReport';
+import { ExcelReader } from '../../../../utils/excelReader';
 import * as fs from 'fs';
 
 let browser: import('@playwright/test').Browser;
@@ -38,11 +39,11 @@ test.describe('Create Order Flow', () => {
                     });
                     perf.start('Navigate to Add Order');
 
-                    const orderData = await test.step('Fetch order data', async () => {
-                        return orderTestData.testOrders.find(order => order.description === "New customer with Standard Product");
+                     const orderData = await test.step('Fetch order data', async () => {
+                     return orderTestData.testOrders.find(order => order.description === 'Order with Standard product - Fulfillment using Billing Address');
                     });
                     if (!orderData) {
-                        throw new Error("Order data not found for description: New customer with single item");
+                        throw new Error('Order data not found for description: Order with Standard product - Fulfillment using Billing Address');
                     }
 
                     const homepage = new Homepage(page);
@@ -185,17 +186,17 @@ test.describe('Create Order Flow', () => {
                 }
         });
 
-    test('should create a new order with a standard product for an existing customer and select a specific address', async () => {
-            const perf = new PerformanceRecorder();
-            perf.startFlow('Create Order Flow - Existing Customer');
-            let html = '';
-            try {
-                const pages = await context.pages();
-                const page = pages.length > 0 ? pages[0] : await context.newPage();
-                await test.step('Bring page to front', async () => {
-                    await page.bringToFront();
-                });
-                perf.start('Navigate to Add Order');
+    test('Order with Custom product - Fulfillment using Billing Address', async () => {
+        const perf = new PerformanceRecorder();
+        perf.startFlow('Create Order Flow - Existing Customer');
+        let html = '';
+        try {
+            const pages = await context.pages();
+            const page = pages.length > 0 ? pages[0] : await context.newPage();
+            await test.step('Bring page to front', async () => {
+                await page.bringToFront();
+            });
+            perf.start('Navigate to Add Order');
 
                 const orderData = await test.step('Fetch order data', async () => {
                     return orderTestData.testOrders.find(order => order.description === "Existing customer with Standard Product");
@@ -204,27 +205,45 @@ test.describe('Create Order Flow', () => {
                     throw new Error("Order data not found for description: Existing customer with Standard Product");
                 }
 
-                const homepage = new Homepage(page);
-                await test.step('Navigate to Add Order page', async () => {
-                    await homepage.navigateToSideMenuOption('Orders', 'Add');
-                    await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/orders/add-order');
-                    await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
-                });
+            // Fetch test case data from Excel
+            const testCase = await test.step('Fetch test case data', async () => {
+                const excelReader = ExcelReader.getInstance();
+                const tc = await excelReader.getTestCase({ scenario: 'Order with Custom product - Fulfillment using Billing Address', sheetName: 'Custom Product' });
+                if (!tc) {
+                    throw new Error('Test case not found in Excel sheet');
+                }
+                return tc;
+            });
 
-                const addOrderPage = new AddOrderPage(page);
-                perf.nextAction('Select Existing Customer');
-                await test.step('Select Existing Customer', async () => {
+            // Log test case information
+            console.log(`Executing Test Case: ${testCase['Test Case ID']}`);
+            console.log(`Scenario: ${testCase['Test Scenario']}`);
+            console.log(`Pre-Condition: ${testCase['Pre-Condition']}`);
+            console.log(`Payment Method: ${testCase['Payment Method']}`);
+            console.log(`Expected Result: ${testCase['Expected Result']}`);
+
+            // Use Excel data for test logic
+            const homepage = new Homepage(page);
+            await test.step('Navigate to Add Order page', async () => {
+                await homepage.navigateToSideMenuOption('Orders', 'Add');
+                await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/orders/add-order');
+                await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+            });
+
+            const addOrderPage = new AddOrderPage(page);
+            perf.nextAction('Select Existing Customer');
+            await test.step('Select Existing Customer', async () => {
                 await addOrderPage.selectAndFillExistingCustomerDetails(
                                     orderData.customer?.email || '',
                                     orderData.customer?.existingCustomerAddressCard || ''
                                     );
-                 });
-                perf.nextAction('Proceed to Add Items');
-                await test.step('Proceed to Add Items', async () => {
-                    await addOrderPage.clickNextButton();
-                });
-                perf.nextAction('Add Products');
-                await test.step('Add Products', async () => {
+            });
+            perf.nextAction('Proceed to Add Items');
+            await test.step('Proceed to Add Items', async () => {
+                await addOrderPage.clickNextButton();
+            });
+            perf.nextAction('Add Products');
+            await test.step('Add Products', async () => {
                     for (let i = 0; i < orderData.items.length; i++) {
                         const productDetails = orderData.items[i];
                         await addOrderPage.clickAddCustomProductLink();
@@ -236,36 +255,36 @@ test.describe('Create Order Flow', () => {
                             quantity: productDetails.quantity.toString()
                         });
                     }
-                });
-                await test.step('Proceed to Fulfillment', async () => {
-                    await addOrderPage.clickNextButton();
-                });
-                await test.step('Select Shipping Method', async () => {
+            });
+            await test.step('Proceed to Fulfillment', async () => {
+                await addOrderPage.clickNextButton();
+            });
+            await test.step('Select Shipping Method', async () => {
                     await addOrderPage.selectShippingMethod(orderData.ShippingMethod || '');
-                });
-                await test.step('Set Custom Shipping Details', async () => {
+            });
+            await test.step('Set Custom Shipping Details', async () => {
                     const customShippingDetails = {
                         method: orderData.shipping.method || '',
                         cost: orderData.shipping.price?.toString() || ''
                     };
                     await addOrderPage.setCustomShippingDetails(customShippingDetails);
-                });
-                await test.step('Proceed to Payment', async () => {
-                    await addOrderPage.clickNextButton();
-                });
-                await test.step('Select Payment Method & Verify Summary', async () => {
+            });
+            await test.step('Proceed to Payment', async () => {
+                await addOrderPage.clickNextButton();
+            });
+            await test.step('Select Payment Method & Verify Summary', async () => {
                     await addOrderPage.selectPaymentMethod(orderData.payment.paymentCategory || '');
                     await addOrderPage.verifyPaymentMethodSelected(orderData.payment.paymentCategory || '');
                     await addOrderPage.verifySummaryDetails(orderData.expectedPaymentSummary || {});
-                });
-                await test.step('Add Comments & Staff Notes', async () => {
+            });
+            await test.step('Add Comments & Staff Notes', async () => {
                     await addOrderPage.fillComments(orderData.comments || 'Default customer comment');
                     await addOrderPage.fillStaffNotes(orderData.staffNotes || 'Default staff note');
-                });
-            } finally {
-                html = generatePerformanceHtmlReport('Create Order Flow - Existing Customer', perf.getLogs());
-                fs.writeFileSync('test-results/performance-report-existing-customer.html', html);
-            }
-        });
+            });
+        } finally {
+            html = generatePerformanceHtmlReport('Create Order Flow - Existing Customer', perf.getLogs());
+            fs.writeFileSync('test-results/performance-report-existing-customer.html', html);
+        }
+    });
 
 });
