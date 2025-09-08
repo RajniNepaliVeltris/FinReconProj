@@ -111,7 +111,7 @@ export class Homepage extends BasePage {
   async navigateToSideMenuOption(menuName: string, subMenuName: string) {
     const menuLocator = this.sideMenuLocators[menuName];
     if (menuLocator && (await menuLocator.isVisible())) {
-      await menuLocator.click();
+      await this.clickElement(menuLocator);
       console.log(`Navigated to ${menuName} menu.`);
       if (menuName === 'Orders') {
         await this.navigateToOrdersSubMenuOption(subMenuName);
@@ -128,7 +128,7 @@ export class Homepage extends BasePage {
   async navigateToOrdersSubMenuOption(subMenuName: string) {
     const subMenuLocator = this.ordersSubMenuLocators[subMenuName];
     if (subMenuLocator && (await subMenuLocator.isVisible())) {
-      await subMenuLocator.click();
+      await this.clickElement(subMenuLocator);
       console.log(`Navigated to Orders submenu option: ${subMenuName}`);
     } else {
       console.error(`Orders submenu option not found: ${subMenuName}`);
@@ -138,7 +138,7 @@ export class Homepage extends BasePage {
   async navigateToProductsSubMenuOption(subMenuName: string) {
     const subMenuLocator = this.productsSubMenuLocators[subMenuName];
     if (subMenuLocator && (await subMenuLocator.isVisible())) {
-      await subMenuLocator.click();
+      await this.clickElement(subMenuLocator);
       console.log(`Navigated to Products submenu option: ${subMenuName}`);
     } else {
       console.error(`Products submenu option not found: ${subMenuName}`);
@@ -156,7 +156,7 @@ export class Homepage extends BasePage {
 
     const subMenuLocator = subMenuLocators[menuName]?.[subMenuName];
     if (subMenuLocator && (await subMenuLocator.isVisible())) {
-      await subMenuLocator.click();
+      await this.clickElement(subMenuLocator);
       console.log(`Navigated to ${menuName} submenu option: ${subMenuName}`);
     } else {
       console.error(`${menuName} submenu option not found: ${subMenuName}`);

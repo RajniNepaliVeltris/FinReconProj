@@ -55,7 +55,7 @@ export class ExcelReader {
         console.log(`Expected Result: ${testCase['Expected Result']}`);
     }
     private static instance: ExcelReader;
-    private constructor() {}
+    private constructor() { }
 
     public static getInstance(): ExcelReader {
         if (!ExcelReader.instance) {
@@ -66,7 +66,15 @@ export class ExcelReader {
 
     private async readWorkbook(): Promise<Excel.Workbook> {
         const workbook = new Excel.Workbook();
-        await workbook.xlsx.readFile(path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'));
+        try {
+            const filePath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
+            console.log('Attempting to load Excel file:', filePath);
+            await workbook.xlsx.readFile(filePath);
+            console.log('Excel file loaded successfully');
+        } catch (err) {
+            console.error('Error loading Excel file:', err);
+            throw err;
+        }
         return workbook;
     }
 
@@ -74,32 +82,39 @@ export class ExcelReader {
      * Wrapper to fetch a test case by scenario and sheet name
      */
     public async getTestCase({ scenario, sheetName }: { scenario: string, sheetName: string }): Promise<TestCase | undefined> {
-        const workbook = await this.readWorkbook();
-        const worksheet = workbook.getWorksheet(sheetName);
-        if (!worksheet) {
-            throw new Error(`Worksheet ${sheetName} not found in the Excel file`);
-        }
+        try {
+            const workbook = await this.readWorkbook();
+            const worksheet = workbook.getWorksheet(sheetName);
+            if (!worksheet) {
+                console.log('Worksheet not found:', sheetName);
+                throw new Error(`Worksheet ${sheetName} not found in the Excel file`);
+            }
 
-        const headers: { [key: string]: number } = {};
-        worksheet.getRow(1).eachCell((cell, colNumber) => {
-            headers[cell.value?.toString() || ''] = colNumber;
-        });
-
-        if (!headers['Test Scenario']) {
-            throw new Error('Test Scenario column not found in the worksheet');
-        }
-
-        const testCases: TestCase[] = [];
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber === 1) return; // Skip header row
-            const testCase: any = {};
-            Object.keys(headers).forEach(header => {
-                testCase[header] = row.getCell(headers[header]).value?.toString() || '';
+            const headers: { [key: string]: number } = {};
+            worksheet.getRow(1).eachCell((cell, colNumber) => {
+                headers[cell.value?.toString() || ''] = colNumber;
             });
-            testCases.push(testCase as TestCase);
-        });
 
-        return testCases.find(testCase => testCase['Test Scenario'] && testCase['Test Scenario'].includes(scenario));
+            if (!headers['Test Scenario']) {
+                console.log('Test Scenario column not found in the worksheet');
+                throw new Error('Test Scenario column not found in the worksheet');
+            }
+
+            const testCases: TestCase[] = [];
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return; // Skip header row
+                const testCase: any = {};
+                Object.keys(headers).forEach(header => {
+                    testCase[header] = row.getCell(headers[header]).value?.toString() || '';
+                });
+                testCases.push(testCase as TestCase);
+            });
+
+            return testCases.find(testCase => testCase['Test Scenario'] && testCase['Test Scenario'].includes(scenario));
+        } catch (error) {
+            console.log('Error fetching test case:', error);
+            console.error('Error fetching test case:', error);
+        }
     }
 
     public async getAllTestCases(sheetName: string = 'Custom Product'): Promise<TestCase[]> {
@@ -117,7 +132,7 @@ export class ExcelReader {
         const testCases: TestCase[] = [];
         worksheet.eachRow((row, rowNumber) => {
             if (rowNumber === 1) return; // Skip header row
-            
+
             const testCase: any = {};
             Object.keys(headers).forEach(header => {
                 testCase[header] = row.getCell(headers[header]).value?.toString() || '';
