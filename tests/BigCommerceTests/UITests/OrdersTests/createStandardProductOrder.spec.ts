@@ -1,116 +1,27 @@
 
-import { test, expect, chromium } from '@playwright/test';
+import { test } from '../../../../utils/baseTest';
+import { expect } from '@playwright/test';
 import { Homepage } from '../../../../pages/BigCommercePages/Dashboard/homepage';
 import { AddOrderPage } from '../../../../pages/BigCommercePages/Orders/addOrderPage';
-import orderTestData from '../../../../data/BigCommerceData/orderTestData.json';
-import { PerformanceRecorder } from '../../../../utils/PerformanceRecorder';
 import { ExcelReader, TestCase } from '../../../../utils/excelReader';
+import { TestConfig } from '../../../../utils/testConfig';
 
-let browser: import('@playwright/test').Browser;
-let context: import('@playwright/test').BrowserContext;
-
-
-test.beforeAll(async () => {
-    browser = await chromium.connectOverCDP({
-        endpointURL: 'http://localhost:9222',
-        timeout: 30000,
-        slowMo: 100
-    });
-    context = browser.contexts()[0];
-});
-
-
-// Helper functions
-function logStep(title: string, details?: any) {
-    console.log(`\n=== ${title} ===`);
-    if (details) console.table(details);
-}
-
-async function fetchTestCaseDataByName(testCaseName: string, sheetName: string) {
-    const excelReader = ExcelReader.getInstance();
-    const allCases = await excelReader.getAllTestCases(sheetName);
-    const tc = allCases.find(tc => tc['Test Case Name'] === testCaseName);
-    if (!tc) throw new Error(`Test case '${testCaseName}' not found in Excel sheet '${sheetName}'`);
-    logStep('Test Case Info', {
-        'ID': tc['Test Case ID'],
-        'Name': tc['Test Case Name'],
-        'Scenario': tc['Test Scenario'],
-        'Pre-Condition': tc['Pre-Condition'],
-        'Payment Method': tc['Payment Method'],
-        'Expected Result': tc['Expected Result']
-    });
-    return tc;
-}
-
-function getOrderData(description: string) {
-    const orderData = orderTestData.testOrders.find(order => order.description === description);
-    if (!orderData) throw new Error(`Order data not found for description: ${description}`);
-    return orderData;
-}
-
-
-
-// Allow specifying scenarios to run via environment variable
-// Usage: set SCENARIOS="Order with Standard product - Fulfillment using Billing Address:Standard Product,Another Scenario:Sheet Name"
-const envScenarios = process.env.SCENARIOS;
-let scenarios: { scenario: string, sheetName: string }[] = [];
-if (envScenarios) {
-    scenarios = envScenarios.split(',').map(pair => {
-        const [scenario, sheetName] = pair.split(':');
-        return { scenario: scenario.trim(), sheetName: (sheetName || '').trim() };
-    });
-} else {
-    // Default: only run the main scenario
-    scenarios = [
-        { scenario: 'Order with Standard product - Fulfillment using Billing Address', sheetName: 'Standard Product' }
-    ];
-}
-
-
-// Usage: set TESTCASE_NAMES="TC-001,TC-002" (where TC-001 is the Test Case Name in Excel)
-const envTestCaseNames = process.env.TESTCASE_NAMES;
-let testCaseNames: string[] = [
-    //NoCoupon
-    'Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon',
-    'Standard_FulfillmentusingBillingAddress_CashonDelivery_ManualDiscount_NoCoupon',
-    'Standard_FulfillmentusingBillingAddress_BankDeposit_NoDiscount_NoCoupon',
-    'Standard_FulfillmentusingBillingAddress_BankDeposit_ManualDiscount_NoCoupon',
-    'Standard_FulfillmentusingBillingAddress_Cybersource_NoDiscount_NoCoupon',
-    'Standard_FulfillmentusingBillingAddress_Cybersource_ManualDiscount_NoCoupon',
-    'Standard_FulfillmentusingBillingAddress_ManualPayment_NoDiscount_NoCoupon',
-    'Standard_FulfillmentusingBillingAddress_ManualPayment_ManualDiscount_NoCoupon'
-];
-if (envTestCaseNames) {
-    testCaseNames = envTestCaseNames.split(',').map(tc => tc.trim());
-} else {
-    // Default: only run one test case
-    testCaseNames = [
-                    'Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon',
-                    'Standard_FulfillmentusingBillingAddress_CashonDelivery_ManualDiscount_NoCoupon',
-                    'Standard_FulfillmentusingBillingAddress_BankDeposit_NoDiscount_NoCoupon',
-                    'Standard_FulfillmentusingBillingAddress_BankDeposit_ManualDiscount_NoCoupon',
-                    'Standard_FulfillmentusingBillingAddress_Cybersource_NoDiscount_NoCoupon',
-                    'Standard_FulfillmentusingBillingAddress_Cybersource_ManualDiscount_NoCoupon',               
-                    'Standard_FulfillmentusingBillingAddress_ManualPayment_NoDiscount_NoCoupon',
-                    'Standard_FulfillmentusingBillingAddress_ManualPayment_ManualDiscount_NoCoupon'
-                    ];
-}
+const testConfig = TestConfig.getInstance();
+const scenarios = testConfig.getScenarios();
+const testCaseNames = testConfig.getTestCaseNames();
 
 for (const { scenario, sheetName } of scenarios) {
     for (const testCaseName of testCaseNames) {
         test.describe(scenario, () => {
-            test(`Execute: ${testCaseName}`, async ({ }, testInfo) => {
+            test(`Execute: ${testCaseName}`, async ({ baseTest }, testInfo) => {
                 testInfo.annotations.push(
                     { type: 'test-type', description: 'E2E' },
                     { type: 'feature', description: 'Order Creation' }
                 );
                 testInfo.setTimeout(testInfo.timeout + 30000);
-                const perf = new PerformanceRecorder();
-                perf.startFlow('Create Order Flow');
                 let testCase: TestCase | undefined;
                 let screenshotPath: string | undefined;
-                const pages = await context.pages();
-                const page = pages.length > 0 ? pages[0] : await context.newPage();
+                const page = await baseTest.getPage();
                 await page.bringToFront();
                 const excelReader = ExcelReader.getInstance();
                 let testResult = 'Passed';
@@ -119,12 +30,9 @@ for (const { scenario, sheetName } of scenarios) {
                 let currentStep = '';
 
                 try {
-                    testCase = await fetchTestCaseDataByName(testCaseName, sheetName);
+                    testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
                     // Only execute if Automation is true
-                    const automationValue = String(testCase['Automation']).toLowerCase();
-                    if (!(automationValue === 'true')) {
-                        test.skip(true, `Automation column is not set to true for this test case.`);
-                        await excelReader.updateTestResult(sheetName, testCaseName, 'Skipped', 'Automation column not true');
+                    if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
                         return;
                     }
                     // Only execute if scenario matches
@@ -133,22 +41,20 @@ for (const { scenario, sheetName } of scenarios) {
                         await excelReader.updateTestResult(sheetName, testCaseName, 'Skipped', 'Scenario does not match');
                         return;
                     }
-                    logStep('Executing Test Case', { 'Name': testCaseName, 'Scenario': scenario });
-                    const orderData = getOrderData(scenario);
+                    await excelReader.logStep('Executing Test Case', { 'Name': testCaseName, 'Scenario': scenario });
+                    const orderData = excelReader.getOrderData(scenario);
                     const homepage = new Homepage(page);
                     currentStep = 'Navigate to Add Order page';
                     await test.step(currentStep, async () => {
                         await homepage.navigateToSideMenuOption('Orders', 'Add');
                         await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/orders/add-order');
                         await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
-                        perf.start('Navigate to Add Order');
                     });
 
                     const addOrderPage = new AddOrderPage(page);
 
                     currentStep = 'Select Existing Customer';
                     await test.step(currentStep, async () => {
-                        perf.nextAction('Select Existing Customer');
                         await addOrderPage.selectAndFillExistingCustomerDetails(
                             orderData.customer?.email || '',
                             orderData.customer?.existingCustomerAddressCard || ''
@@ -157,7 +63,6 @@ for (const { scenario, sheetName } of scenarios) {
 
                     currentStep = 'Add Products';
                     await test.step(currentStep, async () => {
-                        perf.nextAction('Proceed to Add Items');
                         await addOrderPage.clickNextButton();
                         if (testCase) {
                             for (const item of testCase['Product_Quantity']) {
@@ -191,11 +96,10 @@ for (const { scenario, sheetName } of scenarios) {
                     await test.step(currentStep, async () => {
                         await addOrderPage.clickNextButton();
                         if (testCase) {
-                            
                             await addOrderPage.selectPaymentMethod(testCase['Payment_Category'] || '');
                             await addOrderPage.verifyPaymentMethodSelected(testCase['Payment_Category'] || '');
                             let cardDetails: any = undefined;
-                            if(testCase['Payment_Category'] === "Cybersource") {
+                            if (testCase['Payment_Category'] === "Cybersource") {
                                 cardDetails = {
                                     cardHolderName: testCase['CS_CardHolderName'] || '',
                                     cardType: testCase['CS_CardType'] || 'Visa',
@@ -205,16 +109,15 @@ for (const { scenario, sheetName } of scenarios) {
                                 };
                                 await addOrderPage.fillCybersourceCardDetails(cardDetails);
                             }
-                            if (testCase['Discount Applied']== "Manual Discount") {
+                            if (testCase['Discount Applied'] == "Manual Discount") {
                                 await addOrderPage.fillManualDiscount(testCase['Manual_Discount']?.toString() || '');
                             }
-                            if (testCase['Coupon Applied']== "Valid Coupon" || testCase['Coupon Applied']== "Invalid Coupon") {
+                            if (testCase['Coupon Applied'] == "Valid Coupon" || testCase['Coupon Applied'] == "Invalid Coupon") {
                                 await addOrderPage.applyCoupon(testCase['Coupon_Code']?.toString() || '');
-                            }else {
+                            } else {
                                 console.log('No coupon to apply as per test data');
                             }
                         }
-
                     });
 
                     currentStep = 'Verify Summary and Add Comments';
@@ -229,89 +132,20 @@ for (const { scenario, sheetName } of scenarios) {
                             await addOrderPage.verifySummaryDetails(expectedPaymentDetails);
                             await addOrderPage.fillComments(testCase['Comments'] || 'Default customer comment');
                             await addOrderPage.fillStaffNotes(testCase['Staff_Notes'] || 'Default staff note');
-                            screenshotPath = `test-results/screenshots/${testCase['Test Case ID']}.png`;
-                            await page.screenshot({ path: screenshotPath });
-                            await testInfo.attach('screenshot', { path: screenshotPath, contentType: 'image/png' });
+                            screenshotPath = await excelReader.captureAndAttachScreenshot(page, testCase, testInfo);
                         }
                     });
                 } catch (err: any) {
                     testResult = 'Failed';
                     failedStep = currentStep;
-                    
+
                     let failureScreenshotPath: string | undefined;
-                    
-                    // Capture failure screenshot
-                    try {
-                        if (page) {
-                            failureScreenshotPath = `test-results/screenshots/failure_${testCase?.['Test Case ID']}_${Date.now()}.png`;
-                            await page.screenshot({ path: failureScreenshotPath });
-                            console.log(`Captured failure screenshot: ${failureScreenshotPath}`);
-                        }
-                    } catch (screenshotErr) {
-                        console.error('Failed to capture failure screenshot:', screenshotErr);
-                    }
+                    failureScreenshotPath = await excelReader.handleTestFailure(sheetName, testCaseName, currentStep, err, page, testCase);
 
-                    // Ensure the failure is recorded in Excel with detailed information
-                    try {
-                        const failureTime = new Date().toISOString();
-                        const failureInfo = {
-                            failedStep: currentStep,
-                            errorMessage: err?.message || String(err),
-                            failureScreenshot: failureScreenshotPath,
-                            failureTimestamp: failureTime
-                        };
-
-                        // Create detailed notes about the test execution up to the failure
-                        const executionSummary = `Test failed during: ${currentStep}\n` +
-                            `Previous successful steps:\n` +
-                            `1. Navigate to Add Order page\n` +
-                            `2. Select Existing Customer\n` +
-                            `3. Add Products\n` +
-                            `4. Proceed to Fulfillment\n` +
-                            `5. Proceed to Payment\n` +
-                            `6. Verify Summary and Add Comments`;
-
-                        await excelReader.updateTestResult(
-                            sheetName,
-                            testCaseName,
-                            'Failed',
-                            executionSummary,
-                            failureInfo
-                        );
-                        console.log('Successfully recorded detailed test failure in Excel');
-                    } catch (excelErr) {
-                        console.error('Failed to record test failure in Excel:', excelErr);
-                        console.error('Excel Error:', excelErr);
-                    }
-                    
                     throw err; // Re-throw the error to fail the test
                 } finally {
                     if (testCase) {
-                        console.log('\nTest Summary:');
-                        console.table([
-                            {
-                                'Test Case': testCase['Test Case Name'],
-                                'Result': testResult,
-                                'Screenshot': screenshotPath || 'N/A',
-                                'Execution_Notes': executionNotes
-                            }
-                        ]);
-                        
-                        // Update Excel with the final result
-                        try {
-                            if (testResult === 'Passed') {
-                                const successDetails = [
-                                    'All steps completed successfully',
-                                    `Execution Time: ${new Date().toISOString()}`,
-                                    `Screenshot: ${screenshotPath || 'N/A'}`
-                                ].join('\n');
-                                
-                                await excelReader.updateTestResult(sheetName, testCaseName, 'Passed', successDetails);
-                                console.log('Successfully recorded test success in Excel');
-                            }
-                        } catch (excelErr) {
-                            console.error('Failed to record final test result in Excel:', excelErr);
-                        }
+                        await excelReader.logTestSummaryAndRecordResult(testCase, testResult, screenshotPath, executionNotes, sheetName, testCaseName);
                     }
                 }
             });

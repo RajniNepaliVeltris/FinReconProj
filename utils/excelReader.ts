@@ -1,5 +1,6 @@
 import * as Excel from 'exceljs';
 import * as path from 'path';
+import orderTestData from '../data/BigCommerceData/orderTestData.json';
 
 export interface TestCase {
     'Global Test Case ID': string;
@@ -124,6 +125,29 @@ export class ExcelReader {
             console.error('Error fetching test case:', error);
         }
     }
+
+    
+public async fetchTestCaseDataByName(testCaseName: string, sheetName: string) {
+    const excelReader = ExcelReader.getInstance();
+    const allCases = await excelReader.getAllTestCases(sheetName);
+    const tc = allCases.find(tc => tc['Test Case Name'] === testCaseName);
+    if (!tc) throw new Error(`Test case '${testCaseName}' not found in Excel sheet '${sheetName}'`);
+    await this.logStep('Test Case Info', {
+        'ID': tc['Test Case ID'],
+        'Name': tc['Test Case Name'],
+        'Scenario': tc['Test Scenario'],
+        'Pre-Condition': tc['Pre-Condition'],
+        'Payment Method': tc['Payment Method'],
+        'Expected Result': tc['Expected Result']
+    });
+    return tc;
+}
+
+// Helper functions
+public async logStep(title: string, details?: any) {
+    console.log(`\n=== ${title} ===`);
+    if (details) console.table(details);
+}
 
     public async getAllTestCases(sheetName: string = 'Custom Product'): Promise<TestCase[]> {
         const workbook = await this.readWorkbook();
@@ -339,4 +363,160 @@ export class ExcelReader {
                 throw error;
             }
         }
+
+    /**
+     * Record a detailed test failure in Excel with step, error, screenshot, and summary
+     */
+    public async recordDetailedTestFailure(
+        sheetName: string,
+        testCaseName: string,
+        currentStep: string,
+        err: any,
+        failureScreenshotPath?: string
+    ): Promise<void> {
+        const failureTime = new Date().toISOString();
+        const failureInfo = {
+            failedStep: currentStep,
+            errorMessage: err?.message || String(err),
+            failureScreenshot: failureScreenshotPath,
+            failureTimestamp: failureTime
+        };
+        const executionSummary = `Test failed during: ${currentStep}\n` +
+            `Previous successful steps:\n` +
+            `1. Navigate to Add Order page\n` +
+            `2. Select Existing Customer\n` +
+            `3. Add Products\n` +
+            `4. Proceed to Fulfillment\n` +
+            `5. Proceed to Payment\n` +
+            `6. Verify Summary and Add Comments`;
+        await this.updateTestResult(
+            sheetName,
+            testCaseName,
+            'Failed',
+            executionSummary,
+            failureInfo
+        );
+        console.log('Successfully recorded detailed test failure in Excel');
+    }
+
+    /**
+     * Check if the test case should be automated and skip if not
+     */
+    public async checkAutomationAndSkipIfNeeded(
+        testCase: TestCase,
+        sheetName: string,
+        testCaseName: string,
+        test: any
+    ): Promise<boolean> {
+        const automationValue = String(testCase['Automation']).toLowerCase();
+        if (automationValue !== 'true') {
+            test.skip(true, `Automation column is not set to true for this test case.`);
+            await this.updateTestResult(sheetName, testCaseName, 'Skipped', 'Automation column not true');
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Handle test failure: capture screenshot and record detailed failure in Excel
+     */
+    public async handleTestFailure(
+        sheetName: string,
+        testCaseName: string,
+        currentStep: string,
+        err: any,
+        page: any, // Playwright Page
+        testCase: TestCase | undefined
+    ): Promise<string | undefined> {
+        let failureScreenshotPath: string | undefined;
+        // Capture failure screenshot
+        try {
+            if (page && testCase) {
+                failureScreenshotPath = `test-results/screenshots/failure_${testCase['Test Case ID']}_${Date.now()}.png`;
+                await page.screenshot({ path: failureScreenshotPath });
+                console.log(`Captured failure screenshot: ${failureScreenshotPath}`);
+            }
+        } catch (screenshotErr) {
+            console.error('Failed to capture failure screenshot:', screenshotErr);
+        }
+        // Record detailed failure
+        try {
+            await this.recordDetailedTestFailure(sheetName, testCaseName, currentStep, err, failureScreenshotPath);
+        } catch (excelErr) {
+            console.error('Failed to record test failure in Excel:', excelErr);
+            console.error('Excel Error:', excelErr);
+        }
+        return failureScreenshotPath;
+    }
+
+    /**
+     * Record test success in Excel with details
+     */
+    public async recordTestSuccess(
+        sheetName: string,
+        testCaseName: string,
+        screenshotPath?: string
+    ): Promise<void> {
+        const successDetails = [
+            'All steps completed successfully',
+            `Execution Time: ${new Date().toISOString()}`,
+            `Screenshot: ${screenshotPath || 'N/A'}`
+        ].join('\n');
+
+        await this.updateTestResult(sheetName, testCaseName, 'Passed', successDetails);
+        console.log('Successfully recorded test success in Excel');
+    }
+
+    /**
+     * Log test summary and record final result in Excel
+     */
+    public async logTestSummaryAndRecordResult(
+        testCase: TestCase,
+        testResult: string,
+        screenshotPath: string | undefined,
+        executionNotes: string,
+        sheetName: string,
+        testCaseName: string
+    ): Promise<void> {
+        console.log('\nTest Summary:');
+        console.table([
+            {
+                'Test Case': testCase['Test Case Name'],
+                'Result': testResult,
+                'Screenshot': screenshotPath || 'N/A',
+                'Execution_Notes': executionNotes
+            }
+        ]);
+
+        if (testResult === 'Passed') {
+            try {
+                await this.recordTestSuccess(sheetName, testCaseName, screenshotPath);
+            } catch (excelErr) {
+                console.error('Failed to record final test result in Excel:', excelErr);
+            }
+        }
+    }
+
+    /**
+     * Capture screenshot and attach to test info
+     */
+    public async captureAndAttachScreenshot(
+        page: any,
+        testCase: TestCase,
+        testInfo: any
+    ): Promise<string> {
+        const screenshotPath = `test-results/screenshots/${testCase['Test Case ID']}.png`;
+        await page.screenshot({ path: screenshotPath });
+        await testInfo.attach('screenshot', { path: screenshotPath, contentType: 'image/png' });
+        return screenshotPath;
+    }
+
+    /**
+     * Get order data by description from JSON
+     */
+    public getOrderData(description: string) {
+        const orderData = orderTestData.testOrders.find(order => order.description === description);
+        if (!orderData) throw new Error(`Order data not found for description: ${description}`);
+        return orderData;
+    }
 }

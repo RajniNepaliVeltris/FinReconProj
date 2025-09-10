@@ -16,7 +16,7 @@ test('should read test case and display headers from Custom Product sheet', asyn
 
     // Now try to read a test case
     const excelReader = ExcelReader.getInstance();
-    const testCase = await excelReader.getTestCase({ testCase: { name: 'Standard_FulfillmentusingBillingAddress_Cybersource_NoDiscount_NoCoupon' }, sheetName: 'Standard Product' });
+    const testCase = await excelReader.fetchTestCaseDataByName('Standard_FulfillmentusingBillingAddress_Cybersource_NoDiscount_NoCoupon', 'Standard Product');
     if (!testCase) {
         throw new Error('Test case not found in Excel sheet');
     }
