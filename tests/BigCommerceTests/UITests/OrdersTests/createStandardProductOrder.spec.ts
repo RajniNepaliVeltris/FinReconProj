@@ -90,7 +90,9 @@ if (envTestCaseNames) {
                     'Standard_FulfillmentusingBillingAddress_BankDeposit_NoDiscount_NoCoupon',
                     'Standard_FulfillmentusingBillingAddress_BankDeposit_ManualDiscount_NoCoupon',
                     'Standard_FulfillmentusingBillingAddress_Cybersource_NoDiscount_NoCoupon',
-                    'Standard_FulfillmentusingBillingAddress_Cybersource_ManualDiscount_NoCoupon'
+                    'Standard_FulfillmentusingBillingAddress_Cybersource_ManualDiscount_NoCoupon',               
+                    'Standard_FulfillmentusingBillingAddress_ManualPayment_NoDiscount_NoCoupon',
+                    'Standard_FulfillmentusingBillingAddress_ManualPayment_ManualDiscount_NoCoupon'
                     ];
 }
 
@@ -235,10 +237,54 @@ for (const { scenario, sheetName } of scenarios) {
                 } catch (err: any) {
                     testResult = 'Failed';
                     failedStep = currentStep;
-                    executionNotes = `Step: ${failedStep}, Error: ${err?.message || err}`;
-                    console.error(`Test failed at step: ${failedStep}`);
-                    await excelReader.updateTestResult(sheetName, testCaseName, testResult, executionNotes);
-                    throw err;
+                    
+                    let failureScreenshotPath: string | undefined;
+                    
+                    // Capture failure screenshot
+                    try {
+                        if (page) {
+                            failureScreenshotPath = `test-results/screenshots/failure_${testCase?.['Test Case ID']}_${Date.now()}.png`;
+                            await page.screenshot({ path: failureScreenshotPath });
+                            console.log(`Captured failure screenshot: ${failureScreenshotPath}`);
+                        }
+                    } catch (screenshotErr) {
+                        console.error('Failed to capture failure screenshot:', screenshotErr);
+                    }
+
+                    // Ensure the failure is recorded in Excel with detailed information
+                    try {
+                        const failureTime = new Date().toISOString();
+                        const failureInfo = {
+                            failedStep: currentStep,
+                            errorMessage: err?.message || String(err),
+                            failureScreenshot: failureScreenshotPath,
+                            failureTimestamp: failureTime
+                        };
+
+                        // Create detailed notes about the test execution up to the failure
+                        const executionSummary = `Test failed during: ${currentStep}\n` +
+                            `Previous successful steps:\n` +
+                            `1. Navigate to Add Order page\n` +
+                            `2. Select Existing Customer\n` +
+                            `3. Add Products\n` +
+                            `4. Proceed to Fulfillment\n` +
+                            `5. Proceed to Payment\n` +
+                            `6. Verify Summary and Add Comments`;
+
+                        await excelReader.updateTestResult(
+                            sheetName,
+                            testCaseName,
+                            'Failed',
+                            executionSummary,
+                            failureInfo
+                        );
+                        console.log('Successfully recorded detailed test failure in Excel');
+                    } catch (excelErr) {
+                        console.error('Failed to record test failure in Excel:', excelErr);
+                        console.error('Excel Error:', excelErr);
+                    }
+                    
+                    throw err; // Re-throw the error to fail the test
                 } finally {
                     if (testCase) {
                         console.log('\nTest Summary:');
@@ -250,9 +296,21 @@ for (const { scenario, sheetName } of scenarios) {
                                 'Execution_Notes': executionNotes
                             }
                         ]);
-                        // Only write to Excel if we haven't already written in catch block
-                        if (testResult === 'Passed') {
-                            await excelReader.updateTestResult(sheetName, testCaseName, 'Passed', 'All steps completed successfully');
+                        
+                        // Update Excel with the final result
+                        try {
+                            if (testResult === 'Passed') {
+                                const successDetails = [
+                                    'All steps completed successfully',
+                                    `Execution Time: ${new Date().toISOString()}`,
+                                    `Screenshot: ${screenshotPath || 'N/A'}`
+                                ].join('\n');
+                                
+                                await excelReader.updateTestResult(sheetName, testCaseName, 'Passed', successDetails);
+                                console.log('Successfully recorded test success in Excel');
+                            }
+                        } catch (excelErr) {
+                            console.error('Failed to record final test result in Excel:', excelErr);
                         }
                     }
                 }
