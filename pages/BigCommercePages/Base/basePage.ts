@@ -115,7 +115,10 @@ export class BasePage {
       await locator.waitFor({ state: 'visible', timeout: 5000 });
       if (await locator.isVisible()) {
         await locator.click();
-        await locator.fill(text);
+        if(text)
+          await locator.fill(text);
+        else
+          console.log(`No text provided to enter into element: ${locator}`);
         console.log(`Entered text: ${text} into element: ${locator}`);
       }
     } catch (error1) {

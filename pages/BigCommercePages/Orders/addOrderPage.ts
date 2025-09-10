@@ -1304,14 +1304,37 @@ export class AddOrderPage extends Homepage {
         console.log("Payment method verified successfully.");
     }
 
-    async fillCybersourceCardDetails(cardDetails: { name: string; type:string; number: string; expiry: string; cvv: string }) {
-        
-        await this.enterText(this.cybersourceCardNameInput, cardDetails.name);
-        await this.setDropdownValue(this.cybersourceCardTypeSelect, cardDetails.type);
-        await this.enterText(this.cybersourceCardNumberInput, cardDetails.number);
-        await this.setDropdownValue(this.cybersourceCardExpiryMonthSelect, cardDetails.expiry.split("-")[0]);
-        await this.setDropdownValue(this.cybersourceCardExpiryYearSelect, cardDetails.expiry.split("-")[1]);
-        await this.enterText(this.cybersourceCardCVVInput, cardDetails.cvv);
+    /**
+     * Helper function to format card expiry from date string
+     * @param dateString Date string in format 'Sun Apr 01 2029 05:30:00 GMT+0530 (India Standard Time)'
+     * @returns Object containing month (three-letter format e.g., 'Jan') and year (full year e.g., '2025')
+     */
+    private formatCardExpiry(dateString: string): { month: string; year: string } {
+        const date = new Date(dateString);
+        // Get month with first letter uppercase and rest lowercase
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = months[date.getMonth()];
+        // Get full year
+        const year = date.getFullYear().toString();
+        return { month, year };
+    }
+
+    async fillCybersourceCardDetails(cardDetails: { cardHolderName: string; cardType:string; cardNumber: string; cardExpiry: string; cardCVC: string }) {
+        try {
+            await this.enterText(this.cybersourceCardNameInput, cardDetails.cardHolderName);
+            await this.setDropdownValue(this.cybersourceCardTypeSelect, cardDetails.cardType);
+            await this.enterText(this.cybersourceCardNumberInput, cardDetails.cardNumber);
+
+            // Format the expiry date from the full date string
+            const { month, year } = this.formatCardExpiry(cardDetails.cardExpiry);
+            await this.setDropdownValue(this.cybersourceCardExpiryMonthSelect, month);
+            await this.setDropdownValue(this.cybersourceCardExpiryYearSelect, year);
+            await this.enterText(this.cybersourceCardCVVInput, cardDetails.cardCVC);
+        } catch (error) {
+            console.log("Error filling Cybersource card details:", error);
+            console.error("Error filling Cybersource card details:", error);
+            throw error;
+        }
     }
 
     async fillManualDiscount(discount: string) {
