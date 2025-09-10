@@ -16,25 +16,25 @@ export class BasePage {
    * @param locator - Locator for the dropdown element
    * @param value - value to select or fill
    */
-async setDropdownValue(locator: Locator, value: string): Promise<void> {
-  try {
+  async setDropdownValue(locator: Locator, value: string): Promise<void> {
+    try {
 
-    const tagName = await locator.evaluate(el => el.tagName.toLowerCase());
+      const tagName = await locator.evaluate(el => el.tagName.toLowerCase());
 
-    if (tagName === 'select') {
-      let selected = false;
-      let optionLocator: Locator | null = null;
+      if (tagName === 'select') {
+        let selected = false;
+        let optionLocator: Locator | null = null;
 
-      // Attempt to select by label
-      try {
-        await locator.selectOption({ label: value });
-        optionLocator = locator.locator(`option[label='${value}'], option:has-text("${value}")`);
-        console.log(`Selected by label: '${value}'`);
-        selected = true;
-      } catch (error) {
+        // Attempt to select by label
+        try {
+          await locator.selectOption({ label: value });
+          optionLocator = locator.locator(`option[label='${value}'], option:has-text("${value}")`);
+          console.log(`Selected by label: '${value}'`);
+          selected = true;
+        } catch (error) {
           console.error(`Failed to set dropdown value '${value}':`, error);
           throw error;
-      }
+        }
 
         // Attempt to select by value
         if (!selected) {
@@ -44,8 +44,8 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
             console.log(`Selected by value: '${value}'`);
             selected = true;
           } catch (error) {
-              console.error(`Failed to set dropdown value '${value}':`, error);
-              throw error;
+            console.error(`Failed to set dropdown value '${value}':`, error);
+            throw error;
           }
         }
 
@@ -58,8 +58,8 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
             console.log(`Selected by index: '${index}'`);
             selected = true;
           } catch (error) {
-              console.error(`Failed to set dropdown value '${value}':`, error);
-              throw error;
+            console.error(`Failed to set dropdown value '${value}':`, error);
+            throw error;
           }
         }
 
@@ -79,47 +79,49 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
       }
     } catch (error1) {
       console.log(`Error determining tag name for locator: ${locator}`, error1);
-    console.error(`Error in setDropdownValue for value '${value}':`, error1);
-    throw error1;
+      console.error(`Error in setDropdownValue for value '${value}':`, error1);
+      throw error1;
+    }
   }
-}
 
 
-    async waitForElement(locator: Locator, timeout: number = 30000): Promise<void> {
-      try {
-        await locator.waitFor({ state: 'visible', timeout });
-        console.log(`Waited for element: ${locator}`);
-      } catch (error) {
-        console.log(`Error occurred while waiting for element: ${locator}`, error);
-        console.error(`Element not found within timeout: ${locator}`, error);
-        throw new Error(`Wait for element failed: ${error}`);
-      }
+
+
+  async waitForElement(locator: Locator, timeout: number = 30000): Promise<void> {
+    try {
+      await locator.waitFor({ state: 'visible', timeout });
+      console.log(`Waited for element: ${locator}`);
+    } catch (error) {
+      console.log(`Error occurred while waiting for element: ${locator}`, error);
+      console.error(`Element not found within timeout: ${locator}`, error);
+      throw new Error(`Wait for element failed: ${error}`);
     }
+  }
 
-    async clickElement(locator: Locator, options = { force: false, timeout: 30000 }): Promise<void> {
-      try {
-        await locator.waitFor({ state: 'visible', timeout: options.timeout });
-        await locator.click({ force: options.force });
-        console.log(`Clicked on element: ${locator}`);
-      } catch (error) {
-        console.log(`Error occurred while clicking element: ${locator}`, error);
-        console.error(`Failed to click element: ${locator}`, error);
-        throw new Error(`Click element failed: ${error}`);
-      }
+  async clickElement(locator: Locator, options = { force: false, timeout: 30000 }): Promise<void> {
+    try {
+      await locator.waitFor({ state: 'visible', timeout: options.timeout });
+      await locator.click({ force: options.force });
+      console.log(`Clicked on element: ${locator}`);
+    } catch (error) {
+      console.log(`Error occurred while clicking element: ${locator}`, error);
+      console.error(`Failed to click element: ${locator}`, error);
+      throw new Error(`Click element failed: ${error}`);
     }
+  }
 
-    async enterText(locator: Locator, text: string): Promise<void> {
-      try {
-        await locator.waitFor({ state: 'visible', timeout: 5000 });
-        if (await locator.isVisible()) {
-          await locator.click();
-          await locator.fill(text);
-          console.log(`Entered text: ${text} into element: ${locator}`);
-        }
-      } catch (error1) {
-        console.error(`Failed to enter text into element: ${locator}`, error1);
-        throw new Error(`Enter text failed: ${error1}`);
+  async enterText(locator: Locator, text: string): Promise<void> {
+    try {
+      await locator.waitFor({ state: 'visible', timeout: 5000 });
+      if (await locator.isVisible()) {
+        await locator.click();
+        await locator.fill(text);
+        console.log(`Entered text: ${text} into element: ${locator}`);
       }
+    } catch (error1) {
+      console.error(`Failed to enter text into element: ${locator}`, error1);
+      throw new Error(`Enter text failed: ${error1}`);
+    }
   }
 
   async clearAndEnterText(locator: Locator, text: string): Promise<void> {
@@ -233,6 +235,41 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
     }
   }
 
+  /**
+   * Handles input-based dropdown elements where clicking opens a dropdown menu.
+   * Selects an option from the dropdown list based on matching text.
+   * @param inputLocator - Locator for the input element that triggers the dropdown
+   * @param optionText - Text of the option to select from the dropdown
+   * @param dropdownOptionsSelector - CSS selector for the dropdown options (default: 'li, [role="option"]')
+   * @param timeout - Maximum time to wait for elements (default: 5000ms)
+   */
+  async selectFromInputDropdown(
+    inputLocator: Locator,
+    optionText: string,
+    dropdownOptionsSelector: string = 'li, [role="option"]',
+    timeout: number = 5000
+  ): Promise<void> {
+    try {
+      // Wait for and click the input to open dropdown
+      await this.waitForElement(inputLocator, timeout);
+      await this.clickElement(inputLocator);
+
+      // Wait for dropdown options to be visible
+      const dropdownOptions = this.page.locator(dropdownOptionsSelector);
+      await dropdownOptions.first().waitFor({ state: 'visible', timeout });
+
+      // Find and click the matching option
+      const matchingOption = dropdownOptions.filter({ hasText: optionText }).first();
+      await matchingOption.waitFor({ state: 'visible', timeout });
+      await matchingOption.click();
+
+      console.log(`Selected "${optionText}" from input dropdown`);
+    } catch (error) {
+      console.error(`Failed to select "${optionText}" from input dropdown:`, error);
+      throw new Error(`Input dropdown selection failed: ${error}`);
+    }
+  }
+
   async collapseSideMenuOption(locator: Locator): Promise<void> {
     try {
       await locator.scrollIntoViewIfNeeded();
@@ -262,7 +299,7 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
 
   async retryOperation(operation: () => Promise<void>, maxAttempts: number = 3, delay: number = 1000): Promise<void> {
     let lastError: Error | null = null;
-    
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         await operation();
@@ -270,14 +307,14 @@ async setDropdownValue(locator: Locator, value: string): Promise<void> {
       } catch (error) {
         lastError = error as Error;
         console.warn(`Attempt ${attempt}/${maxAttempts} failed:`, error);
-        
+
         if (attempt < maxAttempts) {
           console.log(`Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
-    
+
     // If we got here, all attempts failed
     throw new Error(`Operation failed after ${maxAttempts} attempts: ${lastError?.message}`);
   }
