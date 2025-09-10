@@ -1269,6 +1269,10 @@ export class AddOrderPage extends Homepage {
             //as in the value is shown as custom but the text is Manual Payment
             selectedOption = "Manual payment";
         }
+        if(selectedOption === "checkout_cod") {
+            //as in the value is shown as checkout_cod but the text is Cash on Delivery
+            selectedOption = "Cash on Delivery";
+        }
         if (selectedOption !== expectedMethod) {
             console.error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
             throw new Error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
@@ -1277,9 +1281,11 @@ export class AddOrderPage extends Homepage {
         console.log("Payment method verified successfully.");
     }
 
-    async applyManualDiscount(discount: string) {
+    async fillManualDiscount(discount: string) {
         await this.manualDiscountInput.fill(discount);
-    await this.clickElement(this.applyDiscountButton);
+        await this.clickElement(this.applyDiscountButton);
+        await this.page.waitForTimeout(5000); // Wait for the discount to be applied
+
     }
 
     async applyCoupon(couponCode: string) {

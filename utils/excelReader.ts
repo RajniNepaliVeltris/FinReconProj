@@ -25,16 +25,22 @@ export interface TestCase {
     'Shipping_Price': string;
     'Payment_Category': string;
     'Payment_description': string;
-    'Payment_method': string;
-    'Payment_amount': string;
-    'Payment_status': string;
+    'Email_Invoice_Check': string;
+    'Manual_Discount': string;
     'ExpectedPaySum_subtotalAmt': string;
     'ExpectedPaySum_shippingAmt': string;
     'ExpectedPaySum_taxAmt': string;
     'ExpectedPaySum_totalAmt': string;
     'Comments': string;
     'Staff_Notes': string;
-    [key: string]: string; // For any additional dynamic columns
+    'CS_CardHolderName': string;
+    'CS_CardType': string;
+    'CS_CreditCardNo': string;
+    'CS_CCV2Value': string;
+    'CS_CardExpiryDate(JAN-2025)': string;
+    'Automation': boolean;
+    'Order_Id': string;
+    [key: string]: string | boolean; // For any additional dynamic columns
 
 }
 
@@ -81,7 +87,7 @@ export class ExcelReader {
     /**
      * Wrapper to fetch a test case by scenario and sheet name
      */
-    public async getTestCase({ scenario, sheetName }: { scenario: string, sheetName: string }): Promise<TestCase | undefined> {
+    public async getTestCase({ testCase, sheetName }: { testCase: TestCase | undefined, sheetName: string }): Promise<TestCase | undefined> {
         try {
             const workbook = await this.readWorkbook();
             const worksheet = workbook.getWorksheet(sheetName);
@@ -110,7 +116,7 @@ export class ExcelReader {
                 testCases.push(testCase as TestCase);
             });
 
-            return testCases.find(testCase => testCase['Test Scenario'] && testCase['Test Scenario'].includes(scenario));
+            return testCases.find(testCase => testCase['Test Case Name'] && testCase['Test Case Name'].includes(testCase?.['Test Case Name'] || ''));
         } catch (error) {
             console.log('Error fetching test case:', error);
             console.error('Error fetching test case:', error);
