@@ -120,7 +120,7 @@ for (const { scenario, sheetName } of scenarios) {
                         }
                     });
 
-                    currentStep = 'Verify Summary and Add Comments';
+                    currentStep = 'Verify Payment Summary and Add Comments & Staff Notes';
                     await test.step(currentStep, async () => {
                         if (testCase) {
                             const expectedPaymentDetails = {
