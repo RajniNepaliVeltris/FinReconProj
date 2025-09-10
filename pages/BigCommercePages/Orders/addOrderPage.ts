@@ -111,6 +111,12 @@ export class AddOrderPage extends Homepage {
 
     // Payment and Summary Section Locators
     private paymentDropdown: Locator;
+    private cybersourceCardNameInput: Locator;
+    private cybersourceCardTypeSelect: Locator;
+    private cybersourceCardNumberInput: Locator;
+    private cybersourceCardExpiryMonthSelect: Locator;
+    private cybersourceCardExpiryYearSelect: Locator;
+    private cybersourceCardCVVInput: Locator;
     private manualDiscountInput: Locator;
     private applyDiscountButton: Locator;
     private couponInput: Locator;
@@ -245,6 +251,14 @@ export class AddOrderPage extends Homepage {
 
         // Payment Method
         this.paymentDropdown = initLocator(`//div[@class='payment-form']//select[@id='paymentMethod']`);
+        this.cybersourceCardNameInput = initLocator(`//input[@name='paymentField[checkout_cybersourcev2][creditcard_name]']`);
+        this.cybersourceCardTypeSelect = initLocator(`//select[@name='paymentField[checkout_cybersourcev2][creditcard_cctype]']`);
+        this.cybersourceCardNumberInput = initLocator(`//input[@name='paymentField[checkout_cybersourcev2][creditcard_ccno]']`);
+        this.cybersourceCardExpiryMonthSelect = initLocator(`//select[@name='paymentField[checkout_cybersourcev2][creditcard_ccexpm]']`);
+        this.cybersourceCardExpiryYearSelect = initLocator(`//select[@name='paymentField[checkout_cybersourcev2][creditcard_ccexpy]']`);
+        this.cybersourceCardCVVInput = initLocator(`//input[@name='paymentField[checkout_cybersourcev2][creditcard_cccvd]']`);
+
+
 
         // Summary Section Locators
         const summarySectionXPath = "//div[contains(@class,'orderSummaryContainer')]";
@@ -1273,12 +1287,31 @@ export class AddOrderPage extends Homepage {
             //as in the value is shown as checkout_cod but the text is Cash on Delivery
             selectedOption = "Cash on Delivery";
         }
+        if(selectedOption === "checkout_bankdeposit") {
+            //as in the value is shown as checkout_offline but the text is Offline Payment
+            selectedOption = "Bank Deposit";
+        }
+        if(selectedOption === "checkout_cybersourcev2") {
+            //as in the value is shown as checkout_offline but the text is Offline Payment
+            selectedOption = "Cybersource";
+        }
+
         if (selectedOption !== expectedMethod) {
             console.error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
             throw new Error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
         }
     
         console.log("Payment method verified successfully.");
+    }
+
+    async fillCybersourceCardDetails(cardDetails: { name: string; type:string; number: string; expiry: string; cvv: string }) {
+        
+        await this.enterText(this.cybersourceCardNameInput, cardDetails.name);
+        await this.setDropdownValue(this.cybersourceCardTypeSelect, cardDetails.type);
+        await this.enterText(this.cybersourceCardNumberInput, cardDetails.number);
+        await this.setDropdownValue(this.cybersourceCardExpiryMonthSelect, cardDetails.expiry.split("-")[0]);
+        await this.setDropdownValue(this.cybersourceCardExpiryYearSelect, cardDetails.expiry.split("-")[1]);
+        await this.enterText(this.cybersourceCardCVVInput, cardDetails.cvv);
     }
 
     async fillManualDiscount(discount: string) {

@@ -84,8 +84,14 @@ if (envTestCaseNames) {
     testCaseNames = envTestCaseNames.split(',').map(tc => tc.trim());
 } else {
     // Default: only run one test case
-    testCaseNames = ['Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon',
-        'Standard_FulfillmentusingBillingAddress_CashonDelivery_ManualDiscount_NoCoupon'];
+    testCaseNames = [
+                    'Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon',
+                    'Standard_FulfillmentusingBillingAddress_CashonDelivery_ManualDiscount_NoCoupon',
+                    'Standard_FulfillmentusingBillingAddress_BankDeposit_NoDiscount_NoCoupon',
+                    'Standard_FulfillmentusingBillingAddress_BankDeposit_ManualDiscount_NoCoupon',
+                    'Standard_FulfillmentusingBillingAddress_Cybersource_NoDiscount_NoCoupon',
+                    'Standard_FulfillmentusingBillingAddress_Cybersource_ManualDiscount_NoCoupon'
+                    ];
 }
 
 for (const { scenario, sheetName } of scenarios) {
@@ -104,20 +110,32 @@ for (const { scenario, sheetName } of scenarios) {
                 const pages = await context.pages();
                 const page = pages.length > 0 ? pages[0] : await context.newPage();
                 await page.bringToFront();
+                const excelReader = ExcelReader.getInstance();
+                let testResult = 'Passed';
+                let executionNotes = '';
+                let failedStep = '';
+                let currentStep = '';
 
                 try {
                     testCase = await fetchTestCaseDataByName(testCaseName, sheetName);
+                    // Only execute if Automation is true
+                    const automationValue = String(testCase['Automation']).toLowerCase();
+                    if (!(automationValue === 'true')) {
+                        test.skip(true, `Automation column is not set to true for this test case.`);
+                        await excelReader.updateTestResult(sheetName, testCaseName, 'Skipped', 'Automation column not true');
+                        return;
+                    }
                     // Only execute if scenario matches
                     if (testCase['Test Scenario'] !== scenario) {
                         test.skip(true, `Test scenario does not match: ${testCase['Test Scenario']} !== ${scenario}`);
+                        await excelReader.updateTestResult(sheetName, testCaseName, 'Skipped', 'Scenario does not match');
                         return;
                     }
-                    else{
-                        logStep('Executing Test Case', { 'Name': testCaseName, 'Scenario': scenario });
-                    }
+                    logStep('Executing Test Case', { 'Name': testCaseName, 'Scenario': scenario });
                     const orderData = getOrderData(scenario);
                     const homepage = new Homepage(page);
-                    await test.step('Navigate to Add Order page', async () => {
+                    currentStep = 'Navigate to Add Order page';
+                    await test.step(currentStep, async () => {
                         await homepage.navigateToSideMenuOption('Orders', 'Add');
                         await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/orders/add-order');
                         await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
@@ -126,7 +144,8 @@ for (const { scenario, sheetName } of scenarios) {
 
                     const addOrderPage = new AddOrderPage(page);
 
-                    await test.step('Select Existing Customer', async () => {
+                    currentStep = 'Select Existing Customer';
+                    await test.step(currentStep, async () => {
                         perf.nextAction('Select Existing Customer');
                         await addOrderPage.selectAndFillExistingCustomerDetails(
                             orderData.customer?.email || '',
@@ -134,7 +153,8 @@ for (const { scenario, sheetName } of scenarios) {
                         );
                     });
 
-                    await test.step('Add Products', async () => {
+                    currentStep = 'Add Products';
+                    await test.step(currentStep, async () => {
                         perf.nextAction('Proceed to Add Items');
                         await addOrderPage.clickNextButton();
                         if (testCase) {
@@ -150,7 +170,8 @@ for (const { scenario, sheetName } of scenarios) {
                         }
                     });
 
-                    await test.step('Proceed to Fulfillment', async () => {
+                    currentStep = 'Proceed to Fulfillment';
+                    await test.step(currentStep, async () => {
                         await addOrderPage.clickNextButton();
                         if (testCase && testCase['Shipping_Method'] !== 'None') {
                             await addOrderPage.selectShippingMethod(testCase['Shipping_Method'] || '');
@@ -164,11 +185,24 @@ for (const { scenario, sheetName } of scenarios) {
                         }
                     });
 
-                    await test.step('Proceed to Payment', async () => {
+                    currentStep = 'Proceed to Payment';
+                    await test.step(currentStep, async () => {
                         await addOrderPage.clickNextButton();
                         if (testCase) {
+                            
                             await addOrderPage.selectPaymentMethod(testCase['Payment_Category'] || '');
                             await addOrderPage.verifyPaymentMethodSelected(testCase['Payment_Category'] || '');
+                            let cardDetails: any = undefined;
+                            if(testCase['Payment_Category'] === "Cybersource") {
+                                cardDetails = {
+                                    cardHolderName: testCase['CS_CardHolderName'] || '',
+                                    cardType: testCase['CS_CardType'] || 'Visa',
+                                    cardNumber: testCase['CS_CreditCardNo'] || '',
+                                    cardExpiry: testCase['CS_CardExpiryDate(JAN-2025)'] || 'Jan-2025',
+                                    cardCVC: testCase['CS_CCV2Value'] || '123'
+                                };
+                                await addOrderPage.fillCybersourceCardDetails(cardDetails);
+                            }
                             if (testCase['Discount Applied']== "Manual Discount") {
                                 await addOrderPage.fillManualDiscount(testCase['Manual_Discount']?.toString() || '');
                             }
@@ -181,7 +215,8 @@ for (const { scenario, sheetName } of scenarios) {
 
                     });
 
-                    await test.step('Verify Summary and Add Comments', async () => {
+                    currentStep = 'Verify Summary and Add Comments';
+                    await test.step(currentStep, async () => {
                         if (testCase) {
                             const expectedPaymentDetails = {
                                 subtotal: testCase['ExpectedPaySum_subtotalAmt']?.toString() || '',
@@ -197,16 +232,28 @@ for (const { scenario, sheetName } of scenarios) {
                             await testInfo.attach('screenshot', { path: screenshotPath, contentType: 'image/png' });
                         }
                     });
+                } catch (err: any) {
+                    testResult = 'Failed';
+                    failedStep = currentStep;
+                    executionNotes = `Step: ${failedStep}, Error: ${err?.message || err}`;
+                    console.error(`Test failed at step: ${failedStep}`);
+                    await excelReader.updateTestResult(sheetName, testCaseName, testResult, executionNotes);
+                    throw err;
                 } finally {
                     if (testCase) {
                         console.log('\nTest Summary:');
                         console.table([
                             {
                                 'Test Case': testCase['Test Case Name'],
-                                'Result': 'Passed',
-                                'Screenshot': screenshotPath || 'N/A'
+                                'Result': testResult,
+                                'Screenshot': screenshotPath || 'N/A',
+                                'Execution_Notes': executionNotes
                             }
                         ]);
+                        // Only write to Excel if we haven't already written in catch block
+                        if (testResult === 'Passed') {
+                            await excelReader.updateTestResult(sheetName, testCaseName, 'Passed', 'All steps completed successfully');
+                        }
                     }
                 }
             });

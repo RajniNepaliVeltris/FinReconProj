@@ -37,9 +37,11 @@ export interface TestCase {
     'CS_CardType': string;
     'CS_CreditCardNo': string;
     'CS_CCV2Value': string;
-    'CS_CardExpiryDate(JAN-2025)': string;
+    'CS_CardExpiryDate(JAN-2025)(JAN-2025)': string;
     'Automation': boolean;
     'Order_Id': string;
+    'Test_Result': string;
+    'Execution_Notes': string;
     [key: string]: string | boolean; // For any additional dynamic columns
 
 }
@@ -148,4 +150,44 @@ export class ExcelReader {
 
         return testCases;
     }
+
+        /**
+         * Update Test_Result and Execution_Notes for a test case in the Excel sheet
+         */
+        public async updateTestResult(sheetName: string, testCaseName: string, result: string, notes: string): Promise<void> {
+            const workbook = await this.readWorkbook();
+            const worksheet = workbook.getWorksheet(sheetName);
+            if (!worksheet) {
+                throw new Error(`Worksheet ${sheetName} not found in the Excel file`);
+            }
+
+            // Find header columns
+            const headers: { [key: string]: number } = {};
+            worksheet.getRow(1).eachCell((cell, colNumber) => {
+                headers[cell.value?.toString() || ''] = colNumber;
+            });
+
+            // Find the row for the test case
+            let foundRow: any = null;
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return; // Skip header
+                const nameCell = row.getCell(headers['Test Case Name']);
+                if (nameCell.value?.toString() === testCaseName) {
+                    foundRow = row;
+                }
+            });
+
+            if (!foundRow) {
+                throw new Error(`Test case '${testCaseName}' not found in sheet '${sheetName}'`);
+            }
+
+            // Update result and notes
+            if (headers['Test_Result']) {
+                foundRow.getCell(headers['Test_Result']).value = result;
+            }
+            if (headers['Execution_Notes']) {
+                foundRow.getCell(headers['Execution_Notes']).value = notes;
+            }
+            await workbook.xlsx.writeFile(path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'));
+        }
 }
