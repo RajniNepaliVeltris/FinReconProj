@@ -59,11 +59,11 @@ This repository contains a modular and extendable QA automation framework built 
 │   └── report.json
 ├── utils/
 │   ├── apiUtils.ts
+│   ├── baseTest.ts
 │   ├── db.ts
 │   ├── excelReader.ts
 │   ├── helpers.ts
-│   ├── performanceHtmlReport.ts
-│   ├── PerformanceRecorder.ts
+│   ├── testConfig.ts
 │   ├── uiInteractions.ts
 │   └── uiInteractions.ts.bak
 ├── playwright.config.ts
@@ -87,8 +87,13 @@ This repository contains a modular and extendable QA automation framework built 
 7. **Data-Driven Testing**: Flexible test data management using JSON and Excel files, supporting scalable and maintainable test scenarios.
 8. **Advanced UI Interactions**: Includes a robust `UIInteractions` utility for handling complex or problematic UI elements, with fallback strategies and iframe support.
 9. **Enhanced Table Verification**: Smart comparison of both input and displayed/highlighted values in tables, with normalization for currency, numbers, and detailed error reporting.
-10. **Extensible Utilities**: Utility modules for API, DB, Excel reading, performance recording, and more, making the framework adaptable to new requirements.
-11. **Chrome Debug Session Support**: Ability to run tests using an existing Chrome instance with preserved login state for faster, session-persistent test execution and debugging.
+10. **Modular Test Infrastructure**: 
+    - `BaseTest` class for centralized browser setup and teardown
+    - `TestConfig` class for environment-based test configuration
+    - `ExcelReader` utility for comprehensive Excel data operations
+    - Singleton patterns for efficient resource management
+11. **Extensible Utilities**: Utility modules for API, DB, Excel reading, and more, making the framework adaptable to new requirements.
+12. **Chrome Debug Session Support**: Ability to run tests using an existing Chrome instance with preserved login state for faster, session-persistent test execution and debugging.
 
 ## Setup
 
@@ -173,9 +178,8 @@ Test execution generates detailed reports in the `test-results` folder:
 - **HTML Report**: Open `test-results/index.html` in your browser for a visual summary of all test runs, including pass/fail status, error details, and links to screenshots/videos.
 - **JSON Report**: For integration or analysis, use `test-results/report.json`.
 - **Screenshots & Videos**: On test failure, screenshots and videos are automatically captured and linked in the HTML report for easy debugging.
-- **Performance Data**: If enabled, performance metrics are recorded and available for review.
 
-You can customize reporting options in `playwright.config.ts` and extend reporting with utilities in `utils/performanceHtmlReport.ts`.
+You can customize reporting options in `playwright.config.ts`.
 
 ## Using Existing Chrome Instance for Tests
 
