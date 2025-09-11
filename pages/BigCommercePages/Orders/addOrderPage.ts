@@ -13,6 +13,7 @@ export class AddOrderPage extends Homepage {
     // Billing Information Locators
     private billingFirstNameInput: Locator;
     private billingLastNameInput: Locator;
+    private shippingAddressInput: Locator;
     private billingCompanyNameInput: Locator;
     private billingPhoneNumberInput: Locator;
     private billingAddressLine1Input: Locator;
@@ -26,7 +27,7 @@ export class AddOrderPage extends Homepage {
     private billingSaveToAddressBookCheckbox: Locator;
 
     //Billing Information for Existing Cutomer
-   
+
     private existingCustomerAddressCardsText: Locator;
     private existingCustomerUseAddressLink: Locator;
 
@@ -97,6 +98,22 @@ export class AddOrderPage extends Homepage {
     private billingAddressDetails: Locator;
     private fetchShippingQuotesLink: Locator;
     private chooseShippingMethodSelect: Locator;
+
+    //Shipping Single new address locators
+    private shippingAddressHeaderText: Locator;
+    private shippingFirstNameInput: Locator;
+    private shippingLastNameInput: Locator;
+    private shippingCompanyNameInput: Locator;
+    private shippingPhoneNumberInput: Locator;
+    private shippingStreetAddressLine1Input: Locator;
+    private shippingStreetAddressLine2Input: Locator;
+    private shippingCityInput: Locator;
+    private shippingStateSelect: Locator;
+    private shippingCountrySelect: Locator;
+    private shippingZipInput: Locator;
+    private shippingPONumberInput: Locator;
+    private shippingTaxIDInput: Locator;
+    private saveCustomerAddressCheckbox: Locator;
 
     // Payment Section Locators
     private customerBillingDetails: Locator;
@@ -225,11 +242,29 @@ export class AddOrderPage extends Homepage {
         // Fulfillment Section Locators
         const fulfillmentBaseXPath = "//div[@class='billingAddressDetails']";
         this.billingAddressRadio = initLocator(`${fulfillmentBaseXPath}//input[@id='shipping-billing']`);
-        this.newSingleAddressRadio = initLocator(`${fulfillmentBaseXPath}//input[@value='shipping-single']`);
-        this.newMultipleAddressRadio = initLocator(`${fulfillmentBaseXPath}//input[@value='shipping-multiple']`);
+        this.shippingAddressInput = initLocator('//input[@class="js-shipping-address"]');
+        this.newSingleAddressRadio = initLocator(`//div[@class='orderMachineStateShipping']//input[@id='shipping-single']`);
+        this.newMultipleAddressRadio = initLocator(`//div[@class='orderMachineStateShipping']//input[@id='shipping-multiple']`);
         this.billingAddressDetails = initLocator(`//div[@id='shipItemsToBillingAddress']//div[@class='order-details']`);
         this.fetchShippingQuotesLink = initLocator(`//fieldset[@class='shipping-method-form']//a[@class='fetchShippingQuotesLink']`);
         this.chooseShippingMethodSelect = initLocator(`//fieldset[@class='shipping-method-form']//select[@id='chooseProvider']`);
+
+        //Shipping Single new address locators
+        const shippingSingleAddressBaseXPath = "//fieldset[@class='shipping-single']";
+        this.shippingAddressHeaderText = initLocator(`${shippingSingleAddressBaseXPath}//span[@class="heading-simple"]`);
+        this.shippingFirstNameInput = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='FirstName']/following-sibling::input`);
+        this.shippingLastNameInput = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='LastName']/following-sibling::input`);
+        this.shippingCompanyNameInput = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='CompanyName']/following-sibling::input`);
+        this.shippingStreetAddressLine1Input = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='AddressLine1']/following-sibling::input`);
+        this.shippingStreetAddressLine2Input = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='AddressLine2']/following-sibling::input`);
+        this.shippingCityInput = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='City']/following-sibling::input`);
+        this.shippingPONumberInput = initLocator(`${shippingSingleAddressBaseXPath}//input[contains(@class,'po-field')]`);
+        this.shippingTaxIDInput = initLocator(`${shippingSingleAddressBaseXPath}//input[contains(@class,'tax-id')]`);
+        this.shippingZipInput = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='Zip']/following-sibling::input`);
+        this.shippingStateSelect = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='State']/following-sibling::select`);
+        this.shippingCountrySelect = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='Country']/following-sibling::select`);
+        this.shippingPhoneNumberInput = initLocator(`${shippingSingleAddressBaseXPath}//input[@value='Phone']/following-sibling::input`);
+        this.saveCustomerAddressCheckbox = initLocator(`${shippingSingleAddressBaseXPath}//input[contains(@id,'saveShippingAddress')]`);
 
         // Shipping Method Locators
         const shippingMethodBaseXPath = "//fieldset[@class='shipping-method-form']";
@@ -306,7 +341,7 @@ export class AddOrderPage extends Homepage {
         if (billingInfo.taxID) await this.billingTaxIDInput.fill(billingInfo.taxID);
         if (billingInfo.saveToAddressBook) {
             await UIInteractions.checkElement(
-                this.billingSaveToAddressBookCheckbox, 
+                this.billingSaveToAddressBookCheckbox,
                 {
                     description: 'Save to Address Book checkbox',
                     timeout: 5000,
@@ -318,37 +353,37 @@ export class AddOrderPage extends Homepage {
     }
 
     async selectAndFillNewCustomerDetails(newCustomerDetails: {
-    email: string;
-    password: string;
-    confirmPassword: string;
-    exclusiveOffers: boolean;
-    lineOfCredit: string;
-    paymentTerms: string;
-    customerGroup: string;
-}) {
-    await this.selectNewCustomer();
-    await this.newCustomerEmailInput.fill(newCustomerDetails.email);
-    await this.newCustomerPasswordInput.fill(newCustomerDetails.password);
-    await this.newCustomerConfirmPasswordInput.fill(newCustomerDetails.confirmPassword);
-    
-    if (newCustomerDetails.exclusiveOffers) {
-        // Use our utility method for reliable checkbox interaction
-        // But DON'T pass the iframe parameter since the locator already has it
-        await UIInteractions.checkElement(
-            this.newCustomerExclusiveOffersCheckbox, 
-            {
-                description: 'I would like to receive updates and offers.',
-                timeout: 5000,
-                page: this.page
-                // Remove the iframe parameter here
-            }
-        );
+        email: string;
+        password: string;
+        confirmPassword: string;
+        exclusiveOffers: boolean;
+        lineOfCredit: string;
+        paymentTerms: string;
+        customerGroup: string;
+    }) {
+        await this.selectNewCustomer();
+        await this.newCustomerEmailInput.fill(newCustomerDetails.email);
+        await this.newCustomerPasswordInput.fill(newCustomerDetails.password);
+        await this.newCustomerConfirmPasswordInput.fill(newCustomerDetails.confirmPassword);
+
+        if (newCustomerDetails.exclusiveOffers) {
+            // Use our utility method for reliable checkbox interaction
+            // But DON'T pass the iframe parameter since the locator already has it
+            await UIInteractions.checkElement(
+                this.newCustomerExclusiveOffersCheckbox,
+                {
+                    description: 'I would like to receive updates and offers.',
+                    timeout: 5000,
+                    page: this.page
+                    // Remove the iframe parameter here
+                }
+            );
+        }
+
+        await this.newCustomerLineOfCreditInput.fill(newCustomerDetails.lineOfCredit);
+        await this.newCustomerPaymentTermsSelect.selectOption(newCustomerDetails.paymentTerms);
+        await this.newCustomerGroupSelect.selectOption(newCustomerDetails.customerGroup);
     }
-    
-    await this.newCustomerLineOfCreditInput.fill(newCustomerDetails.lineOfCredit);
-    await this.newCustomerPaymentTermsSelect.selectOption(newCustomerDetails.paymentTerms);
-    await this.newCustomerGroupSelect.selectOption(newCustomerDetails.customerGroup);
-}
 
     async selectAndFillExistingCustomerDetails(customerEmail: string, existingCustomerAddress: string) {
         await this.selectExistingCustomer();
@@ -404,7 +439,7 @@ export class AddOrderPage extends Homepage {
 
     async browseCategories() {
         await this.clickElement(this.browseCategoriesButton);
-        if(await this.browseCategoryDialog.isVisible()) {
+        if (await this.browseCategoryDialog.isVisible()) {
             console.log("Browsing categories.");
             expect(this.browseCategoryDialog).toBeVisible({ timeout: 5000 });
         }
@@ -415,10 +450,10 @@ export class AddOrderPage extends Homepage {
     }
 
     async addCustomProduct() {
-    await this.clickElement(this.addCustomProductLink);
+        await this.clickElement(this.addCustomProductLink);
         console.log("Adding a custom product.");
         await this.page.waitForTimeout(500); // Wait for any animations
-        
+
     }
 
     async ConfirmationOkInDialogue() {
@@ -452,10 +487,10 @@ export class AddOrderPage extends Homepage {
             await this.waitForElement(this.addProductsSearchInput, 5000);
             await this.clickElement(this.addProductsSearchInput);
             //for (const char of productName) {
-                await this.addProductsSearchInput.fill(productName);
-                await this.page.waitForTimeout(100); // Adjust delay as needed
-                //await this.addProductsSearchInput.type(char);
-                //await this.page.waitForTimeout(100); // Simulate typing for autosuggest
+            await this.addProductsSearchInput.fill(productName);
+            await this.page.waitForTimeout(100); // Adjust delay as needed
+            //await this.addProductsSearchInput.type(char);
+            //await this.page.waitForTimeout(100); // Simulate typing for autosuggest
             //}
             await this.clickElement(this.addProductsSearchInput); // Trigger search/autosuggest
             // Wait for the product search results to appear
@@ -468,12 +503,12 @@ export class AddOrderPage extends Homepage {
                 await this.clickElement(productItem);
                 console.log(`Selected product from autosuggest: ${productName}`);
             } else {
-                    console.error(`Product not found in autosuggest: ${productName}`);
-                }
-        } catch (error) {
-                console.log(`Error in searchAndSelectProduct: ${error}`);
-                console.error(`Error in searchAndSelectProduct: ${error}`);
+                console.error(`Product not found in autosuggest: ${productName}`);
             }
+        } catch (error) {
+            console.log(`Error in searchAndSelectProduct: ${error}`);
+            console.error(`Error in searchAndSelectProduct: ${error}`);
+        }
     }
 
     async searchProductWithBrowseCategories(productName: string) {
@@ -483,32 +518,32 @@ export class AddOrderPage extends Homepage {
             await this.waitForElement(this.browseCategoryResultsSelectList, 20000);
             const resultCount = await this.browseCategoryResultsSelectList.locator('option').count();
             console.log(`Browse categories search results appeared with ${resultCount} items.`);
-                
-                if (resultCount > 0) {
-                    const optionCount = await this.browseCategoryResultsSelectList.locator('option').count();
-                    for (let i = 0; i < optionCount; i++) {
-                        const optionText = await this.browseCategoryResultsSelectList.locator(`option:nth-child(${i + 1})`).textContent() || '';
-                        console.log(`Option ${i + 1}: ${optionText}`);
-                        if (optionText.match(productName)) {
-                            if (await this.browseCategoryResultsSelectList.isVisible()) {
-                                await this.browseCategoryResultsSelectList.selectOption({ index: i });
-                                await this.clickElement(this.browserProductSelectButton, { force: true, timeout: 5000 });
-                                console.log(`Selected product from browse categories: ${productName} (option index: ${i})`);
-                            }
-                        } else {
-                            console.error(`No products found in browse categories for: ${productName}`);
+
+            if (resultCount > 0) {
+                const optionCount = await this.browseCategoryResultsSelectList.locator('option').count();
+                for (let i = 0; i < optionCount; i++) {
+                    const optionText = await this.browseCategoryResultsSelectList.locator(`option:nth-child(${i + 1})`).textContent() || '';
+                    console.log(`Option ${i + 1}: ${optionText}`);
+                    if (optionText.match(productName)) {
+                        if (await this.browseCategoryResultsSelectList.isVisible()) {
+                            await this.browseCategoryResultsSelectList.selectOption({ index: i });
+                            await this.clickElement(this.browserProductSelectButton, { force: true, timeout: 5000 });
+                            console.log(`Selected product from browse categories: ${productName} (option index: ${i})`);
                         }
+                    } else {
+                        console.error(`No products found in browse categories for: ${productName}`);
                     }
                 }
-                else {
-                    console.error(`No products found in browse categories for: ${productName}`);
-                }
-            } catch (error) {
-                console.log(`Error in searchProductWithBrowseCategories: ${error}`);
-                console.error(`Error in searchProductWithBrowseCategories: ${error}`);
             }
+            else {
+                console.error(`No products found in browse categories for: ${productName}`);
+            }
+        } catch (error) {
+            console.log(`Error in searchProductWithBrowseCategories: ${error}`);
+            console.error(`Error in searchProductWithBrowseCategories: ${error}`);
         }
-    
+    }
+
 
     async viewProductDetails(productName: string) {
         const productLink = this.productViewLink.locator(`text=${productName}`);
@@ -522,7 +557,7 @@ export class AddOrderPage extends Homepage {
 
     async selectExistingCustomer() {
         await UIInteractions.checkElement(
-            this.existingCustomerRadio, 
+            this.existingCustomerRadio,
             {
                 description: 'Existing Customer radio button',
                 timeout: 5000,
@@ -534,7 +569,7 @@ export class AddOrderPage extends Homepage {
 
     async selectNewCustomer() {
         const success = await UIInteractions.checkElement(
-            this.newCustomerRadio, 
+            this.newCustomerRadio,
             {
                 description: 'New Customer radio button',
                 timeout: 5000,
@@ -542,14 +577,14 @@ export class AddOrderPage extends Homepage {
                 iframe: 'content-iframe'
             }
         );
-        
+
         if (!success) {
             console.error('Failed to select New Customer radio button after multiple attempts');
             // As a last resort, try with a direct selector
             const directRadioLocator = this.page.frameLocator('#content-iframe')
                 .locator('input[type="radio"][id="check-new-customer"]');
             await directRadioLocator.waitFor({ state: 'visible', timeout: 5000 })
-                .catch(() => {});
+                .catch(() => { });
             await directRadioLocator.check({ force: true })
                 .catch((error) => {
                     console.error('Failed with direct selector too:', error);
@@ -559,9 +594,9 @@ export class AddOrderPage extends Homepage {
     }
 
     async searchCustomer(customerEmail: string) {
-         await this.clickElement(this.customerSearchInput);
-         try{
-        for (const char of customerEmail) {
+        await this.clickElement(this.customerSearchInput);
+        try {
+            for (const char of customerEmail) {
                 await this.customerSearchInput.type(char);
                 await this.page.waitForTimeout(100); // Adjust delay as needed
             }
@@ -569,24 +604,24 @@ export class AddOrderPage extends Homepage {
             console.log(`Error typing customer email: ${error}`);
             console.error(`Error typing customer email: ${error}`);
         }
-        if(await this.customerSearchInput.isVisible()) {
+        if (await this.customerSearchInput.isVisible()) {
             await this.page.waitForTimeout(5000); // Wait for suggestions to load
             await this.clickElement(this.customerSearchInput); // Click to trigger search
         }
         // Wait for the auto list to appear
         await this.waitForElement(this.autoSearchedCustomersList, 10000);
-        if(await this.autoSearchedCustomersList.count() == 1) {
+        if (await this.autoSearchedCustomersList.count() == 1) {
             console.log(`Auto-suggest list appeared with ${await this.autoSearchedCustomersList.count()} items.`);
-           const detailsCardText = await this.autoSearchedCustomerDetailsCard.textContent();
-           if(detailsCardText && detailsCardText.includes(customerEmail)) {
-            await this.clickElement(this.autoSearchedCustomerDetailsCard, { force: true, timeout: 2000 });
-            console.log(`Selected customer from auto list: ${customerEmail}`);
-            if( await this.autoSearchedCustomerDetailsCard.isVisible()) {
-                 await this.clickElement(this.autoSearchedCustomerDetailsCard);
-                console.log(`Clicked on customer details card for: ${customerEmail} to close the auto-suggest list.`);
-            }
-           }else {
-            console.error(`Customer details card does not match the email: ${customerEmail}`);
+            const detailsCardText = await this.autoSearchedCustomerDetailsCard.textContent();
+            if (detailsCardText && detailsCardText.includes(customerEmail)) {
+                await this.clickElement(this.autoSearchedCustomerDetailsCard, { force: true, timeout: 2000 });
+                console.log(`Selected customer from auto list: ${customerEmail}`);
+                if (await this.autoSearchedCustomerDetailsCard.isVisible()) {
+                    await this.clickElement(this.autoSearchedCustomerDetailsCard);
+                    console.log(`Clicked on customer details card for: ${customerEmail} to close the auto-suggest list.`);
+                }
+            } else {
+                console.error(`Customer details card does not match the email: ${customerEmail}`);
             }
         } else {
             console.log(`Auto-suggest list did not appear as expected. Count: ${await this.autoSearchedCustomersList.count()}`);
@@ -599,19 +634,19 @@ export class AddOrderPage extends Homepage {
     }
 
     async clickCancelButton() {
-    await this.clickElement(this.cancelButton);
+        await this.clickElement(this.cancelButton);
     }
 
     async clickBackButton() {
-    await this.clickElement(this.backButton);
+        await this.clickElement(this.backButton);
     }
 
     async clickNextButton() {
-    await this.clickElement(this.nextButton);
+        await this.clickElement(this.nextButton);
     }
 
     async clickSaveButton() {
-    await this.clickElement(this.saveButton);
+        await this.clickElement(this.saveButton);
     }
 
     async addCustomProductDetails(productDetails: {
@@ -624,15 +659,15 @@ export class AddOrderPage extends Homepage {
         await this.customProductSKUInput.fill(productDetails.sku);
         await this.customProductPriceInput.fill(productDetails.price);
         await this.customProductQuantityInput.fill(productDetails.quantity);
-    await this.clickElement(this.customProductAddItemButton);
+        await this.clickElement(this.customProductAddItemButton);
     }
 
     async closeCustomProductDialog() {
-    await this.clickElement(this.customProductCloseButton);
+        await this.clickElement(this.customProductCloseButton);
     }
 
     async clickAddCustomProductLink() {
-    await this.clickElement(this.addCustomProductLink);
+        await this.clickElement(this.addCustomProductLink);
     }
 
     async verifyCustomProductDialogOpen() {
@@ -647,11 +682,11 @@ export class AddOrderPage extends Homepage {
     async verifySubtotal(expectedSubtotal: string) {
         try {
             await this.subtotalPrice.waitFor({ state: 'visible', timeout: 5000 });
-        const actualSubtotal = (await this.subtotalPrice.textContent())?.trim();
-        if (actualSubtotal !== expectedSubtotal) {
-            throw new Error(`Subtotal mismatch. Expected: '${expectedSubtotal}', Found: '${actualSubtotal}'`);
-        }
-        console.log(`Subtotal '${expectedSubtotal}' is verified successfully.`);
+            const actualSubtotal = (await this.subtotalPrice.textContent())?.trim();
+            if (actualSubtotal !== expectedSubtotal) {
+                throw new Error(`Subtotal mismatch. Expected: '${expectedSubtotal}', Found: '${actualSubtotal}'`);
+            }
+            console.log(`Subtotal '${expectedSubtotal}' is verified successfully.`);
         } catch (error) {
             console.log(`Error verifying subtotal: ${error}`);
         }
@@ -659,7 +694,7 @@ export class AddOrderPage extends Homepage {
 
     async selectBillingAddress() {
         await UIInteractions.checkElement(
-            this.billingAddressRadio, 
+            this.billingAddressRadio,
             {
                 description: 'Billing Address radio button',
                 timeout: 5000,
@@ -671,7 +706,7 @@ export class AddOrderPage extends Homepage {
 
     async selectNewSingleAddress() {
         await UIInteractions.checkElement(
-            this.newSingleAddressRadio, 
+            this.newSingleAddressRadio,
             {
                 description: 'New Single Address radio button',
                 timeout: 5000,
@@ -683,7 +718,7 @@ export class AddOrderPage extends Homepage {
 
     async selectNewMultipleAddress() {
         await UIInteractions.checkElement(
-            this.newMultipleAddressRadio, 
+            this.newMultipleAddressRadio,
             {
                 description: 'New Multiple Address radio button',
                 timeout: 5000,
@@ -697,30 +732,30 @@ export class AddOrderPage extends Homepage {
         await this.billingAddressDetails.waitFor({ state: 'visible', timeout: 5000 });
         const actualDetails = await this.billingAddressDetails.locator("dl").allTextContents();
         console.log("Actual billing address details:", actualDetails);
-        
+
         // Improved logic to handle different formats of billing details
         const actualDetailsMap: Record<string, string> = {};
-        
+
         if (actualDetails.length > 0) {
             const detailsText = actualDetails[0]; // Get the combined text
             console.log("Processing details text:", detailsText);
-            
+
             // List of known billing field keys to extract
             const knownFields = [
-                "Name", "Company", "Phone", "Address", "Suburb/City", 
+                "Name", "Company", "Phone", "Address", "Suburb/City",
                 "State/Province", "Country", "ZIP/Postcode", "PO Number", "Tax ID"
             ];
-            
+
             // Process each known field
             for (let i = 0; i < knownFields.length; i++) {
                 const currentField = knownFields[i];
                 const nextField = knownFields[i + 1]; // Next field or undefined if last
-                
+
                 // Find the current field position
                 const fieldPos = detailsText.indexOf(currentField);
                 if (fieldPos !== -1) {
                     let valueEndPos;
-                    
+
                     // If it's not the last field, find the next field position
                     if (nextField) {
                         valueEndPos = detailsText.indexOf(nextField, fieldPos);
@@ -729,12 +764,12 @@ export class AddOrderPage extends Homepage {
                     } else {
                         valueEndPos = detailsText.length;
                     }
-                    
+
                     // Extract the value without the field name
                     const fieldNameLength = currentField.length;
                     const value = detailsText.substring(fieldPos + fieldNameLength, valueEndPos).trim();
                     actualDetailsMap[currentField] = value;
-                    
+
                     console.log(`Extracted ${currentField}: '${value}'`);
                 }
             }
@@ -772,12 +807,67 @@ export class AddOrderPage extends Homepage {
     }
 
     async fetchShippingQuotes() {
-    await this.clickElement(this.fetchShippingQuotesLink);
+        await this.clickElement(this.fetchShippingQuotesLink);
+    }
+
+    async fillSingleShippingAddress(address: {
+        firstName: string;
+        lastName: string;
+        companyName: string;
+        phoneNumber: string;
+        streetAddressLine1: string;
+        streetAddressLine2: string;
+        city: string;
+        state: string;
+        country: string;
+        zip: string;
+        poNumber: string;
+        taxID: string;
+        saveaddressCheckbox: boolean;
+    }) {
+        try {
+            // First select the "New single address" radio button
+            await this.selectNewSingleAddress();
+
+            // Wait for a short moment to ensure the form updates
+            await this.page.waitForTimeout(500);
+
+            if (await this.shippingAddressHeaderText.isVisible()) {
+                // Now fill in the shipping address
+                await this.enterText(this.shippingFirstNameInput, address.firstName);
+                await this.enterText(this.shippingLastNameInput, address.lastName);
+                await this.enterText(this.shippingCompanyNameInput, address.companyName);
+                await this.enterText(this.shippingPhoneNumberInput, address.phoneNumber);
+                await this.enterText(this.shippingStreetAddressLine1Input, address.streetAddressLine1);
+                await this.enterText(this.shippingStreetAddressLine2Input, address.streetAddressLine2);
+                await this.enterText(this.shippingCityInput, address.city);
+                await this.setDropdownValue(this.shippingCountrySelect, address.country);
+
+                await this.enterText(this.shippingZipInput, address.zip);
+                await this.enterText(this.shippingPONumberInput, address.poNumber);
+                await this.enterText(this.shippingTaxIDInput, address.taxID);
+                await this.setDropdownValue(this.shippingStateSelect, address.state);
+                
+                // Optionally check the "Save to address book" checkbox
+                if (address.saveaddressCheckbox) {
+                    await UIInteractions.checkElement(this.saveCustomerAddressCheckbox);
+                } else {
+                    await UIInteractions.uncheckElement(this.saveCustomerAddressCheckbox);
+                }
+            } else {
+                console.log("Shipping Address input is not visible; cannot fill address.");
+                throw new Error("Shipping address input field not visible after selecting new single address option");
+            }
+        } catch (error) {
+            console.log("Error filling new fulfillment shipping address:", error);
+            console.error("Error filling new fulfillment shipping address:", error);
+            throw error; // Re-throw to ensure test failure
+        }
     }
 
     //None or Custom
     async selectShippingMethod(method: string) {
-       try {
+        try {
             if (await this.fetchShippingQuotesLink.isVisible()) {
                 await this.clickElement(this.fetchShippingQuotesLink);
                 await this.page.waitForTimeout(300); // Give UI time to update
@@ -786,66 +876,66 @@ export class AddOrderPage extends Homepage {
             } else {
                 console.log("Shipping method selection elements are not visible; cannot select shipping method.");
             }
-} catch (error) {
-    console.log(`Error selecting shipping method: ${method}`, error);
-    console.error(`Error selecting shipping method: ${method}`, error);
-}
+        } catch (error) {
+            console.log(`Error selecting shipping method: ${method}`, error);
+            console.error(`Error selecting shipping method: ${method}`, error);
+        }
     }
-    
+
 
     async setCustomShippingDetails(details: { provider: string; cost: string }) {
         try {
-    await this.isElementVisible(this.shippingMethodInput, 7000);
-    if (await this.shippingMethodInput.isVisible()) {
-        await this.clickElement(this.shippingMethodInput); // Ensure focus
-        await this.shippingMethodInput.clear(); // Clear any existing value
-        await this.shippingMethodInput.fill(details.provider); // Enter new value
-        await this.page.waitForTimeout(100); // Short wait for UI update
+            await this.isElementVisible(this.shippingMethodInput, 7000);
+            if (await this.shippingMethodInput.isVisible()) {
+                await this.clickElement(this.shippingMethodInput); // Ensure focus
+                await this.shippingMethodInput.clear(); // Clear any existing value
+                await this.shippingMethodInput.fill(details.provider); // Enter new value
+                await this.page.waitForTimeout(100); // Short wait for UI update
 
-        if (await this.shippingCostInput.isVisible()) {
-            await this.clickElement(this.shippingCostInput);
-            await this.shippingCostInput.clear();
-            await this.shippingCostInput.fill(details.cost);
-            await this.page.waitForTimeout(100);
-        } else {
-            console.log("Shipping Cost input is not visible; cannot set custom cost.");
+                if (await this.shippingCostInput.isVisible()) {
+                    await this.clickElement(this.shippingCostInput);
+                    await this.shippingCostInput.clear();
+                    await this.shippingCostInput.fill(details.cost);
+                    await this.page.waitForTimeout(100);
+                } else {
+                    console.log("Shipping Cost input is not visible; cannot set custom cost.");
+                }
+            } else {
+                console.log("Shipping Method input is not visible; cannot set custom shipping details.");
+            }
+        } catch (error) {
+            console.log("Error setting custom shipping details:", error);
+            console.error("Error setting custom shipping details:", error);
         }
-    } else {
-        console.log("Shipping Method input is not visible; cannot set custom shipping details.");
     }
-    } catch (error) {
-        console.log("Error setting custom shipping details:", error);
-        console.error("Error setting custom shipping details:", error);
-    }
-}
 
     async verifyPaymentCustomerBillingDetails(expectedDetails: Record<string, string>) {
         const actualDetails = await this.customerBillingDetails.locator("dl").allTextContents();
         console.log("Actual payment customer billing details:", actualDetails);
-        
+
         // Improved logic to handle different formats of billing details
         const actualDetailsMap: Record<string, string> = {};
-        
+
         if (actualDetails.length > 0) {
             const detailsText = actualDetails[0]; // Get the combined text
             console.log("Processing payment details text:", detailsText);
-            
+
             // List of known billing field keys to extract
             const knownFields = [
-                "Name", "Company", "Phone", "Address", "Suburb/City", 
+                "Name", "Company", "Phone", "Address", "Suburb/City",
                 "State/Province", "Country", "ZIP/Postcode", "PO Number", "Tax ID"
             ];
-            
+
             // Process each known field
             for (let i = 0; i < knownFields.length; i++) {
                 const currentField = knownFields[i];
                 const nextField = knownFields[i + 1]; // Next field or undefined if last
-                
+
                 // Find the current field position
                 const fieldPos = detailsText.indexOf(currentField);
                 if (fieldPos !== -1) {
                     let valueEndPos;
-                    
+
                     // If it's not the last field, find the next field position
                     if (nextField) {
                         valueEndPos = detailsText.indexOf(nextField, fieldPos);
@@ -854,12 +944,12 @@ export class AddOrderPage extends Homepage {
                     } else {
                         valueEndPos = detailsText.length;
                     }
-                    
+
                     // Extract the value without the field name
                     const fieldNameLength = currentField.length;
                     const value = detailsText.substring(fieldPos + fieldNameLength, valueEndPos).trim();
                     actualDetailsMap[currentField] = value;
-                    
+
                     console.log(`Extracted ${currentField}: '${value}'`);
                 }
             }
@@ -869,27 +959,27 @@ export class AddOrderPage extends Homepage {
         // Address in the UI often combines address line 1 and address line 2
         if (expectedDetails["Address"] && expectedDetails["Address"].includes("Suite")) {
             console.log("Address contains Suite, performing flexible address matching");
-            
+
             // Extract the base parts of the expected address (before "Suite")
             const expectedAddressParts = expectedDetails["Address"].split("Suite");
             const expectedBaseAddress = expectedAddressParts[0].trim();
-            
+
             // Check if the actual address contains the base address part
-            if (actualDetailsMap["Address"] && 
+            if (actualDetailsMap["Address"] &&
                 actualDetailsMap["Address"].includes(expectedBaseAddress)) {
                 console.log("Base address part matched, considering address verification successful");
-                
+
                 // Create a temporary copy of expected details with the base address for other checks
-                const modifiedExpectedDetails = {...expectedDetails};
+                const modifiedExpectedDetails = { ...expectedDetails };
                 delete modifiedExpectedDetails["Address"]; // Remove address to skip standard comparison
-                
+
                 // Verify all other fields
                 for (const [key, value] of Object.entries(modifiedExpectedDetails)) {
                     if (actualDetailsMap[key] !== value) {
                         throw new Error(`Billing detail mismatch for '${key}'. Expected: '${value}', Found: '${actualDetailsMap[key] || "(not found)"}'`);
                     }
                 }
-                
+
                 console.log("Billing details are verified successfully (with flexible address matching).");
                 return; // Skip standard verification since we've done special handling
             }
@@ -913,29 +1003,29 @@ export class AddOrderPage extends Homepage {
         try {
             // Check if the shipping details section exists and is visible
             console.log("Checking if shipping details section is visible...");
-            
+
             // Try multiple times with increasing timeouts
             for (let attempt = 1; attempt <= 5; attempt++) { // Increased max attempts
                 try {
                     // Wait for the shipping details element to be visible
-                    await this.shippingDetails.waitFor({ 
-                        state: 'visible', 
+                    await this.shippingDetails.waitFor({
+                        state: 'visible',
                         timeout: attempt * 5000 // Increase timeout with each attempt
                     });
-                    
+
                     const detailsText = await this.shippingDetails.textContent();
-                    console.log(`Shipping details found (attempt ${attempt}):`, 
+                    console.log(`Shipping details found (attempt ${attempt}):`,
                         detailsText ? detailsText.substring(0, 100) + '...' : 'empty');
-                    
+
                     // If we got content, check if it includes shipping information keywords
                     if (detailsText) {
                         // Check for keywords that indicate shipping details are present
                         const shippingKeywords = ['Shipping', 'Address', 'City', 'State', 'ZIP', 'Method', 'Name'];
                         const foundKeywords = shippingKeywords.filter(keyword => detailsText.includes(keyword));
-                        
+
                         if (foundKeywords.length >= 2) { // If at least two keywords are found
                             console.log(`Found shipping keywords: ${foundKeywords.join(', ')}. Proceeding with verification.`);
-                            
+
                             // Take a screenshot for debugging purposes
                             try {
                                 await this.page.screenshot({ path: `shipping-details-${attempt}.png` });
@@ -943,7 +1033,7 @@ export class AddOrderPage extends Homepage {
                             } catch (e) {
                                 console.log("Could not save screenshot:", e);
                             }
-                            
+
                             // If there's any HTML content, log it for debugging
                             try {
                                 const html = await this.shippingDetails.evaluate(el => el.outerHTML);
@@ -951,7 +1041,7 @@ export class AddOrderPage extends Homepage {
                             } catch (e) {
                                 console.log("Could not get HTML content:", e);
                             }
-                            
+
                             return true;
                         } else {
                             console.log(`Only found ${foundKeywords.length} shipping keywords: ${foundKeywords.join(', ')}. Waiting for more content.`);
@@ -959,11 +1049,11 @@ export class AddOrderPage extends Homepage {
                     } else {
                         console.log("Shipping details section found but content is empty");
                     }
-                    
+
                     // Try alternative approaches if we can't find the details after several attempts
                     if (attempt >= 3) {
                         console.log("Attempting to force-refresh shipping details (attempt " + attempt + ")");
-                        
+
                         // Try to scroll to make sure it's in view
                         try {
                             await this.shippingDetails.scrollIntoViewIfNeeded();
@@ -973,21 +1063,21 @@ export class AddOrderPage extends Homepage {
                             console.log("Could not scroll to shipping details:", e);
                         }
                     }
-                    
+
                     // Longer wait time for later attempts
-                    await this.page.waitForTimeout(2000 + (attempt * 500)); 
+                    await this.page.waitForTimeout(2000 + (attempt * 500));
                 } catch (error) {
                     console.warn(`Attempt ${attempt} failed to find shipping details:`, error);
-                    
+
                     if (attempt === 5) { // Increased max attempts
                         console.error("Failed to find shipping details after multiple attempts");
-                        
+
                         // Last resort: Try to find shipping details using a more general selector
                         try {
                             console.log("Trying with a more general selector as last resort...");
                             const alternativeSelector = this.page.frameLocator('#content-iframe')
                                 .locator("//div[contains(text(), 'Shipping') or contains(text(), 'shipping')]");
-                                
+
                             if (await alternativeSelector.count() > 0) {
                                 console.log("Found alternative shipping section, proceeding anyway");
                                 return true;
@@ -995,14 +1085,14 @@ export class AddOrderPage extends Homepage {
                         } catch (e) {
                             console.log("Alternative selector also failed:", e);
                         }
-                        
+
                         throw error;
                     }
-                    
+
                     await this.page.waitForTimeout(2000 + (attempt * 500));
                 }
             }
-            
+
             return false;
         } catch (error) {
             console.error("Error ensuring shipping details visibility:", error);
@@ -1013,24 +1103,24 @@ export class AddOrderPage extends Homepage {
     async verifyFulfillmentShippingDetails(expectedDetails: Record<string, string>) {
         // Wait explicitly for the shipping details to be visible
         await this.ensureShippingDetailsVisible();
-        
+
         // Get the entire shipping details container text first for direct searching
         const containerText = await this.shippingDetails.textContent() || '';
         console.log("Shipping details container full text:", containerText);
-        
+
         const actualDetails = await this.shippingDetails.locator("dl").allTextContents();
         console.log("Actual fulfillment shipping details:", actualDetails);
-        
+
         // Create a modified copy of expected details for fields we'll handle directly
         const modifiedExpectedDetails = { ...expectedDetails };
-        
+
         // Special case for Name field - if it contains the expected name anywhere in the container
         const expectedName = expectedDetails['Name'];
         if (expectedName && containerText.includes(expectedName)) {
             console.log(`Found name '${expectedName}' directly in the shipping details container text`);
             delete modifiedExpectedDetails['Name'];
         }
-        
+
         // Special case for Company field - if it contains the expected company anywhere in the container
         const expectedCompany = expectedDetails['Company'];
         if (expectedCompany && containerText.includes(expectedCompany)) {
@@ -1039,33 +1129,33 @@ export class AddOrderPage extends Homepage {
         } else if (expectedCompany) {
             console.log(`Company '${expectedCompany}' not found in container text, will try other approaches`);
         }
-        
+
         // Continue with the regular verification for other fields
         expectedDetails = modifiedExpectedDetails;
-        
+
         // Improved logic to handle different formats of shipping details
         const actualDetailsMap: Record<string, string> = {};
-        
+
         if (actualDetails.length > 0) {
             const detailsText = actualDetails[0]; // Get the combined text
             console.log("Processing shipping details text:", detailsText);
-            
+
             // List of known shipping field keys to extract
             const knownFields = [
-                "Name", "Company", "Phone", "Address", "Suburb/City", 
+                "Name", "Company", "Phone", "Address", "Suburb/City",
                 "State/Province", "Country", "ZIP/Postcode", "Method", "Carrier"
             ];
-            
+
             // Process each known field
             for (let i = 0; i < knownFields.length; i++) {
                 const currentField = knownFields[i];
                 const nextField = knownFields[i + 1]; // Next field or undefined if last
-                
+
                 // Find the current field position
                 const fieldPos = detailsText.indexOf(currentField);
                 if (fieldPos !== -1) {
                     let valueEndPos;
-                    
+
                     // If it's not the last field, find the next field position
                     if (nextField) {
                         valueEndPos = detailsText.indexOf(nextField, fieldPos);
@@ -1074,21 +1164,21 @@ export class AddOrderPage extends Homepage {
                     } else {
                         valueEndPos = detailsText.length;
                     }
-                    
+
                     // Extract the value without the field name
                     const fieldNameLength = currentField.length;
                     const value = detailsText.substring(fieldPos + fieldNameLength, valueEndPos).trim();
                     actualDetailsMap[currentField] = value;
-                    
+
                     console.log(`Extracted ${currentField}: '${value}'`);
                 }
             }
         }
-        
+
         // Check for expected values directly in the container text as a fallback
         console.log("Checking for expected values directly in container text as fallback...");
         const missingFields: string[] = [];
-        
+
         // For each expected field that wasn't already handled above
         for (const [key, value] of Object.entries(expectedDetails)) {
             // If we didn't extract this field or it doesn't match
@@ -1102,7 +1192,7 @@ export class AddOrderPage extends Homepage {
                 }
             }
         }
-        
+
         if (missingFields.length > 0) {
             console.log("Fields not found directly in container text:", missingFields);
         } else {
@@ -1113,26 +1203,26 @@ export class AddOrderPage extends Homepage {
         // Address in the UI often combines address line 1 and address line 2
         if (expectedDetails["Address"] && expectedDetails["Address"].includes("Suite")) {
             console.log("Address contains Suite, performing flexible address matching");
-            
+
             // Extract the base parts of the expected address (before "Suite")
             const expectedAddressParts = expectedDetails["Address"].split("Suite");
             const expectedBaseAddress = expectedAddressParts[0].trim();
-            
+
             // Check if the actual address contains the base address part
             if (actualDetailsMap["Address"] && actualDetailsMap["Address"].includes(expectedBaseAddress)) {
                 console.log("Base address part matched, considering address verification successful");
-                
+
                 // Create a temporary copy of expected details with the base address for other checks
-                const modifiedExpectedDetails = {...expectedDetails};
+                const modifiedExpectedDetails = { ...expectedDetails };
                 delete modifiedExpectedDetails["Address"]; // Remove address to skip standard comparison
-                
+
                 // Verify all other fields
                 for (const [key, value] of Object.entries(modifiedExpectedDetails)) {
                     if (actualDetailsMap[key] !== value) {
                         throw new Error(`Shipping detail mismatch for '${key}'. Expected: '${value}', Found: '${actualDetailsMap[key] || "(not found)"}'`);
                     }
                 }
-                
+
                 console.log("Shipping details are verified successfully (with flexible address matching).");
                 return; // Skip standard verification since we've done special handling
             }
@@ -1144,7 +1234,7 @@ export class AddOrderPage extends Homepage {
             console.log("Shipping details are verified successfully via direct text matching.");
             return;
         }
-        
+
         // Standard verification for all fields with more resilience
         for (const [key, value] of Object.entries(expectedDetails)) {
             // Special case handling for Name and Company fields
@@ -1153,16 +1243,16 @@ export class AddOrderPage extends Homepage {
                 if (!(key in expectedDetails)) {
                     continue;
                 }
-                
+
                 // Extra debug for the field
                 console.log(`Looking for ${key} field specifically with value:`, value);
-                
+
                 // Try to find the value in various formats
                 if (containerText.includes(value)) {
                     console.log(`Found ${key} '${value}' in container text, skipping standard verification`);
                     continue;
                 }
-                
+
                 // Check if we can find parts separately (for names or multi-word companies)
                 const valueParts = value.split(' ');
                 if (valueParts.length > 1) {
@@ -1170,72 +1260,72 @@ export class AddOrderPage extends Homepage {
                     for (const part of valueParts) {
                         // Skip very short parts (like 'of', 'the', etc.)
                         if (part.length <= 2) continue;
-                        
+
                         if (!containerText.includes(part)) {
                             allPartsFound = false;
                             break;
                         }
                     }
-                    
+
                     if (allPartsFound) {
                         console.log(`Found all parts of ${key} '${value}' separately, skipping standard verification`);
                         continue;
                     }
                 }
             }
-            
+
             // If the key doesn't exist in actualDetailsMap, try a partial match approach
             if (!actualDetailsMap[key]) {
                 console.log(`Key '${key}' not found in shipping details, trying alternative approach...`);
-                
+
                 // Check if the value appears anywhere in the raw details
                 const detailsText = actualDetails.join(" ");
                 if (detailsText.includes(value)) {
                     console.log(`Found value '${value}' directly in shipping details text, considering it matched`);
                     continue; // Skip this field since we found a match
                 }
-                
+
                 // Check for case-insensitive match
                 if (detailsText.toLowerCase().includes(value.toLowerCase())) {
                     console.log(`Found case-insensitive match for '${value}' in shipping details text`);
                     continue; // Skip this field since we found a match
                 }
             }
-            
+
             // Standard equality check
             if (actualDetailsMap[key] !== value) {
                 console.error(`Shipping detail mismatch for '${key}'. Expected: '${value}', Found: '${actualDetailsMap[key] || "(not found)"}'`);
-                
+
                 // Instead of failing immediately, collect all mismatches for better debugging
                 console.log("Full shipping details content:", actualDetails);
                 console.log("Expected details:", expectedDetails);
                 console.log("Actual details map:", actualDetailsMap);
-                
+
                 // Last chance check for Name or Company field in the HTML - check DOM directly
                 if (key === 'Name' || key === 'Company') {
                     try {
                         console.log(`Performing final check for ${key} in HTML structure...`);
-                        
+
                         // Check if the value exists in the HTML structure directly
                         const html = await this.shippingDetails.evaluate(el => el.innerHTML);
-                        
+
                         if (html.includes(value)) {
                             console.log(`Last resort check: Found ${key} '${value}' in HTML structure, considering it matched`);
                             continue; // Skip throwing the error
                         }
-                        
+
                         // Check for parts of the value
                         const valueParts = value.split(' ');
                         if (valueParts.length > 1) {
                             const significantParts = valueParts.filter(part => part.length > 2);
                             const foundParts = significantParts.filter(part => html.includes(part));
-                            
+
                             if (foundParts.length >= significantParts.length) {
                                 console.log(`Last resort check: Found all significant parts of ${key} in HTML structure`);
                                 continue; // Skip throwing the error
                             } else if (foundParts.length > 0) {
                                 console.log(`Last resort check: Found ${foundParts.length}/${significantParts.length} parts of ${key} in HTML structure`);
-                                
+
                                 // For Company field specifically, be more lenient
                                 if (key === 'Company' && foundParts.length >= 1) {
                                     console.log(`Being lenient with Company field verification, considering it matched`);
@@ -1243,19 +1333,19 @@ export class AddOrderPage extends Homepage {
                                 }
                             }
                         }
-                        
+
                         // If it's the Company field, consider it optional as a last resort
                         if (key === 'Company') {
                             console.log("Company field not found, but treating it as optional to avoid test failure");
                             continue; // Skip throwing the error
                         }
-                        
+
                         console.log(`${key} not found in HTML structure either.`);
                     } catch (e) {
                         console.error(`Error performing HTML check for ${key}:`, e);
                     }
                 }
-                
+
                 throw new Error(`Shipping detail mismatch for '${key}'. Expected: '${value}', Found: '${actualDetailsMap[key] || "(not found)"}'`);
             }
         }
@@ -1263,35 +1353,35 @@ export class AddOrderPage extends Homepage {
     }
 
     async changeShippingDetails() {
-    await this.clickElement(this.changeShippingDetailsLink);
+        await this.clickElement(this.changeShippingDetailsLink);
     }
 
     async changeShippingMethod() {
-    await this.clickElement(this.changeShippingMethodLink);
+        await this.clickElement(this.changeShippingMethodLink);
     }
 
 
-  
+
 
     async selectPaymentMethod(method: string) {
         await this.setDropdownValue(this.paymentDropdown, method);
-        
+
     }
     async verifyPaymentMethodSelected(expectedMethod: string) {
         let selectedOption = await this.paymentDropdown.inputValue();
-        if(selectedOption === "custom") {
+        if (selectedOption === "custom") {
             //as in the value is shown as custom but the text is Manual Payment
             selectedOption = "Manual payment";
         }
-        if(selectedOption === "checkout_cod") {
+        if (selectedOption === "checkout_cod") {
             //as in the value is shown as checkout_cod but the text is Cash on Delivery
             selectedOption = "Cash on Delivery";
         }
-        if(selectedOption === "checkout_bankdeposit") {
+        if (selectedOption === "checkout_bankdeposit") {
             //as in the value is shown as checkout_offline but the text is Offline Payment
             selectedOption = "Bank Deposit";
         }
-        if(selectedOption === "checkout_cybersourcev2") {
+        if (selectedOption === "checkout_cybersourcev2") {
             //as in the value is shown as checkout_offline but the text is Offline Payment
             selectedOption = "Cybersource";
         }
@@ -1300,7 +1390,7 @@ export class AddOrderPage extends Homepage {
             console.error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
             throw new Error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
         }
-    
+
         console.log("Payment method verified successfully.");
     }
 
@@ -1319,7 +1409,7 @@ export class AddOrderPage extends Homepage {
         return { month, year };
     }
 
-    async fillCybersourceCardDetails(cardDetails: { cardHolderName: string; cardType:string; cardNumber: string; cardExpiry: string; cardCVC: string }) {
+    async fillCybersourceCardDetails(cardDetails: { cardHolderName: string; cardType: string; cardNumber: string; cardExpiry: string; cardCVC: string }) {
         try {
             await this.enterText(this.cybersourceCardNameInput, cardDetails.cardHolderName);
             await this.setDropdownValue(this.cybersourceCardTypeSelect, cardDetails.cardType);
@@ -1346,7 +1436,7 @@ export class AddOrderPage extends Homepage {
 
     async applyCoupon(couponCode: string) {
         await this.couponInput.fill(couponCode);
-    await this.clickElement(this.applyCouponButton);
+        await this.clickElement(this.applyCouponButton);
     }
 
     async fillComments(comments: string) {
@@ -1364,30 +1454,30 @@ export class AddOrderPage extends Homepage {
             const actualGrandTotal = await this.grandTotalText.textContent();
 
 
-        if (actualSubtotal?.trim() !== expectedSummary.subtotal.trim()) {
-            console.error(`Subtotal mismatch. Expected: ${expectedSummary.subtotal}, Found: ${actualSubtotal}`);
-            throw new Error(`Subtotal mismatch. Expected: ${expectedSummary.subtotal}, Found: ${actualSubtotal}`);
-        }
-        if (actualShipping?.trim() !== expectedSummary.shipping.trim()) {
-            console.error(`Shipping mismatch. Expected: ${expectedSummary.shipping}, Found: ${actualShipping}`);
-            throw new Error(`Shipping mismatch. Expected: ${expectedSummary.shipping}, Found: ${actualShipping}`);
-        }
-        if (actualGrandTotal?.trim() !== expectedSummary.grandTotal.trim()) {
-            console.error(`Grand Total mismatch. Expected: ${expectedSummary.grandTotal}, Found: ${actualGrandTotal}`);
-            throw new Error(`Grand Total mismatch. Expected: ${expectedSummary.grandTotal}, Found: ${actualGrandTotal}`);
-        }
-        if (await this.taxIncludedInTotalText.isVisible()) {
-            const actualTaxIncludedInTotal = await this.taxIncludedInTotalText.textContent();
-            if (actualTaxIncludedInTotal?.trim() !== expectedSummary.taxIncludedInTotal.trim()) {
-                console.error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
-                throw new Error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
+            if (actualSubtotal?.trim() !== expectedSummary.subtotal.trim()) {
+                console.error(`Subtotal mismatch. Expected: ${expectedSummary.subtotal}, Found: ${actualSubtotal}`);
+                throw new Error(`Subtotal mismatch. Expected: ${expectedSummary.subtotal}, Found: ${actualSubtotal}`);
             }
-        }
+            if (actualShipping?.trim() !== expectedSummary.shipping.trim()) {
+                console.error(`Shipping mismatch. Expected: ${expectedSummary.shipping}, Found: ${actualShipping}`);
+                throw new Error(`Shipping mismatch. Expected: ${expectedSummary.shipping}, Found: ${actualShipping}`);
+            }
+            if (actualGrandTotal?.trim() !== expectedSummary.grandTotal.trim()) {
+                console.error(`Grand Total mismatch. Expected: ${expectedSummary.grandTotal}, Found: ${actualGrandTotal}`);
+                throw new Error(`Grand Total mismatch. Expected: ${expectedSummary.grandTotal}, Found: ${actualGrandTotal}`);
+            }
+            if (await this.taxIncludedInTotalText.isVisible()) {
+                const actualTaxIncludedInTotal = await this.taxIncludedInTotalText.textContent();
+                if (actualTaxIncludedInTotal?.trim() !== expectedSummary.taxIncludedInTotal.trim()) {
+                    console.error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
+                    throw new Error(`Tax Included in Total mismatch. Expected: ${expectedSummary.taxIncludedInTotal}, Found: ${actualTaxIncludedInTotal}`);
+                }
+            }
 
-        console.log("Summary details verified successfully.");
-    } catch (error) {
-        console.error("Error verifying summary details:", error);
-        throw error;
-    }
+            console.log("Summary details verified successfully.");
+        } catch (error) {
+            console.error("Error verifying summary details:", error);
+            throw error;
+        }
     }
 }

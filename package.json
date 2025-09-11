@@ -14,7 +14,8 @@
     "test:ui": "npx playwright test --grep @ui",
     "test:api": "npx playwright test --grep @service",
     "test:smoke": "npx playwright test --grep @smoke",
-    "test:regression": "npx playwright test --grep @regression"
+    "test:regression": "npx playwright test --grep @regression",
+    "test:sequential": "npx playwright test --workers=1 --retries=0"
   },
   "name": "finreconautomation",
   "version": "1.0.0",

@@ -8,11 +8,11 @@ import { TestConfig } from '../../../../utils/testConfig';
 
 const testConfig = TestConfig.getInstance();
 const scenarios = testConfig.getScenarios();
-const testCaseNames = testConfig.getTestCaseNames();
 
-for (const { scenario, sheetName } of scenarios) {
-    for (const testCaseName of testCaseNames) {
+test.describe('Standard Product Order Tests', () => {
+    for (const { scenario, sheetName, testCases } of scenarios) {
         test.describe(scenario, () => {
+            for (const testCaseName of testCases) {
             test(`Execute: ${testCaseName}`, async ({ baseTest }, testInfo) => {
                 testInfo.annotations.push(
                     { type: 'test-type', description: 'E2E' },
@@ -31,14 +31,9 @@ for (const { scenario, sheetName } of scenarios) {
 
                 try {
                     testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
+
                     // Only execute if Automation is true
                     if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
-                        return;
-                    }
-                    // Only execute if scenario matches
-                    if (testCase['Test Scenario'] !== scenario) {
-                        test.skip(true, `Test scenario does not match: ${testCase['Test Scenario']} !== ${scenario}`);
-                        await excelReader.updateTestResult(sheetName, testCaseName, 'Skipped', 'Scenario does not match');
                         return;
                     }
                     await excelReader.logStep('Executing Test Case', { 'Name': testCaseName, 'Scenario': scenario });
@@ -80,6 +75,28 @@ for (const { scenario, sheetName } of scenarios) {
                     currentStep = 'Proceed to Fulfillment';
                     await test.step(currentStep, async () => {
                         await addOrderPage.clickNextButton();
+
+                        //Only call this method fillSingleShippingAddress if Scenario contains "Fulfillment using New Single Address"
+                        if (scenario.includes("Fulfillment using New Single Address")) {
+                            if (testCase) {
+                                const address = {
+                                    firstName: orderData.address?.firstName || 'John',
+                                    lastName: orderData.address?.lastName || 'Doe',
+                                    companyName: orderData.address?.companyName || 'JD Inc.',
+                                    phoneNumber: orderData.address?.phoneNumber || '1234567890',
+                                    streetAddressLine1: orderData.address?.streetAddressLine1 || '123 Main St',
+                                    streetAddressLine2: orderData.address?.streetAddressLine2 || 'Apt 4B',
+                                    city: orderData.address?.city || 'Anytown',
+                                    state: orderData.address?.state || 'New York',
+                                    country: orderData.address?.country || 'USA',
+                                    zip: orderData.address?.zip || '90210',
+                                    poNumber: orderData.address?.PO || 'PO123456',
+                                    taxID: orderData.address?.taxID || 'TAXID123',
+                                    saveaddressCheckbox: orderData.address?.saveToAddressBook || false
+                                };
+                                await addOrderPage.fillSingleShippingAddress(address);
+                            }
+                        }
                         if (testCase && testCase['Shipping_Method'] !== 'None') {
                             await addOrderPage.selectShippingMethod(testCase['Shipping_Method'] || '');
                             const customShippingDetails = {
@@ -148,7 +165,8 @@ for (const { scenario, sheetName } of scenarios) {
                         await excelReader.logTestSummaryAndRecordResult(testCase, testResult, screenshotPath, executionNotes, sheetName, testCaseName);
                     }
                 }
-            });
+                });
+            }
         });
     }
-}
+});
