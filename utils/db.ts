@@ -1,5 +1,6 @@
 import { ConnectionPool } from 'mssql';
 import dotenv from 'dotenv';
+import { QueryManager } from './queryManager';
 
 dotenv.config();
 
@@ -91,5 +92,68 @@ export async function transferBigCDataToFinRecon() {
       .input('name', data.name)
       .input('price', data.price)
       .query('INSERT INTO FinReconData (id, name, price) VALUES (@id, @name, @price)');
+  }
+}
+
+export async function verifyOrderExists(orderId: string): Promise<boolean> {
+  const connection = await getBigCConnection();
+  const result = await connection.request()
+    .input('orderId', orderId)
+    .query('SELECT COUNT(*) as count FROM orders WHERE order_id = @orderId');
+  return result.recordset[0].count > 0;
+}
+
+export async function getOrderDetails(orderId: string): Promise<any> {
+  const connection = await getBigCConnection();
+  const result = await connection.request()
+    .input('orderId', orderId)
+    .query(`
+      SELECT TOP 1
+        order_id,
+        customer_id,
+        status,
+        total_amount,
+        created_date,
+        modified_date
+      FROM orders
+      WHERE order_id = @orderId
+    `);
+  return result.recordset[0];
+}
+
+export async function getTableSchema(tableName: string): Promise<any[]> {
+  const connection = await getBigCConnection();
+  const result = await connection.request()
+    .input('tableName', tableName)
+    .query(`
+      SELECT
+        COLUMN_NAME,
+        DATA_TYPE,
+        IS_NULLABLE,
+        COLUMN_DEFAULT
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = @tableName
+      ORDER BY ORDINAL_POSITION
+    `);
+  return result.recordset;
+}
+
+export async function verifyOrderInDatabase(orderId: string): Promise<{ exists: boolean; details?: any; error?: string }> {
+  try {
+    console.log(`Verifying order ${orderId} in BigCommerce database using comprehensive query...`);
+
+    const queryManager = QueryManager.getInstance();
+    const results = await queryManager.executeQuery('comprehensive-order-details', { OrderNumber: orderId });
+
+    if (results && results.length > 0) {
+      console.log(`Order ${orderId} found with ${results.length} detail records`);
+      return { exists: true, details: results };
+    } else {
+      console.log(`Order ${orderId} not found in database`);
+      return { exists: false };
+    }
+  } catch (error: any) {
+    console.error(`Error verifying order ${orderId}:`, error);
+    return { exists: false, error: error.message };
   }
 }
