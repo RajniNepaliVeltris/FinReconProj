@@ -5,6 +5,22 @@ export interface TestScenario {
     testCases: string[];
 }
 
+export interface Address {
+    firstName: string;
+    lastName: string;
+    companyName: string;
+    phoneNumber: string;
+    streetAddressLine1: string;
+    streetAddressLine2: string;
+    city: string;
+    state: string;
+    country: string;
+    zip: string;
+    poNumber: string;
+    taxID: string;
+    saveaddressCheckbox: boolean;
+}
+
 export class TestConfig {
     private static instance: TestConfig;
     private constructor() {}
@@ -14,6 +30,48 @@ export class TestConfig {
             TestConfig.instance = new TestConfig();
         }
         return TestConfig.instance;
+    }
+
+    /**
+     * Get base URL for BigCommerce store
+     */
+    public getBaseUrl(): string {
+        return process.env.BASE_URL || 'https://store-5nfoomf2b4.mybigcommerce.com';
+    }
+
+    /**
+     * Get add order URL
+     */
+    public getAddOrderUrl(): string {
+        return `${this.getBaseUrl()}/manage/orders/add-order`;
+    }
+
+    /**
+     * Get all orders URL
+     */
+    public getAllOrdersUrl(): string {
+        return `${this.getBaseUrl()}/manage/orders`;
+    }
+
+    /**
+     * Get default address for fulfillment
+     */
+    public getDefaultAddress(): Address {
+        return {
+            firstName: process.env.DEFAULT_FIRST_NAME || 'John',
+            lastName: process.env.DEFAULT_LAST_NAME || 'Doe',
+            companyName: process.env.DEFAULT_COMPANY_NAME || 'JD Inc.',
+            phoneNumber: process.env.DEFAULT_PHONE_NUMBER || '1234567890',
+            streetAddressLine1: process.env.DEFAULT_STREET_ADDRESS_LINE1 || '123 Main St',
+            streetAddressLine2: process.env.DEFAULT_STREET_ADDRESS_LINE2 || 'Apt 4B',
+            city: process.env.DEFAULT_CITY || 'Anytown',
+            state: process.env.DEFAULT_STATE || 'New York',
+            country: process.env.DEFAULT_COUNTRY || 'USA',
+            zip: process.env.DEFAULT_ZIP || '90210',
+            poNumber: process.env.DEFAULT_PO_NUMBER || 'PO123456',
+            taxID: process.env.DEFAULT_TAX_ID || 'TAXID123',
+            saveaddressCheckbox: process.env.DEFAULT_SAVE_ADDRESS === 'true' || false
+        };
     }
 
     /**
@@ -67,7 +125,6 @@ export class TestConfig {
                 }
             ];
         }
-        return scenarios;
         return scenarios;
     }
 

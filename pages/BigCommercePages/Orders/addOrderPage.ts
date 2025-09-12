@@ -327,7 +327,8 @@ export class AddOrderPage extends Homepage {
         taxID: string;
         saveToAddressBook: boolean;
     }) {
-        await this.billingFirstNameInput.fill(billingInfo.firstName);
+        await this.enterText(this.billingFirstNameInput,billingInfo.firstName);
+        //await this.billingFirstNameInput.fill(billingInfo.firstName);
         await this.billingLastNameInput.fill(billingInfo.lastName);
         if (billingInfo.companyName) await this.billingCompanyNameInput.fill(billingInfo.companyName);
         if (billingInfo.phoneNumber) await this.billingPhoneNumberInput.fill(billingInfo.phoneNumber);
@@ -1445,6 +1446,10 @@ export class AddOrderPage extends Homepage {
 
     async fillStaffNotes(notes: string) {
         await this.staffNotesInput.fill(notes);
+    }
+
+    async placeOrder() {
+        await this.clickElement(this.saveAndProcessPaymentButton);
     }
 
     async verifySummaryDetails(expectedSummary: { subtotal: string; shipping: string; grandTotal: string; taxIncludedInTotal: string }) {

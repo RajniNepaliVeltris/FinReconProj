@@ -6,6 +6,11 @@ export class AllOrdersPage extends Homepage {
     // Common XPath prefixes
     private readonly ordersIndexForm = '//form[@id="orders-index"]';
     private readonly ordersQuickFilter = '//ul[@id="orders-quick-filter"]';
+
+    //OrderSuccess Alert
+    private readonly orderSuccessAlert: Locator;
+
+
     // Locators for main elements
     private readonly ordersTable: Locator;
     private readonly orderRows: Locator;
@@ -39,40 +44,48 @@ export class AllOrdersPage extends Homepage {
 
     constructor(page: Page) {
         super(page);
-        // Use common prefixes for locator definitions
-        this.ordersTable = page.locator(`${this.ordersIndexForm}/table`);
-        this.orderRows = page.locator(`${this.ordersIndexForm}/table/tbody/tr`);
-        this.filterInput = page.locator(`${this.ordersIndexForm}/div[@class="action-bar"]//input[@id="keyword-filter"]`);
-        this.filterButton = page.locator(`${this.ordersIndexForm}/div[@class="action-bar"]//span[text()="Filter"]`);
-        this.searchButton = page.locator(`${this.ordersIndexForm}//a[contains(@aria-label,"Advanced search")]`);
-        this.addButton = page.locator(`${this.ordersIndexForm}//a[contains(@href,"addOrder")]`);
-        this.exportAllButton = page.locator(`${this.ordersIndexForm}//a[contains(@href,"startExport")]  `);
-        this.chooseActionDropdown = page.locator(`${this.ordersIndexForm}//select[contains(@id,"OrderActionSelect")]`);
-        this.confirmButton = page.locator(`${this.ordersIndexForm}//button[contains(@id,"action-confirm")]`);
-        this.viewSizeDropdown = page.locator('//div[@class="pagination"]//button[contains(text(),"View")]');
+        const iframe = this.page.frameLocator('#content-iframe');
+        if (!iframe) throw new Error('Iframe not found. Ensure the iframe is loaded and accessible.');
 
-        this.allOrdersTab = page.locator(`${this.ordersQuickFilter}/li/a[contains(text(),"All orders")]`);
-        this.awaitingPaymentTab = page.locator(`${this.ordersQuickFilter}/li/a[contains(text(),"Awaiting Payment")]`);
-        this.awaitingFulfillmentTab = page.locator(`${this.ordersQuickFilter}/li/a[contains(text(),"Awaiting Fulfillment")]`);
-        this.awaitingShipmentTab = page.locator(`${this.ordersQuickFilter}/li/a[contains(text(),"Awaiting Shipment")]`);
-        this.highRiskTab = page.locator(`${this.ordersQuickFilter}/li/a[contains(text(),"High Risk")]`);
-        this.preOrdersTab = page.locator(`${this.ordersQuickFilter}/li/a[contains(text(),"Pre-orders")]`);
-        this.moreTab = page.locator(`${this.ordersQuickFilter}/li/a[contains(text(),"More")]`);
-        this.customViewsTab = page.locator(`${this.ordersQuickFilter}/li/a[contains(text(),"Custom views")]`);
+        // Helper to initialize locators
+        const initLocator = (xpath: string) => iframe.locator(xpath);
+        // Use common prefixes for locator definitions
+        this.ordersTable = initLocator(`${this.ordersIndexForm}/table`);
+        this.orderRows = initLocator(`${this.ordersIndexForm}/table/tbody/tr`);
+        this.filterInput = initLocator(`${this.ordersIndexForm}/div[@class="action-bar"]//input[@id="keyword-filter"]`);
+        this.filterButton = initLocator(`${this.ordersIndexForm}/div[@class="action-bar"]//span[text()="Filter"]`);
+        this.searchButton = initLocator(`${this.ordersIndexForm}//a[contains(@aria-label,"Advanced search")]`);
+        this.addButton = initLocator(`${this.ordersIndexForm}//a[contains(@href,"addOrder")]`);
+        this.exportAllButton = initLocator(`${this.ordersIndexForm}//a[contains(@href,"startExport")]  `);
+        this.chooseActionDropdown = initLocator(`${this.ordersIndexForm}//select[contains(@id,"OrderActionSelect")]`);
+        this.confirmButton = initLocator(`${this.ordersIndexForm}//button[contains(@id,"action-confirm")]`);
+        this.viewSizeDropdown = initLocator('//div[@class="pagination"]//button[contains(text(),"View")]');
+
+        this.allOrdersTab = initLocator(`${this.ordersQuickFilter}/li/a[contains(text(),"All orders")]`);
+        this.awaitingPaymentTab = initLocator(`${this.ordersQuickFilter}/li/a[contains(text(),"Awaiting Payment")]`);
+        this.awaitingFulfillmentTab = initLocator(`${this.ordersQuickFilter}/li/a[contains(text(),"Awaiting Fulfillment")]`);
+        this.awaitingShipmentTab = initLocator(`${this.ordersQuickFilter}/li/a[contains(text(),"Awaiting Shipment")]`);
+        this.highRiskTab = initLocator(`${this.ordersQuickFilter}/li/a[contains(text(),"High Risk")]`);
+        this.preOrdersTab = initLocator(`${this.ordersQuickFilter}/li/a[contains(text(),"Pre-orders")]`);
+        this.moreTab = initLocator(`${this.ordersQuickFilter}/li/a[contains(text(),"More")]`);
+        this.customViewsTab = initLocator(`${this.ordersQuickFilter}/li/a[contains(text(),"Custom views")]`);
         this.moreDropdownOptions = {
-            Incomplete: page.locator(`${this.ordersQuickFilter}//div[@class="panel-inline"]//a[contains(text(),"Incomplete")]`),
-            Archived: page.locator(`${this.ordersQuickFilter}//div[@class="panel-inline"]//a[contains(text(),"Archived")]`),
-            Refunded: page.locator(`${this.ordersQuickFilter}//div[@class="panel-inline"]//a[contains(text(),"Refunded")]`),
-            Shipped: page.locator(`${this.ordersQuickFilter}//div[@class="panel-inline"]//a[contains(text(),"Shipped")]`)
+            Incomplete: initLocator(`${this.ordersQuickFilter}//div[@class="panel-inline"]//a[contains(text(),"Incomplete")]`),
+            Archived: initLocator(`${this.ordersQuickFilter}//div[@class="panel-inline"]//a[contains(text(),"Archived")]`),
+            Refunded: initLocator(`${this.ordersQuickFilter}//div[@class="panel-inline"]//a[contains(text(),"Refunded")]`),
+            Shipped: initLocator(`${this.ordersQuickFilter}//div[@class="panel-inline"]//a[contains(text(),"Shipped")]`)
         };
 
-        this.dateColumn = page.locator(`${this.ordersIndexForm}/table//th[@class="date"]/a/i`);
-        this.orderIdColumn = page.locator(`${this.ordersIndexForm}/table//th[@class="order-id"]/a/i`);
-        this.customerColumn = page.locator(`${this.ordersIndexForm}/table//th[@class="name"]/a/i`);
-        this.statusColumn = page.locator(`${this.ordersIndexForm}/table//th[@class="status"]/a/i`);
-        this.totalColumn = page.locator(`${this.ordersIndexForm}/table//th[@class="price"]/a/i`);
-        this.actionColumn = page.locator(`${this.ordersIndexForm}/table//th[@class="action"]/button`);
+        this.dateColumn = initLocator(`${this.ordersIndexForm}/table//th[@class="date"]/a/i`);
+        this.orderIdColumn = initLocator(`${this.ordersIndexForm}/table//th[@class="order-id"]/a/i`);
+        this.customerColumn = initLocator(`${this.ordersIndexForm}/table//th[@class="name"]/a/i`);
+        this.statusColumn = initLocator(`${this.ordersIndexForm}/table//th[@class="status"]/a/i`);
+        this.totalColumn = initLocator(`${this.ordersIndexForm}/table//th[@class="price"]/a/i`);
+        this.actionColumn = initLocator(`${this.ordersIndexForm}/table//th[@class="action"]/button`);
+
+        this.orderSuccessAlert = initLocator(`//div[@id="orderStatus"]//p`);
     }
+
     // Clicks the More dropdown and selects an option
     async selectMoreDropdownOption(option: 'Incomplete' | 'Archived' | 'Refunded' | 'Shipped'): Promise<void> {
         await this.moreTab.click();
@@ -119,6 +132,15 @@ export class AllOrdersPage extends Homepage {
     // Action methods
     async clickAddOrder(): Promise<void> {
         await this.addButton.click();
+    }
+
+    async getOrderIdAlertSuccess(): Promise<string | null> {
+        await this.page.waitForLoadState('networkidle');
+        await this.orderSuccessAlert.waitFor({ state: 'visible' , timeout: 10000 });
+        let orderId = await this.orderSuccessAlert.textContent();
+        if (!orderId) return null;
+        let orderIdMatch = orderId.match(/#(\d+)/);
+        return orderIdMatch ? orderIdMatch[1] : null;
     }
 
     async exportAllOrders(): Promise<void> {

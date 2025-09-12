@@ -4,7 +4,8 @@ import { expect } from '@playwright/test';
 import { Homepage } from '../../../../pages/BigCommercePages/Dashboard/homepage';
 import { AddOrderPage } from '../../../../pages/BigCommercePages/Orders/addOrderPage';
 import { ExcelReader, TestCase } from '../../../../utils/excelReader';
-import { TestConfig } from '../../../../utils/testConfig';
+import { TestConfig, Address } from '../../../../utils/testConfig';
+import { AllOrdersPage } from '../../../../pages/BigCommercePages/Orders/allOrdersPage';
 
 const testConfig = TestConfig.getInstance();
 const scenarios = testConfig.getScenarios();
@@ -42,7 +43,7 @@ test.describe('Standard Product Order Tests', () => {
                     currentStep = 'Navigate to Add Order page';
                     await test.step(currentStep, async () => {
                         await homepage.navigateToSideMenuOption('Orders', 'Add');
-                        await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/orders/add-order');
+                        await expect(page).toHaveURL(testConfig.getAddOrderUrl());
                         await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
                     });
 
@@ -79,20 +80,21 @@ test.describe('Standard Product Order Tests', () => {
                         //Only call this method fillSingleShippingAddress if Scenario contains "Fulfillment using New Single Address"
                         if (scenario.includes("Fulfillment using New Single Address")) {
                             if (testCase) {
-                                const address = {
-                                    firstName: orderData.address?.firstName || 'John',
-                                    lastName: orderData.address?.lastName || 'Doe',
-                                    companyName: orderData.address?.companyName || 'JD Inc.',
-                                    phoneNumber: orderData.address?.phoneNumber || '1234567890',
-                                    streetAddressLine1: orderData.address?.streetAddressLine1 || '123 Main St',
-                                    streetAddressLine2: orderData.address?.streetAddressLine2 || 'Apt 4B',
-                                    city: orderData.address?.city || 'Anytown',
-                                    state: orderData.address?.state || 'New York',
-                                    country: orderData.address?.country || 'USA',
-                                    zip: orderData.address?.zip || '90210',
-                                    poNumber: orderData.address?.PO || 'PO123456',
-                                    taxID: orderData.address?.taxID || 'TAXID123',
-                                    saveaddressCheckbox: orderData.address?.saveToAddressBook || false
+                                const defaultAddress = testConfig.getDefaultAddress();
+                                const address: Address = {
+                                    firstName: orderData.address?.firstName || defaultAddress.firstName,
+                                    lastName: orderData.address?.lastName || defaultAddress.lastName,
+                                    companyName: orderData.address?.companyName || defaultAddress.companyName,
+                                    phoneNumber: orderData.address?.phoneNumber || defaultAddress.phoneNumber,
+                                    streetAddressLine1: orderData.address?.streetAddressLine1 || defaultAddress.streetAddressLine1,
+                                    streetAddressLine2: orderData.address?.streetAddressLine2 || defaultAddress.streetAddressLine2,
+                                    city: orderData.address?.city || defaultAddress.city,
+                                    state: orderData.address?.state || defaultAddress.state,
+                                    country: orderData.address?.country || defaultAddress.country,
+                                    zip: orderData.address?.zip || defaultAddress.zip,
+                                    poNumber: orderData.address?.PO || defaultAddress.poNumber,
+                                    taxID: orderData.address?.taxID || defaultAddress.taxID,
+                                    saveaddressCheckbox: orderData.address?.saveToAddressBook || defaultAddress.saveaddressCheckbox
                                 };
                                 await addOrderPage.fillSingleShippingAddress(address);
                             }
@@ -113,6 +115,14 @@ test.describe('Standard Product Order Tests', () => {
                     await test.step(currentStep, async () => {
                         await addOrderPage.clickNextButton();
                         if (testCase) {
+                            if (testCase['Discount Applied'] == "Manual Discount") {
+                                await addOrderPage.fillManualDiscount(testCase['Manual_Discount']?.toString() || '');
+                            }
+                            if (testCase['Coupon Applied'] == "Valid Coupon" || testCase['Coupon Applied'] == "Invalid Coupon") {
+                                await addOrderPage.applyCoupon(testCase['Coupon_Code']?.toString() || '');
+                            } else {
+                                console.log('No coupon to apply as per test data');
+                            }
                             await addOrderPage.selectPaymentMethod(testCase['Payment_Category'] || '');
                             await addOrderPage.verifyPaymentMethodSelected(testCase['Payment_Category'] || '');
                             let cardDetails: any = undefined;
@@ -126,14 +136,7 @@ test.describe('Standard Product Order Tests', () => {
                                 };
                                 await addOrderPage.fillCybersourceCardDetails(cardDetails);
                             }
-                            if (testCase['Discount Applied'] == "Manual Discount") {
-                                await addOrderPage.fillManualDiscount(testCase['Manual_Discount']?.toString() || '');
-                            }
-                            if (testCase['Coupon Applied'] == "Valid Coupon" || testCase['Coupon Applied'] == "Invalid Coupon") {
-                                await addOrderPage.applyCoupon(testCase['Coupon_Code']?.toString() || '');
-                            } else {
-                                console.log('No coupon to apply as per test data');
-                            }
+                            
                         }
                     });
 
@@ -152,6 +155,24 @@ test.describe('Standard Product Order Tests', () => {
                             screenshotPath = await excelReader.captureAndAttachScreenshot(page, testCase, testInfo);
                         }
                     });
+                    currentStep = 'Place Order';
+                    await test.step(currentStep, async () => {
+                        await addOrderPage.placeOrder();
+                    });
+
+                    currentStep = 'Verify Order Creation in All Orders Page';
+                    await test.step(currentStep, async () => {
+                        const allOrdersPage = new AllOrdersPage(page);
+                        
+                        //await expect(page).toHaveURL(testConfig.getAllOrdersUrl());
+                        const orderId = await allOrdersPage.getOrderIdAlertSuccess();
+                        console.log('Created Order ID:', orderId);
+                        expect(orderId).toBeTruthy();
+                        if (!orderId) throw new Error('Order ID not found');
+                        // Write the orderId back to Excel
+                        await excelReader.updateOrderId(sheetName, testCaseName, orderId);
+                    });
+
                 } catch (err: any) {
                     testResult = 'Failed';
                     failedStep = currentStep;

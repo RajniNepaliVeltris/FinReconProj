@@ -56,6 +56,60 @@ export class ExcelReader {
     /**
      * Log key test case info to console
      */
+        /**
+         * Update the Order_Id for a test case in the Excel sheet
+         * @param sheetName Name of the worksheet
+         * @param testCaseName Name of the test case
+         * @param orderId The orderId to write
+         */
+        public async updateOrderId(sheetName: string, testCaseName: string, orderId: string): Promise<void> {
+            try {
+                const workbook = await this.readWorkbook();
+                const worksheet = workbook.getWorksheet(sheetName);
+                if (!worksheet) {
+                    throw new Error(`Worksheet ${sheetName} not found in the Excel file`);
+                }
+
+                // Find header columns
+                const headers: { [key: string]: number } = {};
+                worksheet.getRow(1).eachCell((cell, colNumber) => {
+                    headers[cell.value?.toString() || ''] = colNumber;
+                });
+
+                if (!headers['Order_Id']) {
+                    throw new Error('Order_Id column not found in the worksheet');
+                }
+                if (!headers['Test Case Name']) {
+                    throw new Error('Test Case Name column not found in the worksheet');
+                }
+
+                // Find the row for the test case
+                let foundRow: any = null;
+                worksheet.eachRow((row, rowNumber) => {
+                    if (rowNumber === 1) return; // Skip header
+                    const nameCell = row.getCell(headers['Test Case Name']);
+                    const cellValue = nameCell.value?.toString() || '';
+                    if (cellValue === testCaseName) {
+                        foundRow = row;
+                    }
+                });
+
+                if (!foundRow) {
+                    throw new Error(`Test case "${testCaseName}" not found in sheet "${sheetName}"`);
+                }
+
+                // Update the Order_Id cell
+                foundRow.getCell(headers['Order_Id']).value = orderId;
+
+                // Save the workbook
+                const filePath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
+                await workbook.xlsx.writeFile(filePath);
+                console.log(`Order_Id updated for test case "${testCaseName}" in sheet "${sheetName}"`);
+            } catch (error) {
+                console.error('Error updating Order_Id:', error);
+                throw error;
+            }
+        }
     public logTestCaseInfo(testCase: TestCase): void {
         console.log(`Executing Test Case: ${testCase['Test Case ID']}`);
         console.log(`Scenario: ${testCase['Test Scenario']}`);
