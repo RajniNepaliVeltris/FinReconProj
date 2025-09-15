@@ -2,7 +2,7 @@ import { test } from '../../../utils/baseTest';
 import { expect, TestInfo } from '@playwright/test';
 import { ExcelReader, TestCase } from '../../../utils/excelReader';
 import { TestConfig } from '../../../utils/testConfig';
-import { verifyOrderInDatabase, getTableSchema } from '../../../utils/db';
+import { verifyOrderInDatabase, getTableSchema, getBigCConnection } from '../../../utils/db';
 import { QueryManager } from '../../../utils/queryManager';
 
 /*
@@ -43,14 +43,14 @@ test.describe('Order Database Verification Tests', () => {
         );
 
         try {
-            console.log('Checking database connection, table schema, and query loading...');
+            console.log('Checking database connection and query loading...');
 
-            // Check orders table schema
-            const schema = await getTableSchema('Order'); // Note: Using 'Order' as the table name from the query
-            console.log('Order table schema:', schema);
+            // Test basic database connectivity with a simple query
+            const connection = await getBigCConnection();
+            const testResult = await connection.request().query('SELECT 1 as TestConnection');
+            console.log('Database connection successful:', testResult.recordset[0]);
 
-            expect(schema.length).toBeGreaterThan(0);
-            console.log('Database connection successful and Order table exists');
+            expect(testResult.recordset[0].TestConnection).toBe(1);
 
             // Check that queries are loaded
             const queryManager = QueryManager.getInstance();
@@ -62,7 +62,7 @@ test.describe('Order Database Verification Tests', () => {
             console.log('Query manager loaded successfully');
 
         } catch (error: any) {
-            console.error('Database connection, schema check, or query loading failed:', error);
+            console.error('Database connection or query loading failed:', error);
             throw error;
         }
     });

@@ -4,6 +4,18 @@ import { UIInteractions } from '../../../utils/uiInteractions';
 import { Homepage } from '../Dashboard/homepage';
 
 export class AddOrderPage extends Homepage {
+    // --- IBM Assessment Voucher Bundle Modal Locators ---
+    private customizeBundleModal: Locator;
+    private bundleBasicDetailsTab: Locator;
+    private bundleOptionsTab: Locator;
+    private bundleNameInput: Locator;
+    private bundleUseStorePricingRadio: Locator;
+    private bundleManualPriceRadio: Locator;
+    private bundleQuantityInput: Locator;
+    private bundleAddItemButton: Locator;
+    private bundleCloseButton: Locator;
+    private bundleProductsRadioButton: Locator;
+    private bundleProductNames: Locator;
 
     // Shipping Locators
 
@@ -310,7 +322,75 @@ export class AddOrderPage extends Homepage {
         this.commentsInput = initLocator(`//textarea[@id="order-comment"]`);
         this.staffNotesInput = initLocator(`//textarea[@id="staff-note"]`);
         this.saveAndProcessPaymentButton = initLocator("//button[@data-saveandprocesspayment='Save & process payment »']");
+    
+        //Bundle Product Dialogue Box
+        const bundleProductDialogue = "//div[@aria-labelledby='product-option']";
+        this.customizeBundleModal = initLocator(`${bundleProductDialogue}`);
+        this.bundleBasicDetailsTab = this.customizeBundleModal.locator("//a[contains(text(),'Basic details')]");
+        this.bundleOptionsTab = this.customizeBundleModal.locator("//a[contains(text(),'Options')]");
+        this.bundleNameInput = this.customizeBundleModal.locator("//input[@id='product-name']");
+        this.bundleUseStorePricingRadio = this.customizeBundleModal.locator("//input[@id='price-current']");
+        this.bundleManualPriceRadio = this.customizeBundleModal.locator("//input[@id='price-custom']");
+        this.bundleQuantityInput = this.customizeBundleModal.locator("//input[@id='product-quantity']");
+        this.bundleAddItemButton = this.customizeBundleModal.locator("//button[@id='dialog-options-submit']");
+        this.bundleCloseButton = this.customizeBundleModal.locator("//button[@class='btn-dialog-close']");
+        this.bundleProductsRadioButton = this.customizeBundleModal.locator("//div[@id='options']//div[contains(@class,'productAttributeRow')]//td[@class='input']//input[@type='radio']");
+        this.bundleProductNames = this.customizeBundleModal.locator("//div[@id='options']//div[contains(@class,'productAttributeRow')]//td[@class='input']//span");
     }
+
+    /**
+     * Fill the Basic details tab in the IBM Assessment Voucher Bundle modal
+     */
+    async fillBundleBasicDetails(name: string, useStorePricing: boolean, quantity: number) {
+        await this.clickElement(this.bundleBasicDetailsTab);
+        await this.enterText(this.bundleNameInput,name);
+        if (useStorePricing) {
+            await this.bundleUseStorePricingRadio.check();
+        } else {
+            await this.bundleManualPriceRadio.check();
+        }
+        await this.enterText(this.bundleQuantityInput,quantity.toString());
+    }
+
+    /**
+     * Fill the Options tab in the IBM Assessment Voucher Bundle modal
+     */
+    async fillBundleOptions(products: Array<{name: string}>) {
+        await this.clickElement(this.bundleOptionsTab);
+        for (let i = 0; i < products.length; i++) {
+            // Assumes product inputs are in order
+            await this.bundleProductsRadioButton.nth(i).fill(products[i].name);
+        }
+    }
+
+    /**
+     * Add the bundle item to the order
+     */
+    async addBundleItem() {
+        await this.clickElement(this.bundleAddItemButton);
+    }
+
+    /**
+     * Close the bundle modal
+     */
+    async closeBundleModal() {
+        await this.clickElement(this.bundleCloseButton);
+    }
+
+    /**
+     * Complete flow to customize and add IBM Assessment Voucher Bundle
+     */
+    async customizeAndAddIBMBundle(details: {
+        name: string,
+        useStorePricing: boolean,
+        quantity: number,
+        products: Array<{name: string}>
+    }) {
+        await this.fillBundleBasicDetails(details.name, details.useStorePricing, details.quantity);
+        await this.fillBundleOptions(details.products);
+        await this.addBundleItem();
+    }
+    
 
     async fillBillingInformation(billingInfo: {
         firstName: string;
@@ -328,18 +408,17 @@ export class AddOrderPage extends Homepage {
         saveToAddressBook: boolean;
     }) {
         await this.enterText(this.billingFirstNameInput,billingInfo.firstName);
-        //await this.billingFirstNameInput.fill(billingInfo.firstName);
-        await this.billingLastNameInput.fill(billingInfo.lastName);
-        if (billingInfo.companyName) await this.billingCompanyNameInput.fill(billingInfo.companyName);
-        if (billingInfo.phoneNumber) await this.billingPhoneNumberInput.fill(billingInfo.phoneNumber);
-        await this.billingAddressLine1Input.fill(billingInfo.addressLine1);
-        if (billingInfo.addressLine2) await this.billingAddressLine2Input.fill(billingInfo.addressLine2);
-        await this.billingSuburbCityInput.fill(billingInfo.suburbCity);
+        await this.enterText(this.billingLastNameInput,billingInfo.lastName);
+        if (billingInfo.companyName) await this.enterText(this.billingCompanyNameInput,billingInfo.companyName);
+        if (billingInfo.phoneNumber) await this.enterText(this.billingPhoneNumberInput,billingInfo.phoneNumber);
+        await this.enterText(this.billingAddressLine1Input,billingInfo.addressLine1);
+        if (billingInfo.addressLine2) await this.enterText(this.billingAddressLine2Input,billingInfo.addressLine2);
+        await this.enterText(this.billingSuburbCityInput,billingInfo.suburbCity);
         await this.billingCountrySelect.selectOption(billingInfo.country);
         await this.billingStateProvinceSelect.selectOption(billingInfo.stateProvince);
-        await this.billingZipPostcodeInput.fill(billingInfo.zipPostcode);
-        if (billingInfo.poNumber) await this.billingPONumberInput.fill(billingInfo.poNumber);
-        if (billingInfo.taxID) await this.billingTaxIDInput.fill(billingInfo.taxID);
+        await this.enterText(this.billingZipPostcodeInput,billingInfo.zipPostcode);
+        if (billingInfo.poNumber) await this.enterText(this.billingPONumberInput,billingInfo.poNumber);
+        if (billingInfo.taxID) await this.enterText(this.billingTaxIDInput,billingInfo.taxID);
         if (billingInfo.saveToAddressBook) {
             await UIInteractions.checkElement(
                 this.billingSaveToAddressBookCheckbox,
@@ -363,9 +442,9 @@ export class AddOrderPage extends Homepage {
         customerGroup: string;
     }) {
         await this.selectNewCustomer();
-        await this.newCustomerEmailInput.fill(newCustomerDetails.email);
-        await this.newCustomerPasswordInput.fill(newCustomerDetails.password);
-        await this.newCustomerConfirmPasswordInput.fill(newCustomerDetails.confirmPassword);
+        await this.enterText(this.newCustomerEmailInput,newCustomerDetails.email);
+        await this.enterText(this.newCustomerPasswordInput,newCustomerDetails.password);
+        await this.enterText(this.newCustomerConfirmPasswordInput,newCustomerDetails.confirmPassword);
 
         if (newCustomerDetails.exclusiveOffers) {
             // Use our utility method for reliable checkbox interaction
@@ -381,7 +460,7 @@ export class AddOrderPage extends Homepage {
             );
         }
 
-        await this.newCustomerLineOfCreditInput.fill(newCustomerDetails.lineOfCredit);
+        await this.enterText(this.newCustomerLineOfCreditInput,newCustomerDetails.lineOfCredit);
         await this.newCustomerPaymentTermsSelect.selectOption(newCustomerDetails.paymentTerms);
         await this.newCustomerGroupSelect.selectOption(newCustomerDetails.customerGroup);
     }
@@ -434,7 +513,9 @@ export class AddOrderPage extends Homepage {
     }
 
     async searchProduct(productName: string) {
-        await this.addProductsSearchInput.fill(productName);
+        await this.waitForElement(this.addProductsSearchInput, 5000);
+        await this.clickElement(this.addProductsSearchInput);
+        await this.enterText(this.addProductsSearchInput,productName);
         console.log(`Searching for product: ${productName}`);
     }
 
@@ -487,12 +568,8 @@ export class AddOrderPage extends Homepage {
         try {
             await this.waitForElement(this.addProductsSearchInput, 5000);
             await this.clickElement(this.addProductsSearchInput);
-            //for (const char of productName) {
-            await this.addProductsSearchInput.fill(productName);
-            await this.page.waitForTimeout(100); // Adjust delay as needed
-            //await this.addProductsSearchInput.type(char);
-            //await this.page.waitForTimeout(100); // Simulate typing for autosuggest
-            //}
+            await this.enterText(this.addProductsSearchInput,productName);
+            await this.page.waitForTimeout(100); 
             await this.clickElement(this.addProductsSearchInput); // Trigger search/autosuggest
             // Wait for the product search results to appear
             await this.waitForElement(this.productSearchResultsList, 10000);
@@ -656,10 +733,10 @@ export class AddOrderPage extends Homepage {
         price: string;
         quantity: string;
     }) {
-        await this.customProductNameInput.fill(productDetails.productName);
-        await this.customProductSKUInput.fill(productDetails.sku);
-        await this.customProductPriceInput.fill(productDetails.price);
-        await this.customProductQuantityInput.fill(productDetails.quantity);
+        await this.enterText(this.customProductNameInput, productDetails.productName);
+        await this.enterText(this.customProductSKUInput, productDetails.sku);
+        await this.enterText(this.customProductPriceInput, productDetails.price);
+        await this.enterText(this.customProductQuantityInput, productDetails.quantity);
         await this.clickElement(this.customProductAddItemButton);
     }
 
@@ -890,13 +967,13 @@ export class AddOrderPage extends Homepage {
             if (await this.shippingMethodInput.isVisible()) {
                 await this.clickElement(this.shippingMethodInput); // Ensure focus
                 await this.shippingMethodInput.clear(); // Clear any existing value
-                await this.shippingMethodInput.fill(details.provider); // Enter new value
+                await this.enterText(this.shippingMethodInput, details.provider); // Enter new value
                 await this.page.waitForTimeout(100); // Short wait for UI update
 
                 if (await this.shippingCostInput.isVisible()) {
                     await this.clickElement(this.shippingCostInput);
                     await this.shippingCostInput.clear();
-                    await this.shippingCostInput.fill(details.cost);
+                    await this.enterText(this.shippingCostInput, details.cost);
                     await this.page.waitForTimeout(100);
                 } else {
                     console.log("Shipping Cost input is not visible; cannot set custom cost.");
@@ -1429,23 +1506,23 @@ export class AddOrderPage extends Homepage {
     }
 
     async fillManualDiscount(discount: string) {
-        await this.manualDiscountInput.fill(discount);
+        await this.enterText(this.manualDiscountInput, discount);
         await this.clickElement(this.applyDiscountButton);
         await this.page.waitForTimeout(5000); // Wait for the discount to be applied
 
     }
 
     async applyCoupon(couponCode: string) {
-        await this.couponInput.fill(couponCode);
+        await this.enterText(this.couponInput, couponCode);
         await this.clickElement(this.applyCouponButton);
     }
 
     async fillComments(comments: string) {
-        await this.commentsInput.fill(comments);
+        await this.enterText(this.commentsInput, comments);
     }
 
     async fillStaffNotes(notes: string) {
-        await this.staffNotesInput.fill(notes);
+        await this.enterText(this.staffNotesInput, notes);
     }
 
     async placeOrder() {
