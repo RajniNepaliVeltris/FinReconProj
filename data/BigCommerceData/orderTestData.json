@@ -137,6 +137,37 @@
                 "taxID": "TAXID123",
                 "saveToAddressBook": false
             }
+        },
+        {
+            "description": "Order with Bundle product - Fulfillment using Billing Address",
+            "customer": {
+                "type": "existing",
+                "email": "harish.lakkimsetti@pearson.com",
+                "existingCustomerAddressCard": "Harish LakkimsettiTest Test New York, New York, 124578United States"
+            }
+        },
+        {
+            "description": "Order with Standard product - Fulfillment using New Single Address",
+            "customer": {
+                "type": "existing",
+                "email": "harish.lakkimsetti@pearson.com",
+                "existingCustomerAddressCard": "Harish LakkimsettiTest Test New York, New York, 124578United States"
+            },
+            "address": {
+                "firstName": "HarishNewAddressSingle",
+                "lastName": "Lakkimsetti",
+                "companyName": "Test",
+                "phoneNumber": "1234567890",
+                "streetAddressLine1": "456 Elm Street",
+                "streetAddressLine2": "Suite 200",
+                "city": "Metropolis",
+                "state": "New York",
+                "country": "United States",
+                "zip": "124578",
+                "PO": "12345",
+                "taxID": "TAXID123",
+                "saveToAddressBook": false
+            }
         }
         
     ]

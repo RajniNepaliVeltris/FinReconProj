@@ -14,7 +14,7 @@ export class AddOrderPage extends Homepage {
     private bundleQuantityInput: Locator;
     private bundleAddItemButton: Locator;
     private bundleCloseButton: Locator;
-    private bundleProductsRadioButton: Locator;
+    private bundleProductsRadioButton: (OptionProduct: string) => Locator;
     private bundleProductNames: Locator;
 
     // Shipping Locators
@@ -334,7 +334,11 @@ export class AddOrderPage extends Homepage {
         this.bundleQuantityInput = this.customizeBundleModal.locator("//input[@id='product-quantity']");
         this.bundleAddItemButton = this.customizeBundleModal.locator("//button[@id='dialog-options-submit']");
         this.bundleCloseButton = this.customizeBundleModal.locator("//button[@class='btn-dialog-close']");
-        this.bundleProductsRadioButton = this.customizeBundleModal.locator("//div[@id='options']//div[contains(@class,'productAttributeRow')]//td[@class='input']//input[@type='radio']");
+       this.bundleProductsRadioButton = (OptionProduct: string) => {
+            return this.customizeBundleModal.locator(
+                `//div[@id='options']//div[contains(@class,'productAttributeRow')]//td[@class='input']//span[@class='name' and contains(text(),'${OptionProduct}')]/preceding-sibling::input`
+            );
+        };
         this.bundleProductNames = this.customizeBundleModal.locator("//div[@id='options']//div[contains(@class,'productAttributeRow')]//td[@class='input']//span");
     }
 
@@ -343,11 +347,15 @@ export class AddOrderPage extends Homepage {
      */
     async fillBundleBasicDetails(name: string, useStorePricing: boolean, quantity: number) {
         await this.clickElement(this.bundleBasicDetailsTab);
-        await this.enterText(this.bundleNameInput,name);
+        //await this.enterText(this.bundleNameInput,name);
+        if(await this.bundleNameInput.evaluate((el, value) => (el as HTMLInputElement).value === value, name) !== true) {
+            throw new Error(`Bundle name input value mismatch. Expected: ${name}`);
+        }
         if (useStorePricing) {
             await this.bundleUseStorePricingRadio.check();
         } else {
             await this.bundleManualPriceRadio.check();
+           // await this.enterText(this.bundleManualPriceInput,'100'); // Example manual price, adjust as needed
         }
         await this.enterText(this.bundleQuantityInput,quantity.toString());
     }
@@ -357,9 +365,14 @@ export class AddOrderPage extends Homepage {
      */
     async fillBundleOptions(products: Array<{name: string}>) {
         await this.clickElement(this.bundleOptionsTab);
+        await this.waitForElement(this.bundleProductNames.first(), 5000);
+        const availableProductsCount = await this.bundleProductNames.count();
+        if (availableProductsCount === 0) {
+            throw new Error('No products available in the bundle options.');
+        }
         for (let i = 0; i < products.length; i++) {
-            // Assumes product inputs are in order
-            await this.bundleProductsRadioButton.nth(i).fill(products[i].name);
+            await this.clickElement(this.bundleProductsRadioButton(products[i].name), { force: true ,timeout: 5000});
+            //await this.checkElement(this.bundleProductNames.nth(i), { state: 'attached' });
         }
     }
 
@@ -381,12 +394,14 @@ export class AddOrderPage extends Homepage {
      * Complete flow to customize and add IBM Assessment Voucher Bundle
      */
     async customizeAndAddIBMBundle(details: {
-        name: string,
+        bundle_name: string,
         useStorePricing: boolean,
         quantity: number,
         products: Array<{name: string}>
     }) {
-        await this.fillBundleBasicDetails(details.name, details.useStorePricing, details.quantity);
+        await this.searchProductWithBrowseCategories(details.bundle_name);
+        await this.waitForElement(this.customizeBundleModal, 5000);
+        await this.fillBundleBasicDetails(details.bundle_name, details.useStorePricing, details.quantity);
         await this.fillBundleOptions(details.products);
         await this.addBundleItem();
     }
