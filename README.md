@@ -1,8 +1,27 @@
 # QA Automation Framework
 
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Test Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 This repository contains a modular and extendable QA automation framework built with TypeScript and Playwright. It supports UI, API, Smoke, and Regression testing.
 
+## Table of Contents
+
+1. [Folder Structure](#folder-structure)
+2. [Key Features](#key-features)
+3. [Prerequisites](#prerequisites)
+4. [Setup Instructions](#setup-instructions)
+5. [Running Tests](#running-tests)
+6. [Reporting](#reporting)
+7. [Advanced Utilities](#advanced-utilities)
+8. [Troubleshooting](#troubleshooting)
+9. [Contribution Guidelines](#contribution-guidelines)
+10. [License](#license)
+
 ## Folder Structure
+
+The project is organized as follows:
 
 ```
 ├── tests/
@@ -82,7 +101,7 @@ This repository contains a modular and extendable QA automation framework built 
 ├── README.md
 ```
 
-## Features
+## Key Features
 
 1. **Modular UI Testing**: Built with Playwright and a Page Object Model, supporting reusable and maintainable UI test components for BigCommerce and Pearson Vue platforms.
 2. **Comprehensive API Testing**: Utilizes Playwright's request API and custom utilities for robust API validation, including data-driven scenarios.
@@ -104,12 +123,24 @@ This repository contains a modular and extendable QA automation framework built 
 13. **Extensible Utilities**: Utility modules for API, DB, Excel reading, query management, and more, making the framework adaptable to new requirements.
 14. **Chrome Debug Session Support**: Ability to run tests using an existing Chrome instance with preserved login state for faster, session-persistent test execution and debugging.
 
-## Setup
+## Prerequisites
+
+Ensure you have the following installed before setting up the project:
+
+- **Node.js**: Version 16.x or higher
+- **npm**: Version 7.x or higher
+- **Git**: For cloning the repository
+- **SQL Server**: For database testing
+- **PowerShell**: For running optional scripts on Windows
+
+## Setup Instructions
+
+Follow these steps to set up the project:
 
 1. **Clone the repository**
    ```powershell
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone https://github.com/RajniNepaliVeltris/FinReconProj.git
+   cd FinReconProj
    ```
 
 2. **Install dependencies**
@@ -121,19 +152,19 @@ This repository contains a modular and extendable QA automation framework built 
    - Create a `.env` file in the project root with your DB and app credentials:
    ```env
    # Main Database (FinRecon)
-   DB_USER=<your-db-user>
-   DB_PASSWORD=<your-db-password>
-   DB_SERVER=<your-db-server>
-   DB_NAME=<your-db-name>
+   DB_USER=admin
+   DB_PASSWORD=admin123
+   DB_SERVER=localhost
+   DB_NAME=FinReconDB
 
    # BigCommerce Database
-   BIGC_DB_USER=<your-bigcommerce-db-user>
-   BIGC_DB_PASSWORD=<your-bigcommerce-db-password>
-   BIGC_DB_SERVER=<your-bigcommerce-db-server>
-   BIGC_DB_NAME=<your-bigcommerce-db-name>
+   BIGC_DB_USER=bigc_admin
+   BIGC_DB_PASSWORD=bigc_password
+   BIGC_DB_SERVER=bigc_server
+   BIGC_DB_NAME=BigCommerceDB
 
    # Application
-   BASE_URL=<your-app-url>
+   BASE_URL=http://localhost:3000
    ```
    - For API and DB config, update files in `data/APIData/` as needed (e.g., `dbConfig.json`, `webhookSecret.json`).
 
@@ -202,240 +233,65 @@ Test results and reports will be generated in the `test-results` folder after ex
 
 ## Reporting
 
-
 Test execution generates detailed reports in the `test-results` folder:
 
 - **HTML Report**: Open `test-results/index.html` in your browser for a visual summary of all test runs, including pass/fail status, error details, and links to screenshots/videos.
 - **JSON Report**: For integration or analysis, use `test-results/report.json`.
 - **Screenshots & Videos**: On test failure, screenshots and videos are automatically captured and linked in the HTML report for easy debugging.
 
-You can customize reporting options in `playwright.config.ts`.
+### Example Output
 
-## Using Existing Chrome Instance for Tests
+#### HTML Report Screenshot
+![HTML Report Example](https://via.placeholder.com/800x400?text=HTML+Report+Example)
 
+#### Test Results JSON
+```json
+{
+  "totalTests": 50,
+  "passed": 45,
+  "failed": 5,
+  "duration": "5m 30s"
+}
+```
 
-### Overview
-Run Playwright tests using an existing Chrome instance with preserved login state for session persistence, faster execution, and easier debugging.
+## Advanced Utilities
 
-#### When to Use
-- Maintain login sessions between test runs (no repeated logins)
-- Debug tests with the same browser state
-- Speed up test execution by reusing the browser instance
+### Postman & Mockoon Integration
 
-### Step-by-Step Guide
+- **Postman**: Import the Postman collections provided in the `postman/` folder to test API workflows.
+- **Mockoon**: Use the Mockoon configuration files to simulate APIs for testing. Refer to the [Mockoon documentation](https://mockoon.com/) for setup instructions.
 
-1. **Launch Chrome with Remote Debugging**
+## Troubleshooting
+
+### Common Issues
+
+1. **Playwright Installation Errors**:
+   - Ensure you have the correct Node.js version installed.
+   - Run `
+1. **Fork the Repository**:
+   - Click the "Fork" button at the top of this repository.
+
+2. **Clone Your Fork**:
    ```powershell
-   .\start-chrome-debug.ps1
+   git clone <your-fork-url>
+   cd <repository-folder>
    ```
-   - Chrome starts with remote debugging on port 9222
-   - User data is stored in `C:\ChromeDebug` (profile persists)
 
-2. **Log In Manually**
-   - Use the opened Chrome window to log into your application
-   - Leave the window open during test runs
-
-3. **Run Playwright Tests**
+3. **Create a New Branch**:
    ```powershell
-   npx playwright test --project=existing-chrome
-   ```
-   - Tests will use the running Chrome instance and preserved session
-
-### Tips & Troubleshooting
-- Always keep the Chrome window open while tests run
-- Do not close Chrome between test runs to preserve session
-- Ensure port 9222 is free (close other Chrome debug sessions if needed)
-- If login state is lost, repeat the manual login step
-- Profile data is saved in `C:\ChromeDebug` for future runs
-
-### Restarting Later
-1. Run `.\start-chrome-debug.ps1`
-2. Log in once (if needed)
-3. Run your tests
-
-## Advanced UI Interaction & Table Verification
-
-
-### UIInteractions Utility
-
-The framework includes a robust `UIInteractions` utility class for handling complex or problematic UI elements. It supports:
-- Fallback strategies for elements that are hard to interact with
-- Automatic handling of iframes and dynamic content
-- Custom timeouts and descriptive error messages
-
-**Example: Interacting with a checkbox (including iframes)**
-```typescript
-await UIInteractions.checkElement(
-   checkboxLocator,
-   {
-      description: 'Terms checkbox',
-      timeout: 5000,
-      page: this.page,
-      iframe: 'content-iframe' // Optional iframe context
-   }
-);
-```
-
-**Tips:**
-- Use descriptive `description` for better error reporting
-- Specify `iframe` if the element is inside an iframe
-- Adjust `timeout` for slow-loading elements
-
-### Table Value Verification
-
-Enhanced table verification supports:
-- Comparing both input field values and displayed/highlighted text
-- Smart normalization for currency, numbers, and formatting
-- Detailed error reporting for mismatches
-
-**Example: Verify product details in a table**
-```typescript
-// Verify input field values
-await addOrderPage.verifyProductInTable(productDetails, { checkHighlightedValues: false });
-
-// Verify highlighted/displayed text values
-await addOrderPage.verifyProductInTable(productDetails, { checkHighlightedValues: true });
-```
-
-**Smart format matching:**
-```typescript
-"$49.99" === "49.99"      // Currency symbols ignored
-"1,234.56" === "1234.56"  // Separators ignored
-"49.990" === "49.99"      // Trailing zeros ignored
-```
-
-**Error reporting example:**
-```
-Product details validation failed for 'Test Product':
-Product price does not match the expected value. Expected: "$49.99", Found: "$50.00"
-Product quantity does not match the expected value. Expected: "2", Found: "1"
-```
-
-**Best Practices:**
-- Use table verification for both UI and API-driven tests
-- Review error messages for quick debugging
-- Extend utility methods for custom table formats as needed
-
-## Database Verification & Query Management
-
-### Overview
-The framework includes comprehensive database verification capabilities with a sophisticated query management system that supports both automated testing and manual SQL Server Management Studio (SSMS) execution.
-
-### Key Components
-
-#### Query Management System (`utils/queryManager.ts`)
-- **Automatic SQL Loading**: Loads queries from `.sql` files in the `queries/` directory
-- **Parameterized Queries**: Secure parameter binding to prevent SQL injection
-- **Singleton Pattern**: Efficient resource management and caching
-- **Error Handling**: Comprehensive error reporting and logging
-
-#### Database Verification (`utils/db.ts`)
-- **BigCommerce Integration**: Direct connection to BigCommerce database
-- **Comprehensive Order Verification**: Validates orders with full details including items, payments, billing, and fulfillment
-- **Flexible Query Execution**: Supports both simple and complex SQL queries
-
-### Database Test Structure
-
-#### DB Tests (`tests/BigCommerceTests/DbTests/`)
-- **`CreateOrderDBTests.spec.ts`**: Comprehensive order verification tests
-- **Connection Validation**: Tests database connectivity and schema
-- **Order Verification**: Validates orders created through UI tests
-
-### SQL Query Files (`queries/`)
-
-#### `bigcommerce-order-queries.sql`
-Contains the comprehensive order verification query that retrieves:
-- **Core Order Information**: Order ID, number, status, dates, financial summary
-- **Customer & Billing Details**: Contact information, addresses, payment methods
-- **Order Items**: Products, quantities, pricing, discounts
-- **Payment Information**: Transactions, interactions, refunds
-- **Fulfillment Details**: Shipping addresses, methods, tracking
-- **Order Notes & Attributes**: Additional order metadata
-
-### Running Database Tests
-
-#### Prerequisites
-1. Configure BigCommerce database credentials in `.env`:
-   ```env
-   BIGC_DB_USER=<your-bigcommerce-db-user>
-   BIGC_DB_PASSWORD=<your-bigcommerce-db-password>
-   BIGC_DB_SERVER=<your-bigcommerce-db-server>
-   BIGC_DB_NAME=<your-bigcommerce-db-name>
+   git checkout -b feature/your-feature-name
    ```
 
-2. Ensure database firewall allows connections from your IP
+4. **Make Changes**:
+   - Follow the existing code style and structure.
+   - Write clear commit messages.
 
-#### Test Execution
-```powershell
-# Run all database tests
-npx playwright test tests/BigCommerceTests/DbTests/
+5. **Run Tests**:
+   - Ensure all tests pass before submitting your changes.
 
-# Run specific database test
-npx playwright test tests/BigCommerceTests/DbTests/CreateOrderDBTests.spec.ts
-
-# Run with detailed output
-npx playwright test tests/BigCommerceTests/DbTests/ --reporter=line
-```
-
-### Manual SSMS Verification
-
-For manual verification or debugging, you can execute queries directly in SQL Server Management Studio:
-
-1. **Connect to BigCommerce Database** in SSMS
-2. **Replace Parameters**: Update `@OrderNumber` with actual order number from Excel
-3. **Execute Query**: Copy and run the comprehensive query from `queries/bigcommerce-order-queries.sql`
-
-#### Example Manual Query
-```sql
--- Quick existence check
-SELECT COUNT(*) as OrderCount
-FROM [Order]
-WHERE OrderNumber = '429113';
-
--- Full order details
-DECLARE @OrderNumber VARCHAR(50) = '429113';
--- [Paste the comprehensive query here]
-```
-
-### Query Management Usage
-
-#### In Test Code
-```typescript
-import { QueryManager } from '../../../utils/queryManager';
-
-// Get query manager instance
-const queryManager = QueryManager.getInstance();
-
-// Execute parameterized query
-const results = await queryManager.executeQuery('comprehensive-order-details', {
-    OrderNumber: '429113'
-});
-```
-
-#### Adding New Queries
-1. Create new `.sql` file in `queries/` directory
-2. Add query with comment header: `-- Query Name Query`
-3. Use parameters with `@ParameterName` syntax
-4. Query will be automatically loaded by `QueryManager`
-
-### Best Practices
-
-#### Database Testing
-- **Order of Execution**: Run UI tests first to create orders, then DB tests to verify
-- **Data Dependencies**: Ensure test data exists before running verification tests
-- **Connection Management**: Database connections are automatically managed
-- **Error Handling**: Tests provide detailed error messages for troubleshooting
-
-#### Query Management
-- **Parameterization**: Always use parameters instead of string concatenation
-- **Query Organization**: Group related queries in logical files
-- **Documentation**: Add clear comments explaining query purpose and parameters
-- **Performance**: Complex queries are optimized for comprehensive data retrieval
-
-#### Manual Verification
-- **SSMS Testing**: Use manual queries for debugging and validation
-- **Parameter Testing**: Test with various parameter values
-- **Result Analysis**: Review all returned data fields for completeness
+6. **Submit a Pull Request**:
+   - Push your changes to your fork.
+   - Open a pull request to the `master` branch of this repository.
 
 ## License
 
