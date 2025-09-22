@@ -1,5 +1,5 @@
 import { Locator, Page } from '@playwright/test';
-import { error } from 'console';
+import { Console, error } from 'console';
 
 // This file represents the base page functionality for BigCommerce.
 
@@ -109,6 +109,16 @@ export class BasePage {
       throw new Error(`Click element failed: ${error}`);
     }
   }
+
+  async selectRadioButton(locator: Locator, value: string) {
+    if (await locator.isVisible()) {
+        await locator.click();
+        console.log(`Selected radio option: ${value}`);
+    } else {
+        throw new Error(`Radio button with value ${value} not found.`);
+    }
+}
+
 
   async enterText(locator: Locator, text: string): Promise<void> {
     try {
@@ -246,10 +256,28 @@ export class BasePage {
    * @param dropdownOptionsSelector - CSS selector for the dropdown options (default: 'li, [role="option"]')
    * @param timeout - Maximum time to wait for elements (default: 5000ms)
    */
+
+  async selectFromInputDropdownDynamic(inputLocator: Locator, optionText: string): Promise<void> {
+  // Type into the input
+  await inputLocator.fill(optionText);
+
+  // Get all matching options
+  const options = this.page
+    .frameLocator('#content-iframe')
+    .locator(`//ul[@role="listbox"]//li[normalize-space(.)='${optionText}']`);
+
+  // Wait for at least one option
+  await options.first().waitFor({ state: 'visible', timeout: 5000 });
+
+  // ✅ Click the first matching option
+  await options.first().click();
+}
+
+
+
   async selectFromInputDropdown(
     inputLocator: Locator,
     optionText: string,
-    dropdownOptionsSelector: string = 'li, [role="option"]',
     timeout: number = 5000
   ): Promise<void> {
     try {
@@ -257,16 +285,28 @@ export class BasePage {
       await this.waitForElement(inputLocator, timeout);
       await this.clickElement(inputLocator);
 
-      // Wait for dropdown options to be visible
-      const dropdownOptions = this.page.locator(dropdownOptionsSelector);
-      await dropdownOptions.first().waitFor({ state: 'visible', timeout });
+      // Wait for the listbox to be visible
+      const listbox = this.page.locator('//ul[@role="listbox"]');
+      console.log(`Waiting for listbox to be visible: ${listbox}`);
+      //await listbox.waitFor({ state: 'visible', timeout });
 
-      // Find and click the matching option
-      const matchingOption = dropdownOptions.filter({ hasText: optionText }).first();
-      await matchingOption.waitFor({ state: 'visible', timeout });
-      await matchingOption.click();
-
-      console.log(`Selected "${optionText}" from input dropdown`);
+      // Get all child elements of the listbox
+      const options = listbox.locator('[role="option"], li, div, span');
+      const count = await options.count();
+      let found = false;
+      for (let i = 0; i < count; i++) {
+        const option = options.nth(i);
+        const text = (await option.textContent())?.trim() || '';
+        if (text === optionText) {
+          await option.click();
+          found = true;
+          console.log(`Selected "${optionText}" from input dropdown`);
+          break;
+        }
+      }
+      if (!found) {
+        throw new Error(`Option with text "${optionText}" not found in input dropdown.`);
+      }
     } catch (error) {
       console.error(`Failed to select "${optionText}" from input dropdown:`, error);
       throw new Error(`Input dropdown selection failed: ${error}`);

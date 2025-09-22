@@ -1,0 +1,276 @@
+{
+  "config": {
+    "configFile": "C:\\Big C automation\\FinReconProj\\playwright.config.ts",
+    "rootDir": "C:/Big C automation/FinReconProj/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "test-results",
+          "open": "never",
+          "attachmentsBaseURL": "attachments",
+          "attachments": true
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/report.json"
+        }
+      ],
+      [
+        "list",
+        {
+          "printSteps": true,
+          "printProgress": true
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Big C automation/FinReconProj/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "existing-chrome",
+        "name": "existing-chrome",
+        "testDir": "C:/Big C automation/FinReconProj/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "3way",
+    "version": "1.55.0",
+    "workers": 6,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "BigCommerceTests\\UITests\\CustomerTests\\createNewCustomerWithAddress.spec.ts",
+      "file": "BigCommerceTests/UITests/CustomerTests/createNewCustomerWithAddress.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Create New Customer With Address",
+          "file": "BigCommerceTests/UITests/CustomerTests/createNewCustomerWithAddress.spec.ts",
+          "line": 65,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Create customer with all fields",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "existing-chrome",
+                  "projectName": "existing-chrome",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 29500,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Clicked on element: locator('//li[@role=\\'menuitem\\']//div[text()=\\'Customers\\']')\n"
+                        },
+                        {
+                          "text": "Navigated to Customers menu.\n"
+                        },
+                        {
+                          "text": "Clicked on element: locator('//div[text()=\\'Customers\\']//..//..//..//a[contains(@href,\\'/manage/customers/add\\') and text()=\\'Add\\']')\n"
+                        },
+                        {
+                          "text": "Navigated to Customers submenu option: Add\n"
+                        },
+                        {
+                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//button[@class=\"dropdown-button\"]')\n"
+                        },
+                        {
+                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//ul[@class=\"dropdown-menu\"]//li[1]')\n"
+                        },
+                        {
+                          "text": "Entered text: John into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"firstName\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: Doe into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"lastName\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: Acme Inc into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"companyName\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: johndoe1758565694535@gmail.com into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"emailAddress\"]')\n"
+                        },
+                        {
+                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//select[@id=\"customerGroup\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: 1234567890 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"phoneNumber\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: 10.00 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"storeCredit\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: TAX123 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"taxExemptCategory\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: 5000 into element: locator('#content-iframe').contentFrame().locator('//form-field[label[contains(normalize-space(.), \"Line of Credit\")]]//input')\n"
+                        },
+                        {
+                          "text": "Entered text: Jhon@53674 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Password\\']//..//..//input[@id=\"password\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: Jhon@53674 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Password\\']//..//..//input[@name=\"passwordConfirm\"]')\n"
+                        },
+                        {
+                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//customer-edit//..//..//li//a[text()=\"Customer address book\"]')\n"
+                        },
+                        {
+                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//section//button//span[text()=\"OK\"]')\n"
+                        },
+                        {
+                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//a//span[text()=\"Add an address\"]')\n"
+                        },
+                        {
+                          "text": "Waited for element: locator('#content-iframe').contentFrame().locator('//h1[text()=\"Add address\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: John into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"firstName\"]')\n"
+                        },
+                        {
+                          "text": "First name entered: Doe\n"
+                        },
+                        {
+                          "text": "Xpath for  Last Name input: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"lastName\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: Doe into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"lastName\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: Acme Inc into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"company\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: 1234567890 into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"phoneNumber\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: 123 Main Street into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"addressLine1\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: Suite 100 into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"addressLine2\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: New York into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"suburbOrCity\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: 10001 into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"zipOrPostcode\"]')\n"
+                        },
+                        {
+                          "text": "Entered text: PO12345 into element: locator('#content-iframe').contentFrame().locator('//label[normalize-space(text())=\"PO Number\"]/following-sibling::span//input')\n"
+                        },
+                        {
+                          "text": "Entered text: TX9999 into element: locator('#content-iframe').contentFrame().locator('//label[normalize-space(text())=\"Tax ID\"]/following-sibling::span//input')\n"
+                        },
+                        {
+                          "text": "Selected radio option: Residential\n"
+                        },
+                        {
+                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//button//span[text()=\"Save\"]')\n"
+                        },
+                        {
+                          "text": "Clicked on element: locator('//li[@role=\\'menuitem\\']//div[text()=\\'Customers\\']')\n"
+                        },
+                        {
+                          "text": "Navigated to Customers menu.\n"
+                        },
+                        {
+                          "text": "Email found: johndoe1758565694535@gmail.com\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "Customers submenu option not found: All Customers\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "steps": [
+                        {
+                          "title": "Bring page to front",
+                          "duration": 15
+                        },
+                        {
+                          "title": "Navigate to Add Customer page",
+                          "duration": 1027
+                        },
+                        {
+                          "title": "Fill Customer Details",
+                          "duration": 22473
+                        },
+                        {
+                          "title": "Verify Customer",
+                          "duration": 5963
+                        }
+                      ],
+                      "startTime": "2025-09-22T18:28:11.974Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\test-finished-1.png"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2039b9334856eff2f7c8-98c20f515e41c0c0e7f3",
+              "file": "BigCommerceTests/UITests/CustomerTests/createNewCustomerWithAddress.spec.ts",
+              "line": 68,
+              "column": 17
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-09-22T18:28:07.178Z",
+    "duration": 35966.17599999998,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

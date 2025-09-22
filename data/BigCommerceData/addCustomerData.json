@@ -1,0 +1,36 @@
+[
+  {
+    "description": "Create customer with all fields",
+    "originChannel": "VueEcom - Sandbox 3",
+    "firstName": "John",
+    "lastName": "Doe",
+    "companyName": "Acme Inc",
+    "email": "",
+    "customerGroup": "CG_Versant_EUR1",
+    "phone": "1234567890",
+    "storeCredit": "10.00",
+    "receiveACSEmails": "Yes",
+    "forcePasswordReset": "No",
+    "taxExemptCode": "TAX123",
+    "lineOfCredit": "5000",
+    "paymentTerms": "Pearson VUE payment terms",
+    "password": "Jhon@53674",
+    "confirmPassword": "Jhon@53674",
+
+    "address": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "companyName": "Acme Inc",
+      "phone": "1234567890",
+      "street": "123 Main Street",
+      "line2": "Suite 100",
+      "city": "New York",
+      "state": "New York",
+      "zip": "10001",
+      "country": "United States",
+      "type": "Residential",
+      "poNumber": "PO12345",
+      "taxId": "TX9999"
+    }
+  }
+]
