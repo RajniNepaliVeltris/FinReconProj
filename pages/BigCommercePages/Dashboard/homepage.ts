@@ -111,8 +111,7 @@ export class Homepage extends BasePage {
   async navigateToSideMenuOption(menuName: string, subMenuName: string) {
     const menuLocator = this.sideMenuLocators[menuName];
     if (menuLocator && (await menuLocator.isVisible())) {
-      await this.clickElement(menuLocator);
-      console.log(`Navigated to ${menuName} menu.`);
+      await this.clickElement(menuLocator, `Side Menu Option: ${menuName}`);
       if (menuName === 'Orders') {
         await this.navigateToOrdersSubMenuOption(subMenuName);
       } else if (menuName === 'Products') {
@@ -128,7 +127,7 @@ export class Homepage extends BasePage {
   async navigateToOrdersSubMenuOption(subMenuName: string) {
     const subMenuLocator = this.ordersSubMenuLocators[subMenuName];
     if (subMenuLocator && (await subMenuLocator.isVisible())) {
-      await this.clickElement(subMenuLocator);
+      await this.clickElement(subMenuLocator, `Orders Submenu Option: ${subMenuName}`);
       console.log(`Navigated to Orders submenu option: ${subMenuName}`);
     } else {
       console.error(`Orders submenu option not found: ${subMenuName}`);
@@ -138,7 +137,7 @@ export class Homepage extends BasePage {
   async navigateToProductsSubMenuOption(subMenuName: string) {
     const subMenuLocator = this.productsSubMenuLocators[subMenuName];
     if (subMenuLocator && (await subMenuLocator.isVisible())) {
-      await this.clickElement(subMenuLocator);
+      await this.clickElement(subMenuLocator, `Products Submenu Option: ${subMenuName}`);
       console.log(`Navigated to Products submenu option: ${subMenuName}`);
     } else {
       console.error(`Products submenu option not found: ${subMenuName}`);
@@ -156,8 +155,7 @@ export class Homepage extends BasePage {
 
     const subMenuLocator = subMenuLocators[menuName]?.[subMenuName];
     if (subMenuLocator && (await subMenuLocator.isVisible())) {
-      await this.clickElement(subMenuLocator);
-      console.log(`Navigated to ${menuName} submenu option: ${subMenuName}`);
+      await this.clickElement(subMenuLocator, `${menuName} submenu option: ${subMenuName}`);
     } else {
       console.error(`${menuName} submenu option not found: ${subMenuName}`);
     }

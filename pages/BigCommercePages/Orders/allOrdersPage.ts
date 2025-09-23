@@ -41,6 +41,10 @@ export class AllOrdersPage extends Homepage {
     private readonly statusColumn: Locator;
     private readonly totalColumn: Locator;
     private readonly actionColumn: Locator;
+    private readonly expandOrderDetails: (orderId: string) => Locator;
+    private readonly orderDetailsActionButton: (orderId: string) => Locator;
+    private readonly orderDetailsStatusDropdown: (orderId: string) => Locator;
+    private readonly orderDetailsActionOption: (action: string) => Locator;
 
     constructor(page: Page) {
         super(page);
@@ -84,6 +88,26 @@ export class AllOrdersPage extends Homepage {
         this.actionColumn = initLocator(`${this.ordersIndexForm}/table//th[@class="action"]/button`);
 
         this.orderSuccessAlert = initLocator(`//div[@id="orderStatus"]//p`);
+        this.expandOrderDetails = (orderId: string) => {
+            return this.ordersTable.locator(
+                `//tr[@data-order-id="${orderId}"]//button[@class="collapsible-trigger"]`
+            );
+        };
+        this.orderDetailsActionButton = (orderId: string) => {
+            return this.ordersTable.locator(
+                `//button[@data-event-payload-order-id="${orderId}"]`
+            );
+        }
+        this.orderDetailsStatusDropdown = (orderId: string) => {
+            return this.ordersTable.locator(
+                `//tr[@data-order-id="${orderId}"]//select[contains(@id,"${orderId}")]`
+            );
+        }
+        this.orderDetailsActionOption = (action: string) => {
+            return this.ordersTable.locator(
+                `//div[@class="dropdown showing"]//li[contains(@aria-label,"${action}")]`
+            );
+        }
     }
 
     // Clicks the More dropdown and selects an option
@@ -91,6 +115,23 @@ export class AllOrdersPage extends Homepage {
         await this.moreTab.click();
         await this.moreDropdownOptions[option].click();
     }
+
+    async selectOrderActions(action: 'Edit order' | 'Print invoice' | 'Print packing' | 'Resend invoice' | 'Send message'
+        | 'View notes' | 'Ship items' | 'View shipments' | 'Refund order' | 'View order timeline'
+    ): Promise<void> {
+        try {
+            if (action)
+                await this.clickElement(this.orderDetailsActionOption(action), `Clicked on Action: "${action}"`);
+            else
+                console.log("Not Matching Action ");
+        } catch (error) {
+            console.log(`Error in selectOrderActions: ${error}`);
+
+        }
+
+    }
+
+    
 
     // Navigation methods
     async navigateToAllOrders(): Promise<void> {
@@ -136,7 +177,7 @@ export class AllOrdersPage extends Homepage {
 
     async getOrderIdAlertSuccess(): Promise<string | null> {
         await this.page.waitForLoadState('networkidle');
-        await this.orderSuccessAlert.waitFor({ state: 'visible' , timeout: 10000 });
+        await this.orderSuccessAlert.waitFor({ state: 'visible', timeout: 10000 });
         let orderId = await this.orderSuccessAlert.textContent();
         if (!orderId) return null;
         let orderIdMatch = orderId.match(/#(\d+)/);
@@ -235,22 +276,35 @@ export class AllOrdersPage extends Homepage {
 
     // Sort methods
     async sortByDate(): Promise<void> {
-        await this.dateColumn.click();
+        await this.clickElement(this.dateColumn, 'Date column');
     }
 
     async sortByOrderId(): Promise<void> {
-        await this.orderIdColumn.click();
+        await this.clickElement(this.orderIdColumn, 'Order ID column');
     }
 
     async sortByCustomer(): Promise<void> {
-        await this.customerColumn.click();
+        await this.clickElement(this.customerColumn, 'Customer column');
     }
 
     async sortByStatus(): Promise<void> {
-        await this.statusColumn.click();
+        await this.clickElement(this.statusColumn, 'Status column');
     }
 
     async sortByTotal(): Promise<void> {
-        await this.totalColumn.click();
+        await this.clickElement(this.totalColumn, 'Total column');
     }
+
+    async searchOrderInTable(orderId: string): Promise<boolean> {
+        const orderRow = this.ordersTable.locator('tr', { hasText: orderId });
+        if (await orderRow.count() > 0) {
+            return await orderRow.isVisible();
+        }
+        return false;
+    }
+
+    async extractOrderDetails(orderId: string) {
+        await this.clickElement(this.expandOrderDetails(orderId), 'Expand Order Details');
+    }
+
 }
