@@ -18,6 +18,15 @@ export interface TestCase {
     'Scenario Category': string;
     'Test Case Name': string;
     'Product_Name': string;
+    //BundleProduct Coloumns
+    'Bundle_Name': string;
+    'Bundle_Quantity': string;
+    'Use_Store_Pricing': boolean;
+    'Manual_Bundle_Price': string;
+    'Product_1': string;
+    'Product_2': string;
+    'Product_3': string;
+    //--------------------
     'Product_SKU': string;
     'Product_Quantity': string;
     'Product_Price': string;

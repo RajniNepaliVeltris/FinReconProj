@@ -8,7 +8,7 @@ import { TestConfig, Address } from '../../../../utils/testConfig';
 import { AllOrdersPage } from '../../../../pages/BigCommercePages/Orders/allOrdersPage';
 
 const testConfig = TestConfig.getInstance();
-const scenarios = testConfig.getScenarios();
+const scenarios = testConfig.getScenarios().filter(s => s.scenario.includes('Standard product'));
 
 test.describe('Standard Product Order Tests', () => {
     for (const { scenario, sheetName, testCases } of scenarios) {

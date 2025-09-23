@@ -1,9 +1,20 @@
 import { Locator, Page, expect } from '@playwright/test';
-import { CustomerInfo, OrderItem, ShippingDetails, PaymentDetails, OrderData } from '../../../models/OrderTypes';
 import { UIInteractions } from '../../../utils/uiInteractions';
 import { Homepage } from '../Dashboard/homepage';
 
 export class AddOrderPage extends Homepage {
+    // --- IBM Assessment Voucher Bundle Modal Locators ---
+    private customizeBundleModal: Locator;
+    private bundleBasicDetailsTab: Locator;
+    private bundleOptionsTab: Locator;
+    private bundleNameInput: Locator;
+    private bundleUseStorePricingRadio: Locator;
+    private bundleManualPriceRadio: Locator;
+    private bundleQuantityInput: Locator;
+    private bundleAddItemButton: Locator;
+    private bundleCloseButton: Locator;
+    private bundleProductsRadioButton: (OptionProduct: string) => Locator;
+    private bundleProductNames: Locator;
 
     // Shipping Locators
 
@@ -310,7 +321,90 @@ export class AddOrderPage extends Homepage {
         this.commentsInput = initLocator(`//textarea[@id="order-comment"]`);
         this.staffNotesInput = initLocator(`//textarea[@id="staff-note"]`);
         this.saveAndProcessPaymentButton = initLocator("//button[@data-saveandprocesspayment='Save & process payment »']");
+    
+        //Bundle Product Dialogue Box
+        const bundleProductDialogue = "//div[@aria-labelledby='product-option']";
+        this.customizeBundleModal = initLocator(`${bundleProductDialogue}`);
+        this.bundleBasicDetailsTab = this.customizeBundleModal.locator("//a[contains(text(),'Basic details')]");
+        this.bundleOptionsTab = this.customizeBundleModal.locator("//a[contains(text(),'Options')]");
+        this.bundleNameInput = this.customizeBundleModal.locator("//input[@id='product-name']");
+        this.bundleUseStorePricingRadio = this.customizeBundleModal.locator("//input[@id='price-current']");
+        this.bundleManualPriceRadio = this.customizeBundleModal.locator("//input[@id='price-custom']");
+        this.bundleQuantityInput = this.customizeBundleModal.locator("//input[@id='product-quantity']");
+        this.bundleAddItemButton = this.customizeBundleModal.locator("//button[@id='dialog-options-submit']");
+        this.bundleCloseButton = this.customizeBundleModal.locator("//button[@class='btn-dialog-close']");
+       this.bundleProductsRadioButton = (OptionProduct: string) => {
+            return this.customizeBundleModal.locator(
+                `//div[@id='options']//div[contains(@class,'productAttributeRow')]//td[@class='input']//span[@class='name' and contains(text(),'${OptionProduct}')]/preceding-sibling::input`
+            );
+        };
+        this.bundleProductNames = this.customizeBundleModal.locator("//div[@id='options']//div[contains(@class,'productAttributeRow')]//td[@class='input']//span");
     }
+
+    /**
+     * Fill the Basic details tab in the IBM Assessment Voucher Bundle modal
+     */
+    async fillBundleBasicDetails(name: string, useStorePricing: boolean, quantity: number) {
+        await this.clickElement(this.bundleBasicDetailsTab, 'Bundle Basic Details Tab');
+        //await this.enterText(this.bundleNameInput,name);
+        if(await this.bundleNameInput.evaluate((el, value) => (el as HTMLInputElement).value === value, name) !== true) {
+            throw new Error(`Bundle name input value mismatch. Expected: ${name}`);
+        }
+        if (useStorePricing) {
+            await this.bundleUseStorePricingRadio.check();
+        } else {
+            await this.bundleManualPriceRadio.check();
+           // await this.enterText(this.bundleManualPriceInput,'100'); // Example manual price, adjust as needed
+        }
+        await this.enterText(this.bundleQuantityInput,quantity.toString());
+    }
+
+    /**
+     * Fill the Options tab in the IBM Assessment Voucher Bundle modal
+     */
+    async fillBundleOptions(products: Array<{name: string}>) {
+        await this.clickElement(this.bundleOptionsTab, 'Bundle Options Tab');
+        await this.waitForElement(this.bundleProductNames.first(), 5000);
+        const availableProductsCount = await this.bundleProductNames.count();
+        if (availableProductsCount === 0) {
+            throw new Error('No products available in the bundle options.');
+        }
+        for (let i = 0; i < products.length; i++) {
+            await this.clickElement(this.bundleProductsRadioButton(products[i].name), `Bundle Product Radio Button: ${products[i].name}`, { force: true ,timeout: 5000});
+            //await this.checkElement(this.bundleProductNames.nth(i), { state: 'attached' });
+        }
+    }
+
+    /**
+     * Add the bundle item to the order
+     */
+    async addBundleItem() {
+        await this.clickElement(this.bundleAddItemButton, 'Bundle Add Item Button');
+    }
+
+    /**
+     * Close the bundle modal
+     */
+    async closeBundleModal() {
+        await this.clickElement(this.bundleCloseButton, 'Bundle Close Button');
+    }
+
+    /**
+     * Complete flow to customize and add IBM Assessment Voucher Bundle
+     */
+    async customizeAndAddIBMBundle(details: {
+        bundle_name: string,
+        useStorePricing: boolean,
+        quantity: number,
+        products: Array<{name: string}>
+    }) {
+        await this.searchProductWithBrowseCategories(details.bundle_name);
+        await this.waitForElement(this.customizeBundleModal, 5000);
+        await this.fillBundleBasicDetails(details.bundle_name, details.useStorePricing, details.quantity);
+        await this.fillBundleOptions(details.products);
+        await this.addBundleItem();
+    }
+    
 
     async fillBillingInformation(billingInfo: {
         firstName: string;
@@ -328,18 +422,17 @@ export class AddOrderPage extends Homepage {
         saveToAddressBook: boolean;
     }) {
         await this.enterText(this.billingFirstNameInput,billingInfo.firstName);
-        //await this.billingFirstNameInput.fill(billingInfo.firstName);
-        await this.billingLastNameInput.fill(billingInfo.lastName);
-        if (billingInfo.companyName) await this.billingCompanyNameInput.fill(billingInfo.companyName);
-        if (billingInfo.phoneNumber) await this.billingPhoneNumberInput.fill(billingInfo.phoneNumber);
-        await this.billingAddressLine1Input.fill(billingInfo.addressLine1);
-        if (billingInfo.addressLine2) await this.billingAddressLine2Input.fill(billingInfo.addressLine2);
-        await this.billingSuburbCityInput.fill(billingInfo.suburbCity);
+        await this.enterText(this.billingLastNameInput,billingInfo.lastName);
+        if (billingInfo.companyName) await this.enterText(this.billingCompanyNameInput,billingInfo.companyName);
+        if (billingInfo.phoneNumber) await this.enterText(this.billingPhoneNumberInput,billingInfo.phoneNumber);
+        await this.enterText(this.billingAddressLine1Input,billingInfo.addressLine1);
+        if (billingInfo.addressLine2) await this.enterText(this.billingAddressLine2Input,billingInfo.addressLine2);
+        await this.enterText(this.billingSuburbCityInput,billingInfo.suburbCity);
         await this.billingCountrySelect.selectOption(billingInfo.country);
         await this.billingStateProvinceSelect.selectOption(billingInfo.stateProvince);
-        await this.billingZipPostcodeInput.fill(billingInfo.zipPostcode);
-        if (billingInfo.poNumber) await this.billingPONumberInput.fill(billingInfo.poNumber);
-        if (billingInfo.taxID) await this.billingTaxIDInput.fill(billingInfo.taxID);
+        await this.enterText(this.billingZipPostcodeInput,billingInfo.zipPostcode);
+        if (billingInfo.poNumber) await this.enterText(this.billingPONumberInput,billingInfo.poNumber);
+        if (billingInfo.taxID) await this.enterText(this.billingTaxIDInput,billingInfo.taxID);
         if (billingInfo.saveToAddressBook) {
             await UIInteractions.checkElement(
                 this.billingSaveToAddressBookCheckbox,
@@ -363,9 +456,9 @@ export class AddOrderPage extends Homepage {
         customerGroup: string;
     }) {
         await this.selectNewCustomer();
-        await this.newCustomerEmailInput.fill(newCustomerDetails.email);
-        await this.newCustomerPasswordInput.fill(newCustomerDetails.password);
-        await this.newCustomerConfirmPasswordInput.fill(newCustomerDetails.confirmPassword);
+        await this.enterText(this.newCustomerEmailInput,newCustomerDetails.email);
+        await this.enterText(this.newCustomerPasswordInput,newCustomerDetails.password);
+        await this.enterText(this.newCustomerConfirmPasswordInput,newCustomerDetails.confirmPassword);
 
         if (newCustomerDetails.exclusiveOffers) {
             // Use our utility method for reliable checkbox interaction
@@ -381,7 +474,7 @@ export class AddOrderPage extends Homepage {
             );
         }
 
-        await this.newCustomerLineOfCreditInput.fill(newCustomerDetails.lineOfCredit);
+        await this.enterText(this.newCustomerLineOfCreditInput,newCustomerDetails.lineOfCredit);
         await this.newCustomerPaymentTermsSelect.selectOption(newCustomerDetails.paymentTerms);
         await this.newCustomerGroupSelect.selectOption(newCustomerDetails.customerGroup);
     }
@@ -412,7 +505,7 @@ export class AddOrderPage extends Homepage {
 
                     if (i < useAddressButtons.length) {
                         // Click the corresponding button
-                        await this.clickElement(useAddressButtons[i], {
+                        await this.clickElement(useAddressButtons[i], `Use Address Button for Address Card ${i + 1}`, {
                             force: true,
                             timeout: 5000
                         });
@@ -434,12 +527,14 @@ export class AddOrderPage extends Homepage {
     }
 
     async searchProduct(productName: string) {
-        await this.addProductsSearchInput.fill(productName);
+        await this.waitForElement(this.addProductsSearchInput, 5000);
+        await this.clickElement(this.addProductsSearchInput, 'Add Products Search Input');
+        await this.enterText(this.addProductsSearchInput, productName);
         console.log(`Searching for product: ${productName}`);
     }
 
     async browseCategories() {
-        await this.clickElement(this.browseCategoriesButton);
+        await this.clickElement(this.browseCategoriesButton, 'Browse Categories Button');
         if (await this.browseCategoryDialog.isVisible()) {
             console.log("Browsing categories.");
             expect(this.browseCategoryDialog).toBeVisible({ timeout: 5000 });
@@ -451,7 +546,7 @@ export class AddOrderPage extends Homepage {
     }
 
     async addCustomProduct() {
-        await this.clickElement(this.addCustomProductLink);
+        await this.clickElement(this.addCustomProductLink, 'Add Custom Product Link');
         console.log("Adding a custom product.");
         await this.page.waitForTimeout(500); // Wait for any animations
 
@@ -463,7 +558,7 @@ export class AddOrderPage extends Homepage {
             await this.page.waitForTimeout(3000);
             console.log(`Waiting for confirmation dialog OK button.`);
             if (await this.dialogueConfirmationOkButton.isVisible()) {
-                await this.clickElement(this.dialogueConfirmationOkButton);
+                await this.clickElement(this.dialogueConfirmationOkButton, 'Confirmation Dialog OK Button');
                 console.log("Clicked OK in confirmation dialog.");
             } else {
                 console.log("Confirmation dialog OK button not visible.");
@@ -476,7 +571,7 @@ export class AddOrderPage extends Homepage {
     async selectProductFromSearchResults(productName: string) {
         const productItem = this.productSearchResultItem.locator(`text=${productName}`);
         if (await productItem.isVisible()) {
-            await this.clickElement(productItem);
+            await this.clickElement(productItem, `Product Search Result Item: ${productName}`);
             console.log(`Selected product: ${productName}`);
         } else {
             console.error(`Product not found in search results: ${productName}`);
@@ -486,14 +581,10 @@ export class AddOrderPage extends Homepage {
     async searchAndSelectProduct(productName: string) {
         try {
             await this.waitForElement(this.addProductsSearchInput, 5000);
-            await this.clickElement(this.addProductsSearchInput);
-            //for (const char of productName) {
-            await this.addProductsSearchInput.fill(productName);
-            await this.page.waitForTimeout(100); // Adjust delay as needed
-            //await this.addProductsSearchInput.type(char);
-            //await this.page.waitForTimeout(100); // Simulate typing for autosuggest
-            //}
-            await this.clickElement(this.addProductsSearchInput); // Trigger search/autosuggest
+            await this.clickElement(this.addProductsSearchInput, 'Add Products Search Input');
+            await this.enterText(this.addProductsSearchInput, productName);
+            await this.page.waitForTimeout(100);
+            await this.clickElement(this.addProductsSearchInput, 'Add Products Search Input'); // Trigger search/autosuggest
             // Wait for the product search results to appear
             await this.waitForElement(this.productSearchResultsList, 10000);
             const resultCount = await this.productSearchResultsList.locator('li').count();
@@ -501,7 +592,7 @@ export class AddOrderPage extends Homepage {
             // Try to select the product from the list
             const productItem = this.productSearchResultItem.locator(`text=${productName}`);
             if (await productItem.isVisible()) {
-                await this.clickElement(productItem);
+                await this.clickElement(productItem, `Product Search Result Item: ${productName}`);
                 console.log(`Selected product from autosuggest: ${productName}`);
             } else {
                 console.error(`Product not found in autosuggest: ${productName}`);
@@ -528,7 +619,7 @@ export class AddOrderPage extends Homepage {
                     if (optionText.match(productName)) {
                         if (await this.browseCategoryResultsSelectList.isVisible()) {
                             await this.browseCategoryResultsSelectList.selectOption({ index: i });
-                            await this.clickElement(this.browserProductSelectButton, { force: true, timeout: 5000 });
+                            await this.clickElement(this.browserProductSelectButton, `Browse Product Select Button (Option Index: ${i})`, { force: true, timeout: 5000 });
                             console.log(`Selected product from browse categories: ${productName} (option index: ${i})`);
                         }
                     } else {
@@ -549,7 +640,7 @@ export class AddOrderPage extends Homepage {
     async viewProductDetails(productName: string) {
         const productLink = this.productViewLink.locator(`text=${productName}`);
         if (await productLink.isVisible()) {
-            await this.clickElement(productLink);
+            await this.clickElement(productLink, `Product View Link: ${productName}`);
             console.log(`Viewing product details for: ${productName}`);
         } else {
             console.error(`View product link not found for: ${productName}`);
@@ -595,7 +686,7 @@ export class AddOrderPage extends Homepage {
     }
 
     async searchCustomer(customerEmail: string) {
-        await this.clickElement(this.customerSearchInput);
+        await this.clickElement(this.customerSearchInput, 'Customer Search Input');
         try {
             for (const char of customerEmail) {
                 await this.customerSearchInput.type(char);
@@ -607,7 +698,7 @@ export class AddOrderPage extends Homepage {
         }
         if (await this.customerSearchInput.isVisible()) {
             await this.page.waitForTimeout(5000); // Wait for suggestions to load
-            await this.clickElement(this.customerSearchInput); // Click to trigger search
+            await this.clickElement(this.customerSearchInput, 'Customer Search Input'); // Click to trigger search
         }
         // Wait for the auto list to appear
         await this.waitForElement(this.autoSearchedCustomersList, 10000);
@@ -615,10 +706,10 @@ export class AddOrderPage extends Homepage {
             console.log(`Auto-suggest list appeared with ${await this.autoSearchedCustomersList.count()} items.`);
             const detailsCardText = await this.autoSearchedCustomerDetailsCard.textContent();
             if (detailsCardText && detailsCardText.includes(customerEmail)) {
-                await this.clickElement(this.autoSearchedCustomerDetailsCard, { force: true, timeout: 2000 });
+                await this.clickElement(this.autoSearchedCustomerDetailsCard, `Auto Searched Customer Details Card: ${customerEmail}`, { force: true, timeout: 2000 });
                 console.log(`Selected customer from auto list: ${customerEmail}`);
                 if (await this.autoSearchedCustomerDetailsCard.isVisible()) {
-                    await this.clickElement(this.autoSearchedCustomerDetailsCard);
+                    await this.clickElement(this.autoSearchedCustomerDetailsCard, `Auto Searched Customer Details Card: ${customerEmail}`);
                     console.log(`Clicked on customer details card for: ${customerEmail} to close the auto-suggest list.`);
                 }
             } else {
@@ -635,19 +726,19 @@ export class AddOrderPage extends Homepage {
     }
 
     async clickCancelButton() {
-        await this.clickElement(this.cancelButton);
+        await this.clickElement(this.cancelButton, 'Cancel Button');
     }
 
     async clickBackButton() {
-        await this.clickElement(this.backButton);
+        await this.clickElement(this.backButton, 'Back Button');
     }
 
     async clickNextButton() {
-        await this.clickElement(this.nextButton);
+        await this.clickElement(this.nextButton, 'Next Button');
     }
 
     async clickSaveButton() {
-        await this.clickElement(this.saveButton);
+        await this.clickElement(this.saveButton, 'Save Button');
     }
 
     async addCustomProductDetails(productDetails: {
@@ -656,19 +747,19 @@ export class AddOrderPage extends Homepage {
         price: string;
         quantity: string;
     }) {
-        await this.customProductNameInput.fill(productDetails.productName);
-        await this.customProductSKUInput.fill(productDetails.sku);
-        await this.customProductPriceInput.fill(productDetails.price);
-        await this.customProductQuantityInput.fill(productDetails.quantity);
-        await this.clickElement(this.customProductAddItemButton);
+        await this.enterText(this.customProductNameInput, productDetails.productName);
+        await this.enterText(this.customProductSKUInput, productDetails.sku);
+        await this.enterText(this.customProductPriceInput, productDetails.price);
+        await this.enterText(this.customProductQuantityInput, productDetails.quantity);
+        await this.clickElement(this.customProductAddItemButton, 'Custom Product Add Item Button');
     }
 
     async closeCustomProductDialog() {
-        await this.clickElement(this.customProductCloseButton);
+        await this.clickElement(this.customProductCloseButton, 'Custom Product Close Button');
     }
 
     async clickAddCustomProductLink() {
-        await this.clickElement(this.addCustomProductLink);
+        await this.clickElement(this.addCustomProductLink, 'Add Custom Product Link');
     }
 
     async verifyCustomProductDialogOpen() {
@@ -808,7 +899,7 @@ export class AddOrderPage extends Homepage {
     }
 
     async fetchShippingQuotes() {
-        await this.clickElement(this.fetchShippingQuotesLink);
+        await this.clickElement(this.fetchShippingQuotesLink, 'Fetch Shipping Quotes Link');
     }
 
     async fillSingleShippingAddress(address: {
@@ -870,9 +961,9 @@ export class AddOrderPage extends Homepage {
     async selectShippingMethod(method: string) {
         try {
             if (await this.fetchShippingQuotesLink.isVisible()) {
-                await this.clickElement(this.fetchShippingQuotesLink);
+                await this.clickElement(this.fetchShippingQuotesLink, 'Fetch Shipping Quotes Link');
                 await this.page.waitForTimeout(300); // Give UI time to update
-                await this.clickElement(this.chooseShippingMethodSelect);
+                await this.clickElement(this.chooseShippingMethodSelect, 'Choose Shipping Method Select');
                 await this.setDropdownValue(this.chooseShippingMethodSelect, method);
             } else {
                 console.log("Shipping method selection elements are not visible; cannot select shipping method.");
@@ -888,15 +979,15 @@ export class AddOrderPage extends Homepage {
         try {
             await this.isElementVisible(this.shippingMethodInput, 7000);
             if (await this.shippingMethodInput.isVisible()) {
-                await this.clickElement(this.shippingMethodInput); // Ensure focus
+                await this.clickElement(this.shippingMethodInput, 'Shipping Method Input'); // Ensure focus
                 await this.shippingMethodInput.clear(); // Clear any existing value
-                await this.shippingMethodInput.fill(details.provider); // Enter new value
+                await this.enterText(this.shippingMethodInput, details.provider); // Enter new value
                 await this.page.waitForTimeout(100); // Short wait for UI update
 
                 if (await this.shippingCostInput.isVisible()) {
-                    await this.clickElement(this.shippingCostInput);
+                    await this.clickElement(this.shippingCostInput, 'Shipping Cost Input');
                     await this.shippingCostInput.clear();
-                    await this.shippingCostInput.fill(details.cost);
+                    await this.enterText(this.shippingCostInput, details.cost);
                     await this.page.waitForTimeout(100);
                 } else {
                     console.log("Shipping Cost input is not visible; cannot set custom cost.");
@@ -1354,11 +1445,11 @@ export class AddOrderPage extends Homepage {
     }
 
     async changeShippingDetails() {
-        await this.clickElement(this.changeShippingDetailsLink);
+        await this.clickElement(this.changeShippingDetailsLink, 'Change Shipping Details Link');
     }
 
     async changeShippingMethod() {
-        await this.clickElement(this.changeShippingMethodLink);
+        await this.clickElement(this.changeShippingMethodLink, 'Change Shipping Method Link');
     }
 
 
@@ -1429,27 +1520,27 @@ export class AddOrderPage extends Homepage {
     }
 
     async fillManualDiscount(discount: string) {
-        await this.manualDiscountInput.fill(discount);
-        await this.clickElement(this.applyDiscountButton);
+        await this.enterText(this.manualDiscountInput, discount);
+        await this.clickElement(this.applyDiscountButton, 'Apply Discount Button');
         await this.page.waitForTimeout(5000); // Wait for the discount to be applied
 
     }
 
     async applyCoupon(couponCode: string) {
-        await this.couponInput.fill(couponCode);
-        await this.clickElement(this.applyCouponButton);
+        await this.enterText(this.couponInput, couponCode);
+        await this.clickElement(this.applyCouponButton, 'Apply Coupon Button');
     }
 
     async fillComments(comments: string) {
-        await this.commentsInput.fill(comments);
+        await this.enterText(this.commentsInput, comments);
     }
 
     async fillStaffNotes(notes: string) {
-        await this.staffNotesInput.fill(notes);
+        await this.enterText(this.staffNotesInput, notes);
     }
 
     async placeOrder() {
-        await this.clickElement(this.saveAndProcessPaymentButton);
+        await this.clickElement(this.saveAndProcessPaymentButton, 'Save and Process Payment Button');
     }
 
     async verifySummaryDetails(expectedSummary: { subtotal: string; shipping: string; grandTotal: string; taxIncludedInTotal: string }) {

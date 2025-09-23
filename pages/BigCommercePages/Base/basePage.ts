@@ -98,14 +98,14 @@ export class BasePage {
     }
   }
 
-  async clickElement(locator: Locator, options = { force: false, timeout: 30000 }): Promise<void> {
+  async clickElement(locator: Locator, locatorName: string, options = { force: false, timeout: 30000 }): Promise<void> {
     try {
       await locator.waitFor({ state: 'visible', timeout: options.timeout });
       await locator.click({ force: options.force });
-      console.log(`Clicked on element: ${locator}`);
+      console.log(`Clicked on element: ${locatorName}`);
     } catch (error) {
-      console.log(`Error occurred while clicking element: ${locator}`, error);
-      console.error(`Failed to click element: ${locator}`, error);
+      console.log(`Error occurred while clicking element: ${locatorName}`, error);
+      console.error(`Failed to click element: ${locatorName}`, error);
       throw new Error(`Click element failed: ${error}`);
     }
   }
@@ -283,7 +283,7 @@ export class BasePage {
     try {
       // Wait for and click the input to open dropdown
       await this.waitForElement(inputLocator, timeout);
-      await this.clickElement(inputLocator);
+      await this.clickElement(inputLocator, 'Input Dropdown');
 
       // Wait for the listbox to be visible
       const listbox = this.page.locator('//ul[@role="listbox"]');

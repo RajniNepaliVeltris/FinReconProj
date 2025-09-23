@@ -122,6 +122,34 @@ export class TestConfig {
                         'Standard_FulfillmentusingNewSingleAddress_ManualPayment_NoDiscount_NoCoupon',
                         'Standard_FulfillmentusingNewSingleAddress_ManualPayment_ManualDiscount_NoCoupon'
                     ]
+                },
+                {
+                    scenario: 'Order with Bundle product - Fulfillment using Billing Address',
+                    sheetName: 'Bundle Product',
+                    testCases: [
+                        'Bundle_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingBillingAddress_CashonDelivery_ManualDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingBillingAddress_BankDeposit_NoDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingBillingAddress_BankDeposit_ManualDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingBillingAddress_Cybersource_NoDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingBillingAddress_Cybersource_ManualDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingBillingAddress_ManualPayment_NoDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingBillingAddress_ManualPayment_ManualDiscount_NoCoupon'
+                    ]
+                },
+                {
+                    scenario: 'Order with Bundle product - Fulfillment using New Single Address',
+                    sheetName: 'Bundle Product',
+                    testCases: [
+                        'Bundle_FulfillmentusingNewSingleAddress_CashonDelivery_NoDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingNewSingleAddress_CashonDelivery_ManualDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingNewSingleAddress_BankDeposit_NoDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingNewSingleAddress_BankDeposit_ManualDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingNewSingleAddress_Cybersource_NoDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingNewSingleAddress_Cybersource_ManualDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingNewSingleAddress_ManualPayment_NoDiscount_NoCoupon',
+                        'Bundle_FulfillmentusingNewSingleAddress_ManualPayment_ManualDiscount_NoCoupon'
+                    ]
                 }
             ];
         }
