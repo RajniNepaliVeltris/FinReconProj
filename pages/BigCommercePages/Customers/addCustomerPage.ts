@@ -126,8 +126,8 @@ export class AddCustomerPage extends Homepage {
             throw new Error('Add Customer page is not loaded properly.');
         }else{
 
-        await this.clickElement(this.originChannelSelect);
-        await this.clickElement(this.channeloptionselect);
+        await this.clickElement(this.originChannelSelect, 'Channel select');
+        await this.clickElement(this.channeloptionselect, 'Channel option select');
         await this.enterText(this.firstNameInput, details.firstName);
         await this.enterText(this.lastNameInput, details.lastName);
         if (details.companyName) {
@@ -142,7 +142,7 @@ export class AddCustomerPage extends Homepage {
             throw new Error('email box not shown');
         }
         if (details.customerGroup){
-        await this.clickElement(this.customerGroupSelect);
+        await this.clickElement(this.customerGroupSelect,'click customer group');
         await this.customerGroupOptionselect.selectOption({label: details.customerGroup})
         }
         else{
@@ -172,9 +172,9 @@ export class AddCustomerPage extends Homepage {
         await this.enterText(this.passwordInput, details.password);
         await this.enterText(this.confirmPasswordInput, details.confirmPassword);
 
-    await this.clickElement(this.addCustomerAddressButton);
-    await this.clickElement(this.confirmSaveOkButton);
-    await this.clickElement(this.addAnAddressButton);
+    await this.clickElement(this.addCustomerAddressButton, 'Add Customer Address Button');
+    await this.clickElement(this.confirmSaveOkButton, 'Confirm Save OK Button');
+    await this.clickElement(this.addAnAddressButton, 'Add An Address Button');
 
     if (details.address) {
         await this.waitForElement(this.addAddressHeading);
@@ -195,7 +195,7 @@ export class AddCustomerPage extends Homepage {
             await this.selectFromInputDropdownDynamic(this.addAddressStateOrProvinceInput, details.address.state);
             this.addTypeRadioButtonInput = this.page.frameLocator('#content-iframe').locator(`//fieldset//label[text()="${details.address.type}"]`);
             await this.selectRadioButton(this.addTypeRadioButtonInput, details.address.type);
-            await this.clickElement(this.saveAddressButton);
+            await this.clickElement(this.saveAddressButton, 'Save Address Button');
         }
         }
     } catch (error) {
@@ -207,27 +207,21 @@ export class AddCustomerPage extends Homepage {
 
     async clickAllCustomers(details: CustomerDetails) {
     try {
-        // Open menu and search for customer
-        //await this.allCustomerMenu.click({ force: true });
        await this.searchCustomerInputBox.fill(details.email);
-
         // Press Enter key to trigger search
         await this.searchCustomerInputBox.press('Enter');
         // Get all rows in the grid
         await expect(this.rows, `Expected exactly 1 row for email ${details.email}`)
             .toHaveCount(1, { timeout: 10000 });
-
         // Once row is confirmed, validate email cell
         const emailCell = this.rows.first().locator('td.email-cell a.mail-to-link');
         await expect(emailCell).toBeVisible({ timeout: 5000 });
-
-        // Log the text
         const emailText = await emailCell.textContent();
         console.log(`Email found: ${emailText?.trim()}`);
 
     }   catch (error) {
         console.error(`Error in clickAllCustomers for email ${details.email}:`, error);
-        throw error; // Re-throw to fail the test
+        throw error;
     }
 }   
 }

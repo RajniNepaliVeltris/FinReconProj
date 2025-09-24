@@ -84,7 +84,7 @@
           "specs": [
             {
               "title": "Create customer with all fields",
-              "ok": true,
+              "ok": false,
               "tags": [],
               "tests": [
                 {
@@ -95,29 +95,31 @@
                   "projectName": "existing-chrome",
                   "results": [
                     {
-                      "workerIndex": 0,
+                      "workerIndex": 11,
                       "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 29500,
-                      "errors": [],
+                      "status": "timedOut",
+                      "duration": 30002,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        }
+                      ],
                       "stdout": [
                         {
-                          "text": "Clicked on element: locator('//li[@role=\\'menuitem\\']//div[text()=\\'Customers\\']')\n"
+                          "text": "Clicked on element: Side Menu Option: Customers\n"
                         },
                         {
-                          "text": "Navigated to Customers menu.\n"
+                          "text": "Clicked on element: Customers submenu option: Add\n"
                         },
                         {
-                          "text": "Clicked on element: locator('//div[text()=\\'Customers\\']//..//..//..//a[contains(@href,\\'/manage/customers/add\\') and text()=\\'Add\\']')\n"
+                          "text": "Clicked on element: undefined\n"
                         },
                         {
-                          "text": "Navigated to Customers submenu option: Add\n"
-                        },
-                        {
-                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//button[@class=\"dropdown-button\"]')\n"
-                        },
-                        {
-                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//ul[@class=\"dropdown-menu\"]//li[1]')\n"
+                          "text": "Clicked on element: undefined\n"
                         },
                         {
                           "text": "Entered text: John into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"firstName\"]')\n"
@@ -129,10 +131,10 @@
                           "text": "Entered text: Acme Inc into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"companyName\"]')\n"
                         },
                         {
-                          "text": "Entered text: johndoe1758565694535@gmail.com into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"emailAddress\"]')\n"
+                          "text": "Entered text: johndoe1758625762190@gmail.com into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"emailAddress\"]')\n"
                         },
                         {
-                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//select[@id=\"customerGroup\"]')\n"
+                          "text": "Clicked on element: undefined\n"
                         },
                         {
                           "text": "Entered text: 1234567890 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"phoneNumber\"]')\n"
@@ -153,13 +155,13 @@
                           "text": "Entered text: Jhon@53674 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Password\\']//..//..//input[@name=\"passwordConfirm\"]')\n"
                         },
                         {
-                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//customer-edit//..//..//li//a[text()=\"Customer address book\"]')\n"
+                          "text": "Clicked on element: undefined\n"
                         },
                         {
-                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//section//button//span[text()=\"OK\"]')\n"
+                          "text": "Clicked on element: undefined\n"
                         },
                         {
-                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//a//span[text()=\"Add an address\"]')\n"
+                          "text": "Clicked on element: undefined\n"
                         },
                         {
                           "text": "Waited for element: locator('#content-iframe').contentFrame().locator('//h1[text()=\"Add address\"]')\n"
@@ -204,54 +206,60 @@
                           "text": "Selected radio option: Residential\n"
                         },
                         {
-                          "text": "Clicked on element: locator('#content-iframe').contentFrame().locator('//button//span[text()=\"Save\"]')\n"
+                          "text": "Clicked on element: undefined\n"
                         },
                         {
-                          "text": "Clicked on element: locator('//li[@role=\\'menuitem\\']//div[text()=\\'Customers\\']')\n"
+                          "text": "Clicked on element: Side Menu Option: Customers\n"
                         },
                         {
-                          "text": "Navigated to Customers menu.\n"
+                          "text": "Clicked on element: Customers submenu option: All customers\n"
                         },
                         {
-                          "text": "Email found: johndoe1758565694535@gmail.com\n"
+                          "text": "Email found: johndoe1758625762190@gmail.com\n"
                         }
                       ],
-                      "stderr": [
-                        {
-                          "text": "Customers submenu option not found: All Customers\n"
-                        }
-                      ],
+                      "stderr": [],
                       "retry": 0,
                       "steps": [
                         {
                           "title": "Bring page to front",
-                          "duration": 15
+                          "duration": 13
                         },
                         {
                           "title": "Navigate to Add Customer page",
-                          "duration": 1027
+                          "duration": 1171
                         },
                         {
                           "title": "Fill Customer Details",
-                          "duration": 22473
+                          "duration": 27016
                         },
                         {
                           "title": "Verify Customer",
-                          "duration": 5963
+                          "duration": 5092
                         }
                       ],
-                      "startTime": "2025-09-22T18:28:11.974Z",
+                      "startTime": "2025-09-23T11:09:19.862Z",
                       "annotations": [],
                       "attachments": [
                         {
                           "name": "screenshot",
                           "contentType": "image/png",
                           "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\test-finished-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\trace.zip"
                         }
                       ]
                     }
                   ],
-                  "status": "expected"
+                  "status": "unexpected"
                 }
               ],
               "id": "2039b9334856eff2f7c8-98c20f515e41c0c0e7f3",
@@ -266,11 +274,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-09-22T18:28:07.178Z",
-    "duration": 35966.17599999998,
-    "expected": 1,
+    "startTime": "2025-09-23T11:09:17.344Z",
+    "duration": 37811.56300000101,
+    "expected": 0,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 1,
     "flaky": 0
   }
 }

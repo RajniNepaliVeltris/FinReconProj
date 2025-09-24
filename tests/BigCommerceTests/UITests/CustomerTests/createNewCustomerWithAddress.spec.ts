@@ -86,7 +86,7 @@ test.describe('Create New Customer With Address', () => {
                 });
 
                 await test.step('Verify Customer', async () => {
-                    await homepage.navigateToSideMenuOption('Customers', 'All Customers');
+                    await homepage.navigateToSideMenuOption('Customers', 'All customers');
                     await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/customers');
                     await addCustomerPage.clickAllCustomers(customerData as CustomerDetails);
                 });
