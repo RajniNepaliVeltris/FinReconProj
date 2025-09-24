@@ -112,6 +112,52 @@ test.describe('Order Database Verification Tests', () => {
                             console.log('Order details from database:', verificationResult.details[0]);
                         }
 
+                        // Fetch BIGOrderId and KiboOrderId from the Excel sheet
+                        const bigOrderId = String(testCase['BIGOrderId']);
+                        const kiboOrderId = String(testCase['KiboOrderId']);
+
+                        if (!bigOrderId.trim()) {
+                            throw new Error('BIGOrderId not found in Excel sheet. Ensure the order has been created first.');
+                        }
+
+                        if (!kiboOrderId.trim()) {
+                            throw new Error('KiboOrderId not found in Excel sheet. Ensure the order has been created first.');
+                        }
+
+                        // Initialize database connection
+                        const connection = await getBigCConnection();
+
+                        // Query the database for BIGC Order ID results
+                        const bigCResult = await connection.request().query(
+                            `SELECT * FROM [Order] WHERE OrderNumber = '${bigOrderId}'`
+                        );
+
+                        if (!bigCResult.recordset || bigCResult.recordset.length === 0) {
+                            throw new Error(`No data found for BIGC Order ID: ${bigOrderId}`);
+                        }
+
+                        const bigCData = bigCResult.recordset[0];
+                        console.log('BIGC Order Data:', bigCData);
+
+                        // Query the database for Kibo Order ID results
+                        const kiboResult = await connection.request().query(
+                            `SELECT * FROM [KiboOrder] WHERE OrderNumber = '${kiboOrderId}'`
+                        );
+
+                        if (!kiboResult.recordset || kiboResult.recordset.length === 0) {
+                            throw new Error(`No data found for Kibo Order ID: ${kiboOrderId}`);
+                        }
+
+                        const kiboData = kiboResult.recordset[0];
+                        console.log('Kibo Order Data:', kiboData);
+
+                        // Compare BIGC and Kibo data values
+                        expect(bigCData.Total).toEqual(kiboData.Total);
+                        expect(bigCData.CustomerName).toEqual(kiboData.CustomerName);
+                        expect(bigCData.Status).toEqual(kiboData.Status);
+
+                        console.log('BIGC and Kibo Order data values match successfully.');
+
                         executionNotes = `Order ${orderId} successfully verified in BigCommerce database. Found ${verificationResult.details?.length || 0} detail records.`;
 
                     } catch (err: any) {
@@ -132,4 +178,176 @@ test.describe('Order Database Verification Tests', () => {
             }
         });
     }
+
+    test('Execute and Verify Order Query from SQL File', async ({}) => {
+        const connection = await getBigCConnection();
+
+        // Fetch the query from the QueryManager
+        const queryManager = QueryManager.getInstance();
+        const query = queryManager.getQuery('fetch-order-by-entityorderid');
+
+        if (!query) {
+            throw new Error('Query not found: fetch-order-by-entityorderid');
+        }
+
+        // Replace the parameter in the query
+        const entityOrderId = 440599;
+        const formattedQuery = query.replace('@EntityOrderId', entityOrderId.toString());
+
+        // Execute the query
+        const result = await connection.request().query(formattedQuery);
+
+        // Verify the results
+        expect(result.recordset).toBeDefined();
+        expect(result.recordset.length).toBeGreaterThan(0);
+
+        const orderData = result.recordset[0];
+        console.log('Order Data:', orderData);
+
+        // Add specific assertions based on expected values
+        expect(orderData.OrderId).toBeDefined();
+        expect(orderData.OrderNumber).toBeDefined();
+        expect(orderData.Total).toBeGreaterThan(0);
+    });
+
+    test('Execute and Verify Order Attributes Query from SQL File', async ({}) => {
+        const connection = await getBigCConnection();
+
+        // Fetch the query from the QueryManager
+        const queryManager = QueryManager.getInstance();
+        const query = queryManager.getQuery('fetch-order-attributes-by-entityorderid');
+
+        if (!query) {
+            throw new Error('Query not found: fetch-order-attributes-by-entityorderid');
+        }
+
+        // Replace the parameter in the query
+        const entityOrderId = 440599;
+        const formattedQuery = query.replace('@EntityOrderId', entityOrderId.toString());
+
+        // Execute the query
+        const result = await connection.request().query(formattedQuery);
+
+        // Verify the results
+        expect(result.recordset).toBeDefined();
+        expect(result.recordset.length).toBeGreaterThan(0);
+
+        const attributeData = result.recordset;
+        console.log('Order Attributes Data:', attributeData);
+
+        // Add specific assertions based on expected values
+        attributeData.forEach(attribute => {
+            expect(attribute.FullyQualifiedName).toBeDefined();
+            expect(attribute.Values).toBeDefined();
+        });
+    });
+
+    test('Execute and Verify Billing and Fulfillment Info Queries from SQL File', async ({}) => {
+        const connection = await getBigCConnection();
+
+        // Fetch the billing info query from the QueryManager
+        const queryManager = QueryManager.getInstance();
+        const billingQuery = queryManager.getQuery('fetch-billing-info-by-entityorderid');
+
+        if (!billingQuery) {
+            throw new Error('Query not found: fetch-billing-info-by-entityorderid');
+        }
+
+        // Replace the parameter in the billing query
+        const entityOrderId = 440599;
+        const formattedBillingQuery = billingQuery.replace('@EntityOrderId', entityOrderId.toString());
+
+        // Execute the billing info query
+        const billingResult = await connection.request().query(formattedBillingQuery);
+
+        // Verify the billing info results
+        expect(billingResult.recordset).toBeDefined();
+        expect(billingResult.recordset.length).toBeGreaterThan(0);
+
+        const billingData = billingResult.recordset;
+        console.log('Billing Info Data:', billingData);
+
+        // Fetch the fulfillment info query from the QueryManager
+        const fulfillmentQuery = queryManager.getQuery('fetch-fulfillment-info-by-entityorderid');
+
+        if (!fulfillmentQuery) {
+            throw new Error('Query not found: fetch-fulfillment-info-by-entityorderid');
+        }
+
+        // Replace the parameter in the fulfillment query
+        const formattedFulfillmentQuery = fulfillmentQuery.replace('@EntityOrderId', entityOrderId.toString());
+
+        // Execute the fulfillment info query
+        const fulfillmentResult = await connection.request().query(formattedFulfillmentQuery);
+
+        // Verify the fulfillment info results
+        expect(fulfillmentResult.recordset).toBeDefined();
+        expect(fulfillmentResult.recordset.length).toBeGreaterThan(0);
+
+        const fulfillmentData = fulfillmentResult.recordset;
+        console.log('Fulfillment Info Data:', fulfillmentData);
+
+        // Add specific assertions based on expected values
+        billingData.forEach(billing => {
+            expect(billing.entityorderid).toBe(entityOrderId);
+        });
+
+        fulfillmentData.forEach(fulfillment => {
+            expect(fulfillment.entityorderid).toBe(entityOrderId);
+        });
+    });
+
+    test('Compare Results for KIBO and BigC Order IDs', async ({}) => {
+        const connection = await getBigCConnection();
+        const excelReader = ExcelReader.getInstance();
+
+        // Fetch test case data from Excel
+        const sheetName = 'Custom Product'; // Replace with the actual sheet name
+        const testCaseName = 'Order Comparison Test'; // Replace with the actual test case name
+        const testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
+
+        if (!testCase) {
+            throw new Error(`Test case '${testCaseName}' not found in Excel sheet '${sheetName}'`);
+        }
+
+        const kiboOrderId = String(testCase['KIBOOrderId']);
+        const bigCOrderId = String(testCase['BIGOrderId']);
+
+        if (!kiboOrderId || !bigCOrderId) {
+            throw new Error('Both KIBOOrderId and BIGOrderId must be provided in the Excel sheet.');
+        }
+
+        // Fetch the query from the QueryManager
+        const queryManager = QueryManager.getInstance();
+        const query = queryManager.getQuery('fetch-order-by-entityorderid');
+
+        if (!query) {
+            throw new Error('Query not found: fetch-order-by-entityorderid');
+        }
+
+        // Execute the query for KIBO Order ID
+        const kiboQuery = query.replace('@EntityOrderId', kiboOrderId);
+        const kiboResult = await connection.request().query(kiboQuery);
+
+        // Execute the query for BigC Order ID
+        const bigCQuery = query.replace('@EntityOrderId', bigCOrderId);
+        const bigCResult = await connection.request().query(bigCQuery);
+
+        // Verify the results
+        expect(kiboResult.recordset).toBeDefined();
+        expect(bigCResult.recordset).toBeDefined();
+        expect(kiboResult.recordset.length).toBeGreaterThan(0);
+        expect(bigCResult.recordset.length).toBeGreaterThan(0);
+
+        const kiboData = kiboResult.recordset[0];
+        const bigCData = bigCResult.recordset[0];
+
+        console.log('KIBO Order Data:', kiboData);
+        console.log('BigC Order Data:', bigCData);
+
+        // Compare specific fields
+        expect(kiboData.Total).toEqual(bigCData.Total);
+        expect(kiboData.CustomerName).toEqual(bigCData.CustomerName);
+        expect(kiboData.Status).toEqual(bigCData.Status);
+    });
 });

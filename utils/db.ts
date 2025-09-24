@@ -143,8 +143,8 @@ export async function verifyOrderInDatabase(orderId: string): Promise<{ exists: 
     console.log(`Verifying order ${orderId} in BigCommerce database using comprehensive query...`);
 
     const queryManager = QueryManager.getInstance();
-    const results = await queryManager.executeQuery('select * from [order] where entityorderid = @OrderNumber', { OrderNumber: orderId });
-
+   const results = await queryManager.executeQuery('fetch-order-by-entityorderid', { OrderNumber: orderId });
+    
     if (results && results.length > 0) {
       console.log(`Order ${orderId} found with ${results.length} detail records`);
       return { exists: true, details: results };
