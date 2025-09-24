@@ -41,7 +41,7 @@ test.describe('Create Order Flow', () => {
             const homepage = new Homepage(page);
             await test.step('Navigate to Add Order page', async () => {
                 await homepage.navigateToSideMenuOption('Orders', 'Add');
-                await expect(page).toHaveURL('https://store-8ijomozpnx.mybigcommerce.com/manage/orders/add-order');
+                await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/orders/add-order');
                 await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
             });
 
