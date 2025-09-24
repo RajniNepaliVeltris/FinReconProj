@@ -19,8 +19,8 @@ test.describe('Pearson VUE - Login', () => {
     // We'll wait a short while for navigation to complete.
     await page.waitForLoadState('networkidle');
 
-    // Example expectation: page title contains "Welcome" (adjust to your app)
+    // Example expectation: page title contains "Home Page" (adjust to your app)
     const title = await page.title();
-    expect(title.toLowerCase()).toContain('welcome');
+    expect(title.toLowerCase()).toContain('home page');
   });
 });
