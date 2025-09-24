@@ -1,5 +1,4 @@
 import { Locator, Page, expect } from '@playwright/test';
-import { UIInteractions } from '../../../utils/uiInteractions';
 import { Homepage } from '../Dashboard/homepage';
 import { CustomerDetails } from './customerType';
 
@@ -126,8 +125,8 @@ export class AddCustomerPage extends Homepage {
             throw new Error('Add Customer page is not loaded properly.');
         }else{
 
-        await this.clickElement(this.originChannelSelect);
-        await this.clickElement(this.channeloptionselect);
+        await this.clickElement(this.originChannelSelect, 'Origin Channel Select');
+        await this.clickElement(this.channeloptionselect, 'Channel Option Select');
         await this.enterText(this.firstNameInput, details.firstName);
         await this.enterText(this.lastNameInput, details.lastName);
         if (details.companyName) {
@@ -142,7 +141,7 @@ export class AddCustomerPage extends Homepage {
             throw new Error('email box not shown');
         }
         if (details.customerGroup){
-        await this.clickElement(this.customerGroupSelect);
+        await this.clickElement(this.customerGroupSelect, 'Customer Group Select');
         await this.customerGroupOptionselect.selectOption({label: details.customerGroup})
         }
         else{
@@ -172,9 +171,9 @@ export class AddCustomerPage extends Homepage {
         await this.enterText(this.passwordInput, details.password);
         await this.enterText(this.confirmPasswordInput, details.confirmPassword);
 
-    await this.clickElement(this.addCustomerAddressButton);
-    await this.clickElement(this.confirmSaveOkButton);
-    await this.clickElement(this.addAnAddressButton);
+    await this.clickElement(this.addCustomerAddressButton, 'Add Customer Address Button');
+    await this.clickElement(this.confirmSaveOkButton, 'Confirm Save OK Button');
+    await this.clickElement(this.addAnAddressButton, 'Add Address Button');
 
     if (details.address) {
         await this.waitForElement(this.addAddressHeading);
@@ -195,7 +194,7 @@ export class AddCustomerPage extends Homepage {
             await this.selectFromInputDropdownDynamic(this.addAddressStateOrProvinceInput, details.address.state);
             this.addTypeRadioButtonInput = this.page.frameLocator('#content-iframe').locator(`//fieldset//label[text()="${details.address.type}"]`);
             await this.selectRadioButton(this.addTypeRadioButtonInput, details.address.type);
-            await this.clickElement(this.saveAddressButton);
+            await this.clickElement(this.saveAddressButton, 'Save Address Button');
         }
         }
     } catch (error) {
