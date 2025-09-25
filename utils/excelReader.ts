@@ -49,9 +49,10 @@ export interface TestCase {
     'CS_CCV2Value': string;
     'CS_CardExpiryDate(JAN-2025)(JAN-2025)': string;
     'Automation': boolean;
-    'Order_Id': string;
+    'BigC_OrderId': string;
     'Test_Result': string;
     'Execution_Notes': string;
+    'KIBO_OrderId': string;
     [key: string]: string | boolean; // For any additional dynamic columns
 
 }
@@ -66,7 +67,7 @@ export class ExcelReader {
      * Log key test case info to console
      */
         /**
-         * Update the Order_Id for a test case in the Excel sheet
+         * Update the BigC_OrderId for a test case in the Excel sheet
          * @param sheetName Name of the worksheet
          * @param testCaseName Name of the test case
          * @param orderId The orderId to write
@@ -85,8 +86,8 @@ export class ExcelReader {
                     headers[cell.value?.toString() || ''] = colNumber;
                 });
 
-                if (!headers['Order_Id']) {
-                    throw new Error('Order_Id column not found in the worksheet');
+                if (!headers['BigC_OrderId']) {
+                    throw new Error('BigC_OrderId column not found in the worksheet');
                 }
                 if (!headers['Test Case Name']) {
                     throw new Error('Test Case Name column not found in the worksheet');
@@ -107,15 +108,15 @@ export class ExcelReader {
                     throw new Error(`Test case "${testCaseName}" not found in sheet "${sheetName}"`);
                 }
 
-                // Update the Order_Id cell
-                foundRow.getCell(headers['Order_Id']).value = orderId;
+                // Update the BigC_OrderId cell
+                foundRow.getCell(headers['BigC_OrderId']).value = orderId;
 
                 // Save the workbook
                 const filePath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
                 await workbook.xlsx.writeFile(filePath);
-                console.log(`Order_Id updated for test case "${testCaseName}" in sheet "${sheetName}"`);
+                console.log(`BigC_OrderId updated for test case "${testCaseName}" in sheet "${sheetName}"`);
             } catch (error) {
-                console.error('Error updating Order_Id:', error);
+                console.error('Error updating BigC_OrderId:', error);
                 throw error;
             }
         }

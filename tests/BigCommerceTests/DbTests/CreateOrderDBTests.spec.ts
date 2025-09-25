@@ -92,9 +92,9 @@ test.describe('Order Database Verification Tests', () => {
 
                         await excelReader.logStep('Verifying Order in Database', { 'Test Case': testCaseName, 'Scenario': scenario });
 
-                        const orderId = testCase['Order_Id'];
+                        const orderId = testCase['BigC_OrderId'];
                         if (!orderId || orderId.trim() === '') {
-                            throw new Error('Order_Id not found in Excel sheet. Ensure the order has been created first.');
+                            throw new Error('BigC_OrderId not found in Excel sheet. Ensure the order has been created first.');
                         }
 
                         const verificationResult = await verifyOrderInDatabase(orderId);

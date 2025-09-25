@@ -21,6 +21,9 @@ test.describe('Pearson VUE - Login', () => {
 
     // Example expectation: page title contains "Home Page" (adjust to your app)
     const title = await page.title();
+    const url = await page.url();
+    console.log(`Landed on page: ${title} (URL: ${url})`);
+    expect (url).toContain('/Home'); // Adjust based on actual landing URL
     expect(title.toLowerCase()).toContain('home page');
   });
 });
