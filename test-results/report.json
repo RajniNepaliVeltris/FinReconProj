@@ -1,0 +1,225 @@
+{
+  "config": {
+    "configFile": "C:\\FinReconAutomation\\playwright.config.ts",
+    "rootDir": "C:/FinReconAutomation/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "test-results",
+          "open": "never",
+          "attachmentsBaseURL": "attachments",
+          "attachments": true
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/report.json"
+        }
+      ],
+      [
+        "list",
+        {
+          "printSteps": true,
+          "printProgress": true
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/FinReconAutomation/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "existing-chrome",
+        "name": "existing-chrome",
+        "testDir": "C:/FinReconAutomation/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "3way",
+    "version": "1.55.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts",
+      "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Standard Product Order Tests",
+          "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
+          "line": 13,
+          "column": 6,
+          "specs": [],
+          "suites": [
+            {
+              "title": "Order with Standard product - Fulfillment using Billing Address",
+              "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
+              "line": 15,
+              "column": 14,
+              "specs": [
+                {
+                  "title": "Execute: Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon",
+                  "ok": false,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [
+                        {
+                          "type": "test-type",
+                          "description": "E2E"
+                        },
+                        {
+                          "type": "feature",
+                          "description": "Order Creation"
+                        }
+                      ],
+                      "expectedStatus": "passed",
+                      "projectId": "existing-chrome",
+                      "projectName": "existing-chrome",
+                      "results": [
+                        {
+                          "workerIndex": 0,
+                          "parallelIndex": 0,
+                          "status": "failed",
+                          "duration": 28000,
+                          "error": {
+                            "message": "Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?",
+                            "stack": "Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:26:19)\n    at NodeBufferReader.checkOffset (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:17:14)\n    at NodeBufferReader.readData (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\NodeBufferReader.js:14:10)\n    at NodeBufferReader.readString (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:75:49)\n    at ZipEntries.isSignature (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:39:37)\n    at ZipEntries.readEndOfCentral (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:164:35)\n    at ZipEntries.load (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:255:14)\n    at C:\\FinReconAutomation\\node_modules\\jszip\\lib\\load.js:48:24\n    at XLSX.load (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:280:17)\n    at XLSX.readFile (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:55:24)\n    at ExcelReader.readWorkbook (C:\\FinReconAutomation\\utils\\excelReader.ts:151:13)\n    at ExcelReader.getAllTestCases (C:\\FinReconAutomation\\utils\\excelReader.ts:223:26)\n    at ExcelReader.fetchTestCaseDataByName (C:\\FinReconAutomation\\utils\\excelReader.ts:202:22)\n    at C:\\FinReconAutomation\\tests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32",
+                            "location": {
+                              "file": "C:\\FinReconAutomation\\utils\\excelReader.ts",
+                              "column": 13,
+                              "line": 151
+                            },
+                            "snippet": "\u001b[90m   at \u001b[39m..\\utils\\excelReader.ts:151\n\n\u001b[0m \u001b[90m 149 |\u001b[39m             \u001b[36mconst\u001b[39m filePath \u001b[33m=\u001b[39m path\u001b[33m.\u001b[39mjoin(__dirname\u001b[33m,\u001b[39m \u001b[32m'../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 150 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Attempting to load Excel file:'\u001b[39m\u001b[33m,\u001b[39m filePath)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 151 |\u001b[39m             \u001b[36mawait\u001b[39m workbook\u001b[33m.\u001b[39mxlsx\u001b[33m.\u001b[39mreadFile(filePath)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 152 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Excel file loaded successfully'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 153 |\u001b[39m         } \u001b[36mcatch\u001b[39m (err) {\n \u001b[90m 154 |\u001b[39m             console\u001b[33m.\u001b[39merror(\u001b[32m'Error loading Excel file:'\u001b[39m\u001b[33m,\u001b[39m err)\u001b[33m;\u001b[39m\u001b[0m"
+                          },
+                          "errors": [
+                            {
+                              "location": {
+                                "file": "C:\\FinReconAutomation\\utils\\excelReader.ts",
+                                "column": 13,
+                                "line": 151
+                              },
+                              "message": "Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n\n\u001b[90m   at \u001b[39m..\\utils\\excelReader.ts:151\n\n\u001b[0m \u001b[90m 149 |\u001b[39m             \u001b[36mconst\u001b[39m filePath \u001b[33m=\u001b[39m path\u001b[33m.\u001b[39mjoin(__dirname\u001b[33m,\u001b[39m \u001b[32m'../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 150 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Attempting to load Excel file:'\u001b[39m\u001b[33m,\u001b[39m filePath)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 151 |\u001b[39m             \u001b[36mawait\u001b[39m workbook\u001b[33m.\u001b[39mxlsx\u001b[33m.\u001b[39mreadFile(filePath)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 152 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Excel file loaded successfully'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 153 |\u001b[39m         } \u001b[36mcatch\u001b[39m (err) {\n \u001b[90m 154 |\u001b[39m             console\u001b[33m.\u001b[39merror(\u001b[32m'Error loading Excel file:'\u001b[39m\u001b[33m,\u001b[39m err)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at NodeBufferReader.checkIndex (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:26:19)\u001b[22m\n\u001b[2m    at NodeBufferReader.checkOffset (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:17:14)\u001b[22m\n\u001b[2m    at NodeBufferReader.readData (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\NodeBufferReader.js:14:10)\u001b[22m\n\u001b[2m    at NodeBufferReader.readString (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:75:49)\u001b[22m\n\u001b[2m    at ZipEntries.isSignature (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:39:37)\u001b[22m\n\u001b[2m    at ZipEntries.readEndOfCentral (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:164:35)\u001b[22m\n\u001b[2m    at ZipEntries.load (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:255:14)\u001b[22m\n\u001b[2m    at C:\\FinReconAutomation\\node_modules\\jszip\\lib\\load.js:48:24\u001b[22m\n\u001b[2m    at XLSX.load (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:280:17)\u001b[22m\n\u001b[2m    at XLSX.readFile (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:55:24)\u001b[22m\n\u001b[2m    at ExcelReader.readWorkbook (C:\\FinReconAutomation\\utils\\excelReader.ts:151:13)\u001b[22m\n\u001b[2m    at ExcelReader.getAllTestCases (C:\\FinReconAutomation\\utils\\excelReader.ts:223:26)\u001b[22m\n\u001b[2m    at ExcelReader.fetchTestCaseDataByName (C:\\FinReconAutomation\\utils\\excelReader.ts:202:22)\u001b[22m\n\u001b[2m    at C:\\FinReconAutomation\\tests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32\u001b[22m"
+                            }
+                          ],
+                          "stdout": [
+                            {
+                              "text": "Attempting to load Excel file: C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+                            },
+                            {
+                              "text": "Updating test result for \"Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon\" in sheet \"Standard Product\"\n"
+                            },
+                            {
+                              "text": "Attempting to load Excel file: C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+                            }
+                          ],
+                          "stderr": [
+                            {
+                              "text": "Error reading file C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.getAllTestCases \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:223:26\u001b[90m)\u001b[39m\n    at ExcelReader.fetchTestCaseDataByName \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:202:22\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+                            },
+                            {
+                              "text": "Error loading Excel file: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.getAllTestCases \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:223:26\u001b[90m)\u001b[39m\n    at ExcelReader.fetchTestCaseDataByName \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:202:22\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+                            },
+                            {
+                              "text": "Error reading file C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+                            },
+                            {
+                              "text": "Error loading Excel file: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+                            },
+                            {
+                              "text": "Error updating test results: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+                            },
+                            {
+                              "text": "Error details: {\n  sheetName: \u001b[32m'Standard Product'\u001b[39m,\n  testCaseName: \u001b[32m'Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon'\u001b[39m,\n  result: \u001b[32m'Failed'\u001b[39m,\n  error: \u001b[32m'End of data reached (data length = 0, asked index = 4). Corrupted zip ?'\u001b[39m\n}\n"
+                            },
+                            {
+                              "text": "Failed to record test failure in Excel: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+                            },
+                            {
+                              "text": "Excel Error: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+                            }
+                          ],
+                          "retry": 0,
+                          "startTime": "2025-09-27T20:34:04.066Z",
+                          "annotations": [
+                            {
+                              "type": "test-type",
+                              "description": "E2E"
+                            },
+                            {
+                              "type": "feature",
+                              "description": "Order Creation"
+                            }
+                          ],
+                          "attachments": [
+                            {
+                              "name": "screenshot",
+                              "contentType": "image/png",
+                              "path": "C:\\FinReconAutomation\\test-results\\BigCommerceTests-UITests-O-01388-elivery-NoDiscount-NoCoupon-existing-chrome\\test-failed-1.png"
+                            }
+                          ],
+                          "errorLocation": {
+                            "file": "C:\\FinReconAutomation\\utils\\excelReader.ts",
+                            "column": 13,
+                            "line": 151
+                          }
+                        }
+                      ],
+                      "status": "unexpected"
+                    }
+                  ],
+                  "id": "f25725089d33fc2f113d-faeb7cb5c7d00a328392",
+                  "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
+                  "line": 17,
+                  "column": 17
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-09-27T20:34:00.501Z",
+    "duration": 31685.025999999998,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}
