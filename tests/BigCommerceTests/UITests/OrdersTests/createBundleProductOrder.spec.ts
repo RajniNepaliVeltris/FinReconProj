@@ -25,8 +25,8 @@ test.describe('Bundle Product Order Tests', () => {
 					const page = await baseTest.getPage();
 					await page.bringToFront();
 					const excelReader = ExcelReader.getInstance();
-					let testResult = 'Passed';
-					let executionNotes = '';
+					let bigcUITestResult = 'Passed';
+					let bigcUIExecutionNotes = '';
 					let failedStep = '';
 					let currentStep = '';
 
@@ -177,14 +177,14 @@ test.describe('Bundle Product Order Tests', () => {
 						});
 
 					} catch (err: any) {
-						testResult = 'Failed';
+						bigcUITestResult = 'Failed';
 						failedStep = currentStep;
 						let failureScreenshotPath: string | undefined;
-						failureScreenshotPath = await excelReader.handleTestFailure(sheetName, testCaseName, currentStep, err, page, testCase);
+						failureScreenshotPath = await excelReader.handleTestFailure(sheetName, testCaseName, currentStep, err, page, testCase, 'bigcUI');
 						throw err;
 					} finally {
 						if (testCase) {
-							await excelReader.logTestSummaryAndRecordResult(testCase, testResult, screenshotPath, executionNotes, sheetName, testCaseName);
+														await excelReader.logTestSummaryAndRecordResult(testCase, bigcUITestResult, screenshotPath, bigcUIExecutionNotes, sheetName, testCaseName, 'bigcUI');
 						}
 					}
 				});

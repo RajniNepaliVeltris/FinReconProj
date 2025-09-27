@@ -321,7 +321,7 @@ export class AddOrderPage extends Homepage {
         this.commentsInput = initLocator(`//textarea[@id="order-comment"]`);
         this.staffNotesInput = initLocator(`//textarea[@id="staff-note"]`);
         this.saveAndProcessPaymentButton = initLocator("//button[@data-saveandprocesspayment='Save & process payment »']");
-    
+
         //Bundle Product Dialogue Box
         const bundleProductDialogue = "//div[@aria-labelledby='product-option']";
         this.customizeBundleModal = initLocator(`${bundleProductDialogue}`);
@@ -333,7 +333,7 @@ export class AddOrderPage extends Homepage {
         this.bundleQuantityInput = this.customizeBundleModal.locator("//input[@id='product-quantity']");
         this.bundleAddItemButton = this.customizeBundleModal.locator("//button[@id='dialog-options-submit']");
         this.bundleCloseButton = this.customizeBundleModal.locator("//button[@class='btn-dialog-close']");
-       this.bundleProductsRadioButton = (OptionProduct: string) => {
+        this.bundleProductsRadioButton = (OptionProduct: string) => {
             return this.customizeBundleModal.locator(
                 `//div[@id='options']//div[contains(@class,'productAttributeRow')]//td[@class='input']//span[@class='name' and contains(text(),'${OptionProduct}')]/preceding-sibling::input`
             );
@@ -347,22 +347,22 @@ export class AddOrderPage extends Homepage {
     async fillBundleBasicDetails(name: string, useStorePricing: boolean, quantity: number) {
         await this.clickElement(this.bundleBasicDetailsTab, 'Bundle Basic Details Tab');
         //await this.enterText(this.bundleNameInput,name);
-        if(await this.bundleNameInput.evaluate((el, value) => (el as HTMLInputElement).value === value, name) !== true) {
+        if (await this.bundleNameInput.evaluate((el, value) => (el as HTMLInputElement).value === value, name) !== true) {
             throw new Error(`Bundle name input value mismatch. Expected: ${name}`);
         }
         if (useStorePricing) {
             await this.bundleUseStorePricingRadio.check();
         } else {
             await this.bundleManualPriceRadio.check();
-           // await this.enterText(this.bundleManualPriceInput,'100'); // Example manual price, adjust as needed
+            // await this.enterText(this.bundleManualPriceInput,'100'); // Example manual price, adjust as needed
         }
-        await this.enterText(this.bundleQuantityInput,quantity.toString());
+        await this.enterText(this.bundleQuantityInput, quantity.toString());
     }
 
     /**
      * Fill the Options tab in the IBM Assessment Voucher Bundle modal
      */
-    async fillBundleOptions(products: Array<{name: string}>) {
+    async fillBundleOptions(products: Array<{ name: string }>) {
         await this.clickElement(this.bundleOptionsTab, 'Bundle Options Tab');
         await this.waitForElement(this.bundleProductNames.first(), 5000);
         const availableProductsCount = await this.bundleProductNames.count();
@@ -370,7 +370,7 @@ export class AddOrderPage extends Homepage {
             throw new Error('No products available in the bundle options.');
         }
         for (let i = 0; i < products.length; i++) {
-            await this.clickElement(this.bundleProductsRadioButton(products[i].name), `Bundle Product Radio Button: ${products[i].name}`, { force: true ,timeout: 5000});
+            await this.clickElement(this.bundleProductsRadioButton(products[i].name), `Bundle Product Radio Button: ${products[i].name}`, { force: true, timeout: 5000 });
             //await this.checkElement(this.bundleProductNames.nth(i), { state: 'attached' });
         }
     }
@@ -396,7 +396,7 @@ export class AddOrderPage extends Homepage {
         bundle_name: string,
         useStorePricing: boolean,
         quantity: number,
-        products: Array<{name: string}>
+        products: Array<{ name: string }>
     }) {
         await this.searchProductWithBrowseCategories(details.bundle_name);
         await this.waitForElement(this.customizeBundleModal, 5000);
@@ -404,7 +404,7 @@ export class AddOrderPage extends Homepage {
         await this.fillBundleOptions(details.products);
         await this.addBundleItem();
     }
-    
+
 
     async fillBillingInformation(billingInfo: {
         firstName: string;
@@ -421,18 +421,18 @@ export class AddOrderPage extends Homepage {
         taxID: string;
         saveToAddressBook: boolean;
     }) {
-        await this.enterText(this.billingFirstNameInput,billingInfo.firstName);
-        await this.enterText(this.billingLastNameInput,billingInfo.lastName);
-        if (billingInfo.companyName) await this.enterText(this.billingCompanyNameInput,billingInfo.companyName);
-        if (billingInfo.phoneNumber) await this.enterText(this.billingPhoneNumberInput,billingInfo.phoneNumber);
-        await this.enterText(this.billingAddressLine1Input,billingInfo.addressLine1);
-        if (billingInfo.addressLine2) await this.enterText(this.billingAddressLine2Input,billingInfo.addressLine2);
-        await this.enterText(this.billingSuburbCityInput,billingInfo.suburbCity);
+        await this.enterText(this.billingFirstNameInput, billingInfo.firstName);
+        await this.enterText(this.billingLastNameInput, billingInfo.lastName);
+        if (billingInfo.companyName) await this.enterText(this.billingCompanyNameInput, billingInfo.companyName);
+        if (billingInfo.phoneNumber) await this.enterText(this.billingPhoneNumberInput, billingInfo.phoneNumber);
+        await this.enterText(this.billingAddressLine1Input, billingInfo.addressLine1);
+        if (billingInfo.addressLine2) await this.enterText(this.billingAddressLine2Input, billingInfo.addressLine2);
+        await this.enterText(this.billingSuburbCityInput, billingInfo.suburbCity);
         await this.billingCountrySelect.selectOption(billingInfo.country);
         await this.billingStateProvinceSelect.selectOption(billingInfo.stateProvince);
-        await this.enterText(this.billingZipPostcodeInput,billingInfo.zipPostcode);
-        if (billingInfo.poNumber) await this.enterText(this.billingPONumberInput,billingInfo.poNumber);
-        if (billingInfo.taxID) await this.enterText(this.billingTaxIDInput,billingInfo.taxID);
+        await this.enterText(this.billingZipPostcodeInput, billingInfo.zipPostcode);
+        if (billingInfo.poNumber) await this.enterText(this.billingPONumberInput, billingInfo.poNumber);
+        if (billingInfo.taxID) await this.enterText(this.billingTaxIDInput, billingInfo.taxID);
         if (billingInfo.saveToAddressBook) {
             await UIInteractions.checkElement(
                 this.billingSaveToAddressBookCheckbox,
@@ -456,9 +456,9 @@ export class AddOrderPage extends Homepage {
         customerGroup: string;
     }) {
         await this.selectNewCustomer();
-        await this.enterText(this.newCustomerEmailInput,newCustomerDetails.email);
-        await this.enterText(this.newCustomerPasswordInput,newCustomerDetails.password);
-        await this.enterText(this.newCustomerConfirmPasswordInput,newCustomerDetails.confirmPassword);
+        await this.enterText(this.newCustomerEmailInput, newCustomerDetails.email);
+        await this.enterText(this.newCustomerPasswordInput, newCustomerDetails.password);
+        await this.enterText(this.newCustomerConfirmPasswordInput, newCustomerDetails.confirmPassword);
 
         if (newCustomerDetails.exclusiveOffers) {
             // Use our utility method for reliable checkbox interaction
@@ -474,7 +474,7 @@ export class AddOrderPage extends Homepage {
             );
         }
 
-        await this.enterText(this.newCustomerLineOfCreditInput,newCustomerDetails.lineOfCredit);
+        await this.enterText(this.newCustomerLineOfCreditInput, newCustomerDetails.lineOfCredit);
         await this.newCustomerPaymentTermsSelect.selectOption(newCustomerDetails.paymentTerms);
         await this.newCustomerGroupSelect.selectOption(newCustomerDetails.customerGroup);
     }
@@ -939,7 +939,7 @@ export class AddOrderPage extends Homepage {
                 await this.enterText(this.shippingPONumberInput, address.poNumber);
                 await this.enterText(this.shippingTaxIDInput, address.taxID);
                 await this.setDropdownValue(this.shippingStateSelect, address.state);
-                
+
                 // Optionally check the "Save to address book" checkbox
                 if (address.saveaddressCheckbox) {
                     await UIInteractions.checkElement(this.saveCustomerAddressCheckbox);
@@ -1456,34 +1456,46 @@ export class AddOrderPage extends Homepage {
 
 
     async selectPaymentMethod(method: string) {
-        await this.setDropdownValue(this.paymentDropdown, method);
+        try {
+            await this.setDropdownValue(this.paymentDropdown, method);
+        } catch (error) {
+            console.log(`Error selecting payment method: ${method}`, error);
+            console.error(`Error selecting payment method: ${method}`, error);
+            throw error;
+        }
 
     }
     async verifyPaymentMethodSelected(expectedMethod: string) {
-        let selectedOption = await this.paymentDropdown.inputValue();
-        if (selectedOption === "custom") {
-            //as in the value is shown as custom but the text is Manual Payment
-            selectedOption = "Manual payment";
-        }
-        if (selectedOption === "checkout_cod") {
-            //as in the value is shown as checkout_cod but the text is Cash on Delivery
-            selectedOption = "Cash on Delivery";
-        }
-        if (selectedOption === "checkout_bankdeposit") {
-            //as in the value is shown as checkout_offline but the text is Offline Payment
-            selectedOption = "Bank Deposit";
-        }
-        if (selectedOption === "checkout_cybersourcev2") {
-            //as in the value is shown as checkout_offline but the text is Offline Payment
-            selectedOption = "Cybersource";
-        }
+        try {
+            let selectedOption = await this.paymentDropdown.inputValue();
+            if (selectedOption === "custom") {
+                //as in the value is shown as custom but the text is Manual Payment
+                selectedOption = "Manual payment";
+            }
+            if (selectedOption === "checkout_cod") {
+                //as in the value is shown as checkout_cod but the text is Cash on delivery
+                selectedOption = "Cash on delivery";
+            }
+            if (selectedOption === "checkout_bankdeposit") {
+                //as in the value is shown as checkout_offline but the text is Offline Payment
+                selectedOption = "Bank Deposit";
+            }
+            if (selectedOption === "checkout_cybersourcev2") {
+                //as in the value is shown as checkout_offline but the text is Offline Payment
+                selectedOption = "Cybersource";
+            }
 
-        if (selectedOption !== expectedMethod) {
-            console.error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
-            throw new Error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
-        }
+            if (selectedOption !== expectedMethod) {
+                console.error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
+                throw new Error(`Payment method mismatch. Expected: ${expectedMethod}, Found: ${selectedOption}`);
+            }
 
-        console.log("Payment method verified successfully.");
+            console.log("Payment method verified successfully.");
+        } catch (error) {
+            console.log(`Error verifying payment method: ${expectedMethod}`, error);
+            console.error(`Error verifying payment method: ${expectedMethod}`, error);
+            throw error;
+        }
     }
 
     /**
@@ -1532,15 +1544,33 @@ export class AddOrderPage extends Homepage {
     }
 
     async fillComments(comments: string) {
-        await this.enterText(this.commentsInput, comments);
+        try {
+            await this.isElementVisible(this.commentsInput, 5000);
+            await this.enterText(this.commentsInput, comments);
+        } catch (error) {
+            console.error("Error filling comments:", error);
+            throw error;
+        }
     }
 
     async fillStaffNotes(notes: string) {
-        await this.enterText(this.staffNotesInput, notes);
+        try {
+            await this.isElementVisible(this.staffNotesInput, 5000);
+            await this.enterText(this.staffNotesInput, notes);
+        } catch (error) {
+            console.log("Error filling staff notes:", error);
+            console.error("Error filling staff notes:", error);
+            throw error;
+        }
     }
 
     async placeOrder() {
+        try{
         await this.clickElement(this.saveAndProcessPaymentButton, 'Save and Process Payment Button');
+        }catch(error){
+            console.log("Error clicking Save and Process Payment Button:", error);
+            throw error;
+        }
     }
 
     async verifySummaryDetails(expectedSummary: { subtotal: string; shipping: string; grandTotal: string; taxIncludedInTotal: string }) {
@@ -1572,6 +1602,7 @@ export class AddOrderPage extends Homepage {
 
             console.log("Summary details verified successfully.");
         } catch (error) {
+            console.log("Error verifying summary details:", error);
             console.error("Error verifying summary details:", error);
             throw error;
         }

@@ -53,6 +53,12 @@ export interface TestCase {
     'Test_Result': string;
     'Execution_Notes': string;
     'KIBO_OrderId': string;
+    'Pearson_Test_Result ': string;
+    'Pearson_Execution_Notes': string;
+    'DB_Test_Result': string;
+    'DB_Execution_Notes': string;
+    'BigC_Test_Result': string;
+    'BigC_Execution_Notes': string;
     [key: string]: string | boolean; // For any additional dynamic columns
 
 }
@@ -252,6 +258,7 @@ public async logStep(title: string, details?: any) {
             testCaseName: string, 
             result: string, 
             notes: string,
+            testType: string = 'default',
             failureInfo?: {
                 failedStep?: string;
                 errorMessage?: string;
@@ -271,8 +278,14 @@ public async logStep(title: string, details?: any) {
                 const headers: { [key: string]: number } = {};
                 const columnMappings = {
                     'Test Case Name': ['Test Case Name', 'TestCaseName', 'Test_Case_Name'],
-                    'Test_Result': ['Test_Result', 'Test Result', 'TestResult', 'Result'],
-                    'Execution_Notes': ['Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes']
+                    'Test_Result': testType === 'pearsonUI' ? ['Pearson_Test_Result', 'Test_Result', 'Test Result', 'TestResult', 'Result'] :
+                                   testType === 'db' ? ['DB_Test_Result', 'Test_Result', 'Test Result', 'TestResult', 'Result'] :
+                                   testType === 'bigcUI' ? ['BigC_Test_Result', 'Test_Result', 'Test Result', 'TestResult', 'Result'] :
+                                   ['Test_Result', 'Test Result', 'TestResult', 'Result'],
+                    'Execution_Notes': testType === 'pearsonUI' ? ['Pearson_Execution_Notes', 'Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes'] :
+                                       testType === 'db' ? ['DB_Execution_Notes', 'Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes'] :
+                                       testType === 'bigcUI' ? ['BigC_Execution_Notes', 'Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes'] :
+                                       ['Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes']
                 };
 
                 worksheet.getRow(1).eachCell((cell, colNumber) => {
@@ -436,7 +449,8 @@ public async logStep(title: string, details?: any) {
         testCaseName: string,
         currentStep: string,
         err: any,
-        failureScreenshotPath?: string
+        failureScreenshotPath?: string,
+        testType: string = 'default'
     ): Promise<void> {
         const failureTime = new Date().toISOString();
         const failureInfo = {
@@ -458,6 +472,7 @@ public async logStep(title: string, details?: any) {
             testCaseName,
             'Failed',
             executionSummary,
+            testType,
             failureInfo
         );
         console.log('Successfully recorded detailed test failure in Excel');
@@ -475,7 +490,7 @@ public async logStep(title: string, details?: any) {
         const automationValue = String(testCase['Automation']).toLowerCase();
         if (automationValue !== 'true') {
             test.skip(true, `Automation column is not set to true for this test case.`);
-            await this.updateTestResult(sheetName, testCaseName, 'Skipped', 'Automation column not true');
+            await this.updateTestResult(sheetName, testCaseName, 'Skipped', 'Automation column not true', 'default');
             return false;
         }
         return true;
@@ -490,7 +505,8 @@ public async logStep(title: string, details?: any) {
         currentStep: string,
         err: any,
         page: any, // Playwright Page
-        testCase: TestCase | undefined
+        testCase: TestCase | undefined,
+        testType: string = 'default'
     ): Promise<string | undefined> {
         let failureScreenshotPath: string | undefined;
         // Capture failure screenshot
@@ -505,7 +521,7 @@ public async logStep(title: string, details?: any) {
         }
         // Record detailed failure
         try {
-            await this.recordDetailedTestFailure(sheetName, testCaseName, currentStep, err, failureScreenshotPath);
+            await this.recordDetailedTestFailure(sheetName, testCaseName, currentStep, err, failureScreenshotPath, testType);
         } catch (excelErr) {
             console.error('Failed to record test failure in Excel:', excelErr);
             console.error('Excel Error:', excelErr);
@@ -519,7 +535,8 @@ public async logStep(title: string, details?: any) {
     public async recordTestSuccess(
         sheetName: string,
         testCaseName: string,
-        screenshotPath?: string
+        screenshotPath?: string,
+        testType: string = 'default'
     ): Promise<void> {
         const successDetails = [
             'All steps completed successfully',
@@ -527,7 +544,7 @@ public async logStep(title: string, details?: any) {
             `Screenshot: ${screenshotPath || 'N/A'}`
         ].join('\n');
 
-        await this.updateTestResult(sheetName, testCaseName, 'Passed', successDetails);
+        await this.updateTestResult(sheetName, testCaseName, 'Passed', successDetails, testType);
         console.log('Successfully recorded test success in Excel');
     }
 
@@ -540,7 +557,8 @@ public async logStep(title: string, details?: any) {
         screenshotPath: string | undefined,
         executionNotes: string,
         sheetName: string,
-        testCaseName: string
+        testCaseName: string,
+        testType: string = 'default'
     ): Promise<void> {
         console.log('\nTest Summary:');
         console.table([
@@ -554,7 +572,7 @@ public async logStep(title: string, details?: any) {
 
         if (testResult === 'Passed') {
             try {
-                await this.recordTestSuccess(sheetName, testCaseName, screenshotPath);
+                await this.recordTestSuccess(sheetName, testCaseName, screenshotPath, testType);
             } catch (excelErr) {
                 console.error('Failed to record final test result in Excel:', excelErr);
             }

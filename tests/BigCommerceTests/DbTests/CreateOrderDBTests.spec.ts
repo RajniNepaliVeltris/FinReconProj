@@ -1,9 +1,9 @@
 import { test } from '../../../utils/baseTest';
 import { expect, TestInfo } from '@playwright/test';
 import { ExcelReader, TestCase } from '../../../utils/excelReader';
-import { TestConfig } from '../../../utils/testConfig';
 import { verifyOrderInDatabase, getTableSchema, getBigCConnection } from '../../../utils/db';
 import { QueryManager } from '../../../utils/queryManager';
+import { TestConfig } from '../../../utils/testConfig';
 
 /*
  * Manual SSMS Query for Order Verification:
@@ -78,8 +78,8 @@ test.describe('Order Database Verification Tests', () => {
                     testInfo.setTimeout(testInfo.timeout + 30000);
                     let testCase: TestCase | undefined;
                     const excelReader = ExcelReader.getInstance();
-                    let testResult = 'Passed';
-                    let executionNotes = '';
+                    let dbTestResult = 'Passed';
+                    let dbExecutionNotes = '';
                     let failedStep = '';
 
                     try {
@@ -158,20 +158,20 @@ test.describe('Order Database Verification Tests', () => {
 
                         console.log('BIGC and Kibo Order data values match successfully.');
 
-                        executionNotes = `Order ${orderId} successfully verified in BigCommerce database. Found ${verificationResult.details?.length || 0} detail records.`;
+                        dbExecutionNotes = `Order ${orderId} successfully verified in BigCommerce database. Found ${verificationResult.details?.length || 0} detail records.`;
 
                     } catch (err: any) {
-                        testResult = 'Failed';
+                        dbTestResult = 'Failed';
                         failedStep = 'Database Verification';
 
-                        executionNotes = `Failed to verify order in database: ${err.message}`;
+                        dbExecutionNotes = `Failed to verify order in database: ${err.message}`;
 
-                        await excelReader.handleTestFailure(sheetName, testCaseName, failedStep, err, undefined, testCase);
+                        await excelReader.handleTestFailure(sheetName, testCaseName, failedStep, err, undefined, testCase, 'db');
 
                         throw err;
                     } finally {
                         if (testCase) {
-                            await excelReader.logTestSummaryAndRecordResult(testCase, testResult, undefined, executionNotes, sheetName, testCaseName);
+                            await excelReader.logTestSummaryAndRecordResult(testCase, dbTestResult, undefined, dbExecutionNotes, sheetName, testCaseName, 'db');
                         }
                     }
                 });

@@ -160,10 +160,24 @@ export class BasePage {
 
   async getElementText(locator: Locator): Promise<string> {
     try {
-      const text = await locator.textContent() || '';
-      return text;
-    } catch (error) {
-      console.error(`Failed to get text from element: ${locator}`, error);
+      // If the page has been closed, fail fast with a clear message
+      try {
+        // @ts-ignore - Playwright Page has isClosed()
+        if ((this.page as any).isClosed && (this.page as any).isClosed()) {
+          throw new Error('Page is already closed');
+        }
+      } catch (e) {
+        // If isClosed check isn't available, continue and let locator.textContent fail below
+      }
+
+      const text = await locator.textContent();
+      return (text || '');
+    } catch (err: any) {
+      console.error(`Failed to get text from element: ${locator}`, err);
+      // Provide a more actionable error for closed contexts
+      if (err && typeof err.message === 'string' && err.message.includes('has been closed')) {
+        throw new Error(`Failed to get text because page/context/browser is closed: ${err.message}`);
+      }
       return '';
     }
   }

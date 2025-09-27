@@ -25,6 +25,9 @@ export class SettlementReportPage extends BasePage {
   readonly paginationPrev: Locator;
   readonly paginationNext: Locator;
 
+  // Cached headers for performance
+  private cachedHeaders: string[] | null = null;
+
   constructor(page: Page) {
     super(page);
 
@@ -170,16 +173,42 @@ export class SettlementReportPage extends BasePage {
     }
   }
 
-  async getCellText(rowIndex: number, columnIndex: number): Promise<string> {
+ async getCellText(rowIndex: number, columnIndex: number): Promise<string> {
+  const maxAttempts = 3;
+  let lastError: unknown = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const row = this.tableRows.nth(rowIndex);
-      const cell = row.locator('td').nth(columnIndex);
-      return (await this.getElementText(cell)).trim();
-    } catch (error) {
-      console.error(`getCellText failed for row=${rowIndex}, col=${columnIndex}`, error);
-      throw new Error(`getCellText failed: ${error}`);
+      await row.waitFor({ state: 'visible', timeout: 5000 });
+
+      // Get all cell texts at once
+      const cells = row.locator('td');
+      const texts = await cells.allTextContents();
+      const text = (texts[columnIndex] || '').trim();
+
+      if (text) return text;
+      else throw new Error(`Cell text is empty on attempt ${attempt}`);
+
+    } catch (err) {
+      lastError = err;
+      console.warn(
+        `getCellText attempt ${attempt}/${maxAttempts} failed for row=${rowIndex}, col=${columnIndex}: ${err instanceof Error ? err.message : err}`
+      );
+
+      if (err instanceof Error && err.message.includes('page/context/browser is closed')) {
+        throw err; // unrecoverable
+      }
     }
+
+    // Retry with exponential backoff
+    const backoff = 250 * 2 ** (attempt - 1);
+    await this.page.waitForTimeout(backoff);
   }
+
+  console.error(`getCellText failed after ${maxAttempts} attempts for row=${rowIndex}, col=${columnIndex}`, lastError);
+  throw new Error(`getCellText failed for row=${rowIndex}, col=${columnIndex}`);
+}
 
   async goToNextPage(): Promise<void> {
     try {
@@ -201,5 +230,54 @@ export class SettlementReportPage extends BasePage {
       console.error('goToPreviousPage failed', error);
       throw new Error(`goToPreviousPage failed: ${error}`);
     }
+  }
+
+  async getRowTexts(rowIndex: number): Promise<string[]> {
+    const maxAttempts = 3;
+    let lastError: unknown = null;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const row = this.tableRows.nth(rowIndex);
+        await row.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Get all cell texts at once
+        const cells = row.locator('td');
+        const texts = await cells.allTextContents();
+        return texts.map(t => t.trim());
+
+      } catch (err) {
+        lastError = err;
+        console.warn(
+          `getRowTexts attempt ${attempt}/${maxAttempts} failed for row=${rowIndex}: ${err instanceof Error ? err.message : err}`
+        );
+
+        if (err instanceof Error && err.message.includes('page/context/browser is closed')) {
+          throw err; // unrecoverable
+        }
+      }
+
+      // Retry with exponential backoff
+      const backoff = 250 * 2 ** (attempt - 1);
+      await this.page.waitForTimeout(backoff);
+    }
+
+    console.error(`getRowTexts failed after ${maxAttempts} attempts for row=${rowIndex}`, lastError);
+    throw new Error(`getRowTexts failed for row=${rowIndex}`);
+  }
+
+  async getRowData(rowIndex: number): Promise<Record<string, string>> {
+    if (!this.cachedHeaders) {
+      const headerElements = this.resultsTable.locator('thead th');
+      this.cachedHeaders = (await headerElements.allTextContents()).map((h: string) => h.trim());
+    }
+    const headers = this.cachedHeaders;
+    const texts = await this.getRowTexts(rowIndex);
+
+    const data: Record<string, string> = {};
+    headers.forEach((header: string, index: number) => {
+      data[header] = texts[index] || '';
+    });
+    return data;
   }
 }

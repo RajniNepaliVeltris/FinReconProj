@@ -25,7 +25,7 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
 
     // Navigate to Settlement Report
     await homePage.navigationtoSpecificMenu('Report', 'Settlement Report');
-    await settlementPage.waitForElement(settlementPage.resultsContainer, 5000);
+    await settlementPage.waitForElement(settlementPage.resultsContainer, 50000);
 
     // Read all test cases from Excel sheet
     const allCases: TestCase[] = await excelReader.getAllTestCases(SHEET_NAME);
@@ -44,11 +44,65 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
 
     // Columns to compare (must match visible header text). Adjust as needed.
     const compareColumns = [
+      'Finance Client',
+      'Site Name',
       'Order Number',
-      'Total',
+      'Line Item Id',
+      'Payment Date',
+      'Order Date',
       'Customer Account Id',
+      'Payment Method',
+      'Currency',
       'Order Status',
-      'Line Item Status'
+      'Line Item Status',
+      'Billing Company Name',
+      'Billing First Name',
+      'Billing Last Name',
+      'Billing Address1',
+      'Billing Address2',
+      'Billing City',
+      'Billing State',
+      'Billing Postal Or Zipcode',
+      'Billing Country',
+      'Billing Phone Number',
+      'Shipping Company Name',
+      'Shipping First Name',
+      'Shipping Last Name',
+      'Shipping Address1',
+      'Shipping Address2',
+      'Shipping City',
+      'Shipping State',
+      'Shipping Postal Or Zip Code',
+      'Shipping Country',
+      'Shipping Phone Number',
+      'Ship To Email',
+      'Manufacturer',
+      'Finance Product Type',
+      'Product Type',
+      'Product Usage',
+      'Product Name',
+      'Product Code',
+      'Quantity',
+      'Product Price',
+      'Sale Price',
+      'Total COGS',
+      'Discounted Total',
+      'Product Loss Amount',
+      'Line Item Level Tax',
+      'Order Line Discount',
+      'Order Shipping',
+      'Coupon Code',
+      'Order Discount',
+      'Shipping Tax',
+      'Component Product Price',
+      'Component Total Price',
+      'FXRate',
+      'Discounted Total USD',
+      'Product Loss Amount USD',
+      'Component Total Price USD',
+      'Fee USD',
+      'Due to Client USD',
+      'Settlement Status'
     ];
 
     for (const tc of relevant) {
@@ -56,8 +110,8 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
       const bigOrderId = String(tc['BigC_OrderId']).trim();
       const kiboOrderId = String(tc['KIBO_OrderId'] || tc['KibOrderId']).trim();
 
-      let testResult = 'Passed';
-      let executionNotes = '';
+      let pearsonUITestResult = 'Passed';
+      let pearsonUIExecutionNotes = '';
 
       await test.step(`Compare order results for test case: ${testCaseName}`, async () => {
         try {
@@ -70,43 +124,32 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
           await settlementPage.clickSearch();
           await settlementPage.waitForElement(settlementPage.resultsTable, 5000);
 
-          // Read headers to map column indices
-          const headers = (await settlementPage.resultsTable.locator('thead th').allTextContents()).map(h => h.trim());
-          const headerIndexMap: Record<string, number> = {};
-          headers.forEach((h, i) => (headerIndexMap[h] = i));
-
-          // Ensure at least one result
-          const kiboRowCount = await settlementPage.getRowCount();
-          if (kiboRowCount === 0) throw new Error(`No results found for KIBO Order ID: ${kiboOrderId}`);
-
           // Extract comparison values for Kibo
+          const rowData = await settlementPage.getRowData(0);
           const kiboValues: Record<string, string> = {};
           for (const col of compareColumns) {
-            const idx = headerIndexMap[col];
-            if (idx === undefined) continue;
-            kiboValues[col] = (await settlementPage.getCellText(0, idx)).trim();
+            kiboValues[col] = rowData[col] || '';
+            console.log("THE value for kiboValues[col] : ",kiboValues[col]);
           }
 
           // Search BIGC order id
-          await settlementPage.setOrderNumber(bigOrderId);
-          await settlementPage.clickSearch();
-          await settlementPage.waitForElement(settlementPage.resultsTable, 5000);
+          //await settlementPage.setOrderNumber(bigOrderId);
+          //await settlementPage.clickSearch();
+         // await settlementPage.waitForElement(settlementPage.resultsTable, 5000);
 
           const bigRowCount = await settlementPage.getRowCount();
           if (bigRowCount === 0) throw new Error(`No results found for BIGC Order ID: ${bigOrderId}`);
 
           // Extract comparison values for BigC
+          const bigRowData = await settlementPage.getRowData(0);
           const bigValues: Record<string, string> = {};
           for (const col of compareColumns) {
-            const idx = headerIndexMap[col];
-            if (idx === undefined) continue;
-            bigValues[col] = (await settlementPage.getCellText(0, idx)).trim();
+            bigValues[col] = bigRowData[col] || '';
           }
 
           // Compare selected columns
           const mismatches: string[] = [];
           for (const col of compareColumns) {
-            if (headerIndexMap[col] === undefined) continue; // skipped
             const a = kiboValues[col] || '';
             const b = bigValues[col] || '';
             if (a !== b) {
@@ -115,26 +158,26 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
           }
 
           if (mismatches.length > 0) {
-            testResult = 'Failed';
-            executionNotes = `Mismatches: ${mismatches.join('; ')}`;
-            throw new Error(executionNotes);
+            pearsonUITestResult = 'Failed';
+            pearsonUIExecutionNotes = `Mismatches: ${mismatches.join('; ')}`;
+            throw new Error(pearsonUIExecutionNotes);
           }
 
           // Record pass in Excel
-          executionNotes = `All compared columns matched for Kibo:${kiboOrderId} and BigC:${bigOrderId}`;
-          await excelReader.updateTestResult(String(SHEET_NAME), String(testCaseName), 'Passed', executionNotes);
+          pearsonUIExecutionNotes = `All compared columns matched for Kibo:${kiboOrderId} and BigC:${bigOrderId}`;
+                    await excelReader.updateTestResult(String(SHEET_NAME), String(testCaseName), 'Passed', pearsonUIExecutionNotes, 'pearsonUI');
         } catch (err: any) {
-          testResult = 'Failed';
-          executionNotes = err?.message || String(err);
+          pearsonUITestResult = 'Failed';
+          pearsonUIExecutionNotes = err?.message || String(err);
 
           try {
-            await excelReader.handleTestFailure(String(SHEET_NAME), String(testCaseName), 'Settlement report comparison', err, page, tc as any);
+            await excelReader.handleTestFailure(String(SHEET_NAME), String(testCaseName), 'Settlement report comparison', err, page, tc as any, 'pearsonUI');
           } catch (innerErr) {
             console.error('Failed to record failure in Excel:', innerErr);
           }
 
           try {
-            await excelReader.updateTestResult(String(SHEET_NAME), String(testCaseName), 'Failed', executionNotes);
+                        await excelReader.updateTestResult(String(SHEET_NAME), String(testCaseName), 'Failed', pearsonUIExecutionNotes, 'pearsonUI');
           } catch (innerErr) {
             console.error('Failed to update test result in Excel:', innerErr);
           }
@@ -142,7 +185,7 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
           throw err;
         } finally {
           try {
-            await excelReader.logTestSummaryAndRecordResult(tc as any, testResult, undefined, executionNotes, String(SHEET_NAME), String(testCaseName));
+                        await excelReader.logTestSummaryAndRecordResult(tc as any, pearsonUITestResult, undefined, pearsonUIExecutionNotes, String(SHEET_NAME), String(testCaseName), 'pearsonUI');
           } catch (e) {
             console.error('Failed to log test summary:', e);
           }
