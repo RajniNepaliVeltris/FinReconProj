@@ -165,7 +165,7 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
 
           // Record pass in Excel
           pearsonUIExecutionNotes = `All compared columns matched for Kibo:${kiboOrderId} and BigC:${bigOrderId}`;
-                    await excelReader.updateTestResult(String(SHEET_NAME), String(testCaseName), 'Passed', pearsonUIExecutionNotes, 'pearsonUI');
+          await excelReader.updateTestResult(String(SHEET_NAME), String(testCaseName), 'Passed', pearsonUIExecutionNotes, 'pearsonUI');
         } catch (err: any) {
           pearsonUITestResult = 'Failed';
           pearsonUIExecutionNotes = err?.message || String(err);
@@ -177,15 +177,14 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
           }
 
           try {
-                        await excelReader.updateTestResult(String(SHEET_NAME), String(testCaseName), 'Failed', pearsonUIExecutionNotes, 'pearsonUI');
+                await excelReader.updateTestResult(String(SHEET_NAME), String(testCaseName), 'Failed', pearsonUIExecutionNotes, 'pearsonUI');
           } catch (innerErr) {
             console.error('Failed to update test result in Excel:', innerErr);
           }
-
           throw err;
         } finally {
           try {
-                        await excelReader.logTestSummaryAndRecordResult(tc as any, pearsonUITestResult, undefined, pearsonUIExecutionNotes, String(SHEET_NAME), String(testCaseName), 'pearsonUI');
+              await excelReader.logTestSummaryAndRecordResult(tc as any, pearsonUITestResult, undefined, pearsonUIExecutionNotes, String(SHEET_NAME), String(testCaseName), 'pearsonUI');
           } catch (e) {
             console.error('Failed to log test summary:', e);
           }
