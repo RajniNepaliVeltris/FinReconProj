@@ -151,6 +151,7 @@ export class ExcelReader {
             await workbook.xlsx.readFile(filePath);
             console.log('Excel file loaded successfully');
         } catch (err) {
+            console.log('Error loading Excel file:', err);
             console.error('Error loading Excel file:', err);
             throw err;
         }
