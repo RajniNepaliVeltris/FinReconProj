@@ -321,10 +321,10 @@ test.describe('Order Database Verification Tests', () => {
             throw new Error(`Test case '${testCaseName}' not found in Excel sheet '${sheetName}'`);
         }
 
-        const kiboOrderId = String(testCase['KIBOOrderId']);
-        const bigCOrderId = String(testCase['BIGOrderId']);
+        const bigOrderId = String(testCase['BigC_OrderId']);
+        const kiboOrderId = String(testCase['KIBO_OrderId']);
 
-        if (!kiboOrderId || !bigCOrderId) {
+        if (!kiboOrderId || !bigOrderId) {
             throw new Error('Both KIBOOrderId and BIGOrderId must be provided in the Excel sheet.');
         }
 
@@ -341,7 +341,7 @@ test.describe('Order Database Verification Tests', () => {
         const kiboResult = await connection.request().query(kiboQuery);
 
         // Execute the query for BigC Order ID
-        const bigCQuery = query.replace('@EntityOrderId', bigCOrderId);
+        const bigCQuery = query.replace('@EntityOrderId', bigOrderId);
         const bigCResult = await connection.request().query(bigCQuery);
 
         // Verify the results
