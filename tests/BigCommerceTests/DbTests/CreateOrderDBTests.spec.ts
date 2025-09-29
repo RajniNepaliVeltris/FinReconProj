@@ -35,6 +35,24 @@ import { TestConfig } from '../../../utils/testConfig';
 const testConfig = TestConfig.getInstance();
 const scenarios = testConfig.getScenarios();
 
+// Helper function to set up common test data and checks
+async function setupTestCase(testCaseName: string, sheetName: string, testInfo: TestInfo): Promise<{ testCase: TestCase; excelReader: ExcelReader }> {
+    console.log(`[DB Test Setup] Starting setup for test case: ${testCaseName} in sheet: ${sheetName}`);
+    const excelReader = ExcelReader.getInstance();
+    const testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
+    console.log(`[DB Test Setup] Fetched test case data: ${Object.keys(testCase).length} fields`);
+
+    // Only execute if Automation is true
+    if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
+        console.log(`[DB Test Setup] Skipping test case due to automation flag: ${testCaseName}`);
+        throw new Error('Test skipped due to automation settings');
+    }
+
+    await excelReader.logStep('Verifying Order in Database', { 'Test Case': testCaseName, 'Scenario': sheetName });
+    console.log(`[DB Test Setup] Setup complete for test case: ${testCaseName}`);
+    return { testCase, excelReader };
+}
+
 test.describe('Order Database Verification Tests', () => {
     test('Database Connection and Schema Check', async ({}, testInfo: TestInfo) => {
         testInfo.annotations.push(
@@ -42,27 +60,26 @@ test.describe('Order Database Verification Tests', () => {
             { type: 'feature', description: 'Database Connectivity' }
         );
 
+        console.log('[DB Setup] Checking database connection and query loading...');
         try {
-            console.log('Checking database connection and query loading...');
-
             // Test basic database connectivity with a simple query
             const connection = await getBigCConnection();
             const testResult = await connection.request().query('SELECT 1 as TestConnection');
-            console.log('Database connection successful:', testResult.recordset[0]);
+            console.log('[DB Setup] Database connection successful:', testResult.recordset[0]);
 
             expect(testResult.recordset[0].TestConnection).toBe(1);
 
             // Check that queries are loaded
             const queryManager = QueryManager.getInstance();
             const availableQueries = queryManager.listQueries();
-            console.log('Available queries:', availableQueries);
+            console.log('[DB Setup] Available queries:', availableQueries.length);
 
             expect(availableQueries.length).toBeGreaterThan(0);
             expect(availableQueries).toContain('comprehensive-order-details');
-            console.log('Query manager loaded successfully');
+            console.log('[DB Setup] Query manager loaded successfully');
 
         } catch (error: any) {
-            console.error('Database connection or query loading failed:', error);
+            console.error('[DB Setup] Database connection or query loading failed:', error.message);
             throw error;
         }
     });
@@ -83,44 +100,37 @@ test.describe('Order Database Verification Tests', () => {
                     let failedStep = '';
 
                     try {
-                        testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
-
-                        // Only execute if Automation is true
-                        if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
-                            return;
-                        }
-
-                        await excelReader.logStep('Verifying Order in Database', { 'Test Case': testCaseName, 'Scenario': scenario });
+                        const setupResult = await setupTestCase(testCaseName, sheetName, testInfo);
+                        testCase = setupResult.testCase;
 
                         const orderId = testCase['BigC_OrderId'];
                         if (!orderId || orderId.trim() === '') {
                             throw new Error('BigC_OrderId not found in Excel sheet. Ensure the order has been created first.');
                         }
+                        console.log(`[DB Verification] Verifying order ID: ${orderId} for test case: ${testCaseName}`);
 
                         const verificationResult = await verifyOrderInDatabase(orderId);
+                        console.log(`[DB Verification] Verification result: exists=${verificationResult.exists}, details count=${verificationResult.details?.length || 0}`);
 
                         if (verificationResult.error) {
+                            console.error(`[DB Verification] Database verification failed: ${verificationResult.error}`);
                             throw new Error(`Database verification failed: ${verificationResult.error}`);
                         }
 
                         expect(verificationResult.exists).toBe(true);
 
                         if (verificationResult.details && verificationResult.details.length > 0) {
-                            console.log(`Order ${orderId} found with ${verificationResult.details.length} detail records`);
+                            console.log(`[DB Verification] Order ${orderId} found with ${verificationResult.details.length} detail records`);
 
                             const firstDetail = verificationResult.details[0];
-                            // Diagnostic logging: show both available properties and types
-                            console.log('First detail record (raw):', firstDetail);
-                            console.log('Available keys on firstDetail:', Object.keys(firstDetail));
+                            console.log(`[DB Verification] First detail keys: ${Object.keys(firstDetail).join(', ')}`);
 
                             const dbEntityOrderId = firstDetail.EntityOrderId ?? firstDetail.entityorderid ?? firstDetail.OrderNumber ?? firstDetail.OrderId ?? firstDetail.OrderNumber;
-                            console.log('dbEntityOrderId (raw):', dbEntityOrderId, 'type:', typeof dbEntityOrderId);
-                            console.log('expected orderId (raw):', orderId, 'type:', typeof orderId);
+                            console.log(`[DB Verification] Comparing DB EntityOrderId: '${dbEntityOrderId}' (type: ${typeof dbEntityOrderId}) with expected: '${orderId}' (type: ${typeof orderId})`);
 
                             // Coerce both sides to string for a safe, type-insensitive comparison
                             expect(String(dbEntityOrderId)).toBe(String(orderId));
-
-                            console.log('Order details from database:', firstDetail);
+                            console.log(`[DB Verification] Order ID match confirmed`);
                         }
 
                         // Fetch BIGOrderId and KiboOrderId from the Excel sheet
@@ -134,9 +144,11 @@ test.describe('Order Database Verification Tests', () => {
                         if (!kiboOrderId.trim()) {
                             throw new Error('KiboOrderId not found in Excel sheet. Ensure the order has been created first.');
                         }
+                        console.log(`[DB Verification] Comparing BigC Order ID: ${bigOrderId} with Kibo Order ID: ${kiboOrderId}`);
 
                         // Initialize database connection
                         const connection = await getBigCConnection();
+                        console.log(`[DB Verification] Established DB connection for comparison queries`);
 
                         // Query the database for BIGC Order ID results
                         const bigCResult = await connection.request().query(
@@ -148,11 +160,11 @@ test.describe('Order Database Verification Tests', () => {
                         }
 
                         const bigCData = bigCResult.recordset[0];
-                        console.log('BIGC Order Data:', bigCData);
+                        console.log(`[DB Verification] Retrieved BigC data: Total=${bigCData.Total}, Status=${bigCData.Status}`);
 
                         // Query the database for Kibo Order ID results
                         const kiboResult = await connection.request().query(
-                            `SELECT * FROM [KiboOrder] WHERE OrderNumber = '${kiboOrderId}'`
+                            `SELECT * FROM [Order] WHERE OrderNumber = '${kiboOrderId}'`
                         );
 
                         if (!kiboResult.recordset || kiboResult.recordset.length === 0) {
@@ -160,21 +172,20 @@ test.describe('Order Database Verification Tests', () => {
                         }
 
                         const kiboData = kiboResult.recordset[0];
-                        console.log('Kibo Order Data:', kiboData);
+                        console.log(`[DB Verification] Retrieved Kibo data: Total=${kiboData.Total}, Status=${kiboData.Status}`);
 
                         // Compare BIGC and Kibo data values
                         expect(bigCData.Total).toEqual(kiboData.Total);
                         expect(bigCData.CustomerName).toEqual(kiboData.CustomerName);
                         expect(bigCData.Status).toEqual(kiboData.Status);
 
-                        console.log('BIGC and Kibo Order data values match successfully.');
-
-                        dbExecutionNotes = `Order ${orderId} successfully verified in BigCommerce database. Found ${verificationResult.details?.length || 0} detail records.`;
+                        console.log('[DB Verification] BigC and Kibo Order data values match successfully.');
+                        dbExecutionNotes = `Order ${orderId} successfully verified in BigCommerce database. Found ${verificationResult.details?.length || 0} detail records. Data comparison passed.`;
 
                     } catch (err: any) {
                         dbTestResult = 'Failed';
                         failedStep = 'Database Verification';
-
+                        console.error(`[DB Verification] Test failed at step: ${failedStep}, error: ${err.message}`);
                         dbExecutionNotes = `Failed to verify order in database: ${err.message}`;
 
                         await excelReader.handleTestFailure(sheetName, testCaseName, failedStep, err, undefined, testCase, 'db');
@@ -182,6 +193,7 @@ test.describe('Order Database Verification Tests', () => {
                         throw err;
                     } finally {
                         if (testCase) {
+                            console.log(`[DB Verification] Recording test result: ${dbTestResult} for test case: ${testCaseName}`);
                             await excelReader.logTestSummaryAndRecordResult(testCase, dbTestResult, undefined, dbExecutionNotes, sheetName, testCaseName, 'db');
                         }
                     }
@@ -191,7 +203,12 @@ test.describe('Order Database Verification Tests', () => {
     }
 
     test('Execute and Verify Order Query from SQL File', async ({}) => {
+        const OrderId = 358102;
+        //const entityOrderId = testCase['BigC_OrderId'];
+        console.log(`[SQL Test] Executing order query for EntityOrderId: ${OrderId}`);
+
         const connection = await getBigCConnection();
+        console.log(`[SQL Test] DB connection established`);
 
         // Fetch the query from the QueryManager
         const queryManager = QueryManager.getInstance();
@@ -202,27 +219,44 @@ test.describe('Order Database Verification Tests', () => {
         }
 
         // Replace the parameter in the query
-        const entityOrderId = 440599;
-        const formattedQuery = query.replace('@EntityOrderId', entityOrderId.toString());
+        let formattedQuery = query;
+        if (query.includes('@OrderNumber')) {
+            formattedQuery = query.replace(/@OrderNumber/g, OrderId.toString());
+        } else {
+            formattedQuery = query.replace(/@EntityOrderId/g, OrderId.toString());
+        }
+        console.log(`[SQL Test] Formatted query ready`);
 
         // Execute the query
         const result = await connection.request().query(formattedQuery);
 
+        if (!result || !result.recordset) {
+            console.error(`[SQL Test] Query result:`, result);
+            throw new Error(`[SQL Test] Query did not return any records or result.recordset is undefined`);
+        }
+        console.log(`[SQL Test] Query executed, records returned: ${result.recordset.length}`);
+
         // Verify the results
-        expect(result.recordset).toBeDefined();
+        expect(result.recordset).not.toBeUndefined();
+        expect(Array.isArray(result.recordset)).toBe(true);
         expect(result.recordset.length).toBeGreaterThan(0);
 
         const orderData = result.recordset[0];
-        console.log('Order Data:', orderData);
+        console.log(`[SQL Test] Order Data: OrderId=${orderData?.OrderId}, OrderNumber=${orderData?.OrderNumber}, Total=${orderData?.Total}`);
 
         // Add specific assertions based on expected values
-        expect(orderData.OrderId).toBeDefined();
-        expect(orderData.OrderNumber).toBeDefined();
-        expect(orderData.Total).toBeGreaterThan(0);
+        expect(orderData?.OrderId).toBeDefined();
+        expect(orderData?.OrderNumber).toBeDefined();
+        expect(orderData?.Total).toBeGreaterThan(0);
+        console.log(`[SQL Test] Assertions passed`);
     });
 
     test('Execute and Verify Order Attributes Query from SQL File', async ({}) => {
+        const entityOrderId = 440599;
+        console.log(`[SQL Test] Executing order attributes query for EntityOrderId: ${entityOrderId}`);
+
         const connection = await getBigCConnection();
+        console.log(`[SQL Test] DB connection established`);
 
         // Fetch the query from the QueryManager
         const queryManager = QueryManager.getInstance();
@@ -233,28 +267,34 @@ test.describe('Order Database Verification Tests', () => {
         }
 
         // Replace the parameter in the query
-        const entityOrderId = 440599;
         const formattedQuery = query.replace('@EntityOrderId', entityOrderId.toString());
+        console.log(`[SQL Test] Formatted query ready`);
 
         // Execute the query
         const result = await connection.request().query(formattedQuery);
+        console.log(`[SQL Test] Query executed, attributes returned: ${result.recordset.length}`);
 
         // Verify the results
         expect(result.recordset).toBeDefined();
         expect(result.recordset.length).toBeGreaterThan(0);
 
         const attributeData = result.recordset;
-        console.log('Order Attributes Data:', attributeData);
+        console.log(`[SQL Test] Sample attribute: ${attributeData[0]?.FullyQualifiedName} = ${attributeData[0]?.Values}`);
 
         // Add specific assertions based on expected values
         attributeData.forEach(attribute => {
             expect(attribute.FullyQualifiedName).toBeDefined();
             expect(attribute.Values).toBeDefined();
         });
+        console.log(`[SQL Test] All attribute assertions passed`);
     });
 
     test('Execute and Verify Billing and Fulfillment Info Queries from SQL File', async ({}) => {
+        const entityOrderId = 440599;
+        console.log(`[SQL Test] Executing billing and fulfillment queries for EntityOrderId: ${entityOrderId}`);
+
         const connection = await getBigCConnection();
+        console.log(`[SQL Test] DB connection established`);
 
         // Fetch the billing info query from the QueryManager
         const queryManager = QueryManager.getInstance();
@@ -265,18 +305,19 @@ test.describe('Order Database Verification Tests', () => {
         }
 
         // Replace the parameter in the billing query
-        const entityOrderId = 440599;
         const formattedBillingQuery = billingQuery.replace('@EntityOrderId', entityOrderId.toString());
+        console.log(`[SQL Test] Billing query formatted`);
 
         // Execute the billing info query
         const billingResult = await connection.request().query(formattedBillingQuery);
+        console.log(`[SQL Test] Billing query executed, records: ${billingResult.recordset.length}`);
 
         // Verify the billing info results
         expect(billingResult.recordset).toBeDefined();
         expect(billingResult.recordset.length).toBeGreaterThan(0);
 
         const billingData = billingResult.recordset;
-        console.log('Billing Info Data:', billingData);
+        console.log(`[SQL Test] Sample billing data: entityorderid=${billingData[0]?.entityorderid}`);
 
         // Fetch the fulfillment info query from the QueryManager
         const fulfillmentQuery = queryManager.getQuery('fetch-fulfillment-info-by-entityorderid');
@@ -287,16 +328,18 @@ test.describe('Order Database Verification Tests', () => {
 
         // Replace the parameter in the fulfillment query
         const formattedFulfillmentQuery = fulfillmentQuery.replace('@EntityOrderId', entityOrderId.toString());
+        console.log(`[SQL Test] Fulfillment query formatted`);
 
         // Execute the fulfillment info query
         const fulfillmentResult = await connection.request().query(formattedFulfillmentQuery);
+        console.log(`[SQL Test] Fulfillment query executed, records: ${fulfillmentResult.recordset.length}`);
 
         // Verify the fulfillment info results
         expect(fulfillmentResult.recordset).toBeDefined();
         expect(fulfillmentResult.recordset.length).toBeGreaterThan(0);
 
         const fulfillmentData = fulfillmentResult.recordset;
-        console.log('Fulfillment Info Data:', fulfillmentData);
+        console.log(`[SQL Test] Sample fulfillment data: entityorderid=${fulfillmentData[0]?.entityorderid}`);
 
         // Add specific assertions based on expected values
         billingData.forEach(billing => {
@@ -306,6 +349,7 @@ test.describe('Order Database Verification Tests', () => {
         fulfillmentData.forEach(fulfillment => {
             expect(fulfillment.entityorderid).toBe(entityOrderId);
         });
+        console.log(`[SQL Test] Billing and fulfillment assertions passed`);
     });
 
     test('Compare Results for KIBO and BigC Order IDs', async ({}) => {
@@ -315,6 +359,8 @@ test.describe('Order Database Verification Tests', () => {
         // Fetch test case data from Excel
         const sheetName = 'Custom Product'; // Replace with the actual sheet name
         const testCaseName = 'Order Comparison Test'; // Replace with the actual test case name
+        console.log(`[Comparison Test] Fetching test case: ${testCaseName} from sheet: ${sheetName}`);
+
         const testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
 
         if (!testCase) {
@@ -325,8 +371,9 @@ test.describe('Order Database Verification Tests', () => {
         const kiboOrderId = String(testCase['KIBO_OrderId']);
 
         if (!kiboOrderId || !bigOrderId) {
-            throw new Error('Both KIBOOrderId and BIGOrderId must be provided in the Excel sheet.');
+            throw new Error('Both KiboOrderId and BigC_OrderId must be provided in the Excel sheet.');
         }
+        console.log(`[Comparison Test] Comparing BigC Order ID: ${bigOrderId} with Kibo Order ID: ${kiboOrderId}`);
 
         // Fetch the query from the QueryManager
         const queryManager = QueryManager.getInstance();
@@ -339,10 +386,12 @@ test.describe('Order Database Verification Tests', () => {
         // Execute the query for KIBO Order ID
         const kiboQuery = query.replace('@EntityOrderId', kiboOrderId);
         const kiboResult = await connection.request().query(kiboQuery);
+        console.log(`[Comparison Test] Kibo query executed, records: ${kiboResult.recordset.length}`);
 
         // Execute the query for BigC Order ID
         const bigCQuery = query.replace('@EntityOrderId', bigOrderId);
         const bigCResult = await connection.request().query(bigCQuery);
+        console.log(`[Comparison Test] BigC query executed, records: ${bigCResult.recordset.length}`);
 
         // Verify the results
         expect(kiboResult.recordset).toBeDefined();
@@ -353,12 +402,13 @@ test.describe('Order Database Verification Tests', () => {
         const kiboData = kiboResult.recordset[0];
         const bigCData = bigCResult.recordset[0];
 
-        console.log('KIBO Order Data:', kiboData);
-        console.log('BigC Order Data:', bigCData);
+        console.log(`[Comparison Test] Kibo Data: Total=${kiboData.Total}, CustomerName=${kiboData.CustomerName}, Status=${kiboData.Status}`);
+        console.log(`[Comparison Test] BigC Data: Total=${bigCData.Total}, CustomerName=${bigCData.CustomerName}, Status=${bigCData.Status}`);
 
         // Compare specific fields
         expect(kiboData.Total).toEqual(bigCData.Total);
         expect(kiboData.CustomerName).toEqual(bigCData.CustomerName);
         expect(kiboData.Status).toEqual(bigCData.Status);
+        console.log(`[Comparison Test] All comparisons passed`);
     });
 });
