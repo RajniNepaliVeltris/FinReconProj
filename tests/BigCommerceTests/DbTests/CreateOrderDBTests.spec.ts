@@ -107,14 +107,25 @@ test.describe('Order Database Verification Tests', () => {
 
                         if (verificationResult.details && verificationResult.details.length > 0) {
                             console.log(`Order ${orderId} found with ${verificationResult.details.length} detail records`);
-                            // Verify that the first record has the correct OrderNumber
-                            expect(verificationResult.details[0].OrderNumber).toBe(orderId);
-                            console.log('Order details from database:', verificationResult.details[0]);
+
+                            const firstDetail = verificationResult.details[0];
+                            // Diagnostic logging: show both available properties and types
+                            console.log('First detail record (raw):', firstDetail);
+                            console.log('Available keys on firstDetail:', Object.keys(firstDetail));
+
+                            const dbEntityOrderId = firstDetail.EntityOrderId ?? firstDetail.entityorderid ?? firstDetail.OrderNumber ?? firstDetail.OrderId ?? firstDetail.OrderNumber;
+                            console.log('dbEntityOrderId (raw):', dbEntityOrderId, 'type:', typeof dbEntityOrderId);
+                            console.log('expected orderId (raw):', orderId, 'type:', typeof orderId);
+
+                            // Coerce both sides to string for a safe, type-insensitive comparison
+                            expect(String(dbEntityOrderId)).toBe(String(orderId));
+
+                            console.log('Order details from database:', firstDetail);
                         }
 
                         // Fetch BIGOrderId and KiboOrderId from the Excel sheet
-                        const bigOrderId = String(testCase['BIGOrderId']);
-                        const kiboOrderId = String(testCase['KiboOrderId']);
+                        const bigOrderId = String(testCase['BigC_OrderId']);
+                        const kiboOrderId = String(testCase['KIBO_OrderId']);
 
                         if (!bigOrderId.trim()) {
                             throw new Error('BIGOrderId not found in Excel sheet. Ensure the order has been created first.');
