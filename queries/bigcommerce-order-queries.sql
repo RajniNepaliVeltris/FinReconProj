@@ -217,7 +217,7 @@ LEFT JOIN itemproductbundleproduct ipbp ON ip.entityitemproductid = ipbp.entityi
 
 LEFT JOIN itemproductproperty ipp ON ip.entityitemproductid = ipp.entityitemproductid
 
-LEFT JOIN itemproductpropertyvalue ippv ON ipp.entityitemproductpropertyid = ippv.entityitemproductpropertyid
+LEFT JOIN itemproductpropertyvalue ippv ON ipp.entityitemproductid = ippv.entityitemproductpropertyid
 
 -- Join Payments
 LEFT JOIN Payment p ON o.entityorderid = p.entityorderid
@@ -242,6 +242,53 @@ LEFT JOIN OrderAttribute oa ON o.entityorderid = oa.entityorderid
 
 WHERE o.OrderNumber = @OrderNumber;
 
+-- Query to fetch order details by entityorderid
+-- Parameters: @EntityOrderId (the entity order ID to verify)
+SELECT o.Id AS OrderId,
+    o.OrderNumber,
+    o.TenantId,
+    o.SiteId,
+    o.CustomerAccountId,
+    o.Email,
+    o.Type AS OrderType,
+    o.Status AS OrderStatus,
+    o.PaymentStatus,
+    o.FulfillmentStatus,
+    o.ReturnStatus,
+    -- Order Dates
+    o.SubmittedDate,
+    o.AcceptedDate,
+    o.CancelledDate,
+    o.ClosedDate,
+    o.auditinfoCreateDate AS OrderCreateDate,
+    o.auditinfoUpdateDate AS OrderUpdateDate,
+    -- Order Financial Summary
+    o.SubTotal,
+    o.DiscountTotal,
+    o.DiscountedSubTotal,
+    o.DiscountedTotal,
+    o.ShippingSubTotal,
+    o.ShippingTotal,
+    o.ShippingTaxTotal,
+    o.ItemTaxTotal,
+    o.TaxTotal,
+    o.FeeTotal,
+    o.HandlingTotal,
+    o.Total,
+    o.TotalCollected,
+    o.AmountRefunded,
+    o.AmountRemainingForPayment,
+    -- Order Flags
+    o.IsEligibleForReturns,
+    o.IsPartialOrder,
+    o.IsTaxExempt,
+    -- Order Configuration
+    o.CurrencyCode,
+    o.PriceListCode,
+    o.CouponCodes
+FROM [order] o
+WHERE entityorderid = @EntityOrderId;
+
 -- Simple Order Existence Check Query
 -- Parameters: @OrderNumber (the order number to check)
 -- SELECT COUNT(*) as OrderCount FROM [Order] WHERE OrderNumber = @OrderNumber;
@@ -258,3 +305,27 @@ WHERE o.OrderNumber = @OrderNumber;
 --     auditinfoCreateDate AS CreatedDate
 -- FROM [Order]
 -- WHERE OrderNumber = @OrderNumber;
+
+-- Query to fetch order attributes by entityorderid
+-- Parameters: @EntityOrderId (the entity order ID to verify)
+SELECT FullyQualifiedName,
+       [Values]
+FROM OrderAttribute
+WHERE entityorderid = @EntityOrderId;
+
+-- Query to fetch billing information by entityorderid
+-- Parameters: @EntityOrderId (the entity order ID to verify)
+SELECT *
+FROM BillingInfo
+WHERE entityorderid = @EntityOrderId;
+
+-- Query to fetch fulfillment information by entityorderid
+-- Parameters: @EntityOrderId (the entity order ID to verify)
+SELECT *
+FROM FulfillmentInfo
+WHERE entityorderid = @EntityOrderId;
+
+-- Fetch Order by EntityOrderId Query
+SELECT *
+FROM dbo.[Order]
+WHERE entityorderid = @OrderNumber;

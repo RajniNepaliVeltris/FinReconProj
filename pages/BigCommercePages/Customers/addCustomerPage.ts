@@ -1,5 +1,4 @@
 import { Locator, Page, expect } from '@playwright/test';
-import { UIInteractions } from '../../../utils/uiInteractions';
 import { Homepage } from '../Dashboard/homepage';
 import { CustomerDetails } from './customerType';
 
@@ -126,8 +125,8 @@ export class AddCustomerPage extends Homepage {
             throw new Error('Add Customer page is not loaded properly.');
         }else{
 
-        await this.clickElement(this.originChannelSelect, 'Channel select');
-        await this.clickElement(this.channeloptionselect, 'Channel option select');
+        await this.clickElement(this.originChannelSelect, 'Origin Channel Select');
+        await this.clickElement(this.channeloptionselect, 'Channel Option Select');
         await this.enterText(this.firstNameInput, details.firstName);
         await this.enterText(this.lastNameInput, details.lastName);
         if (details.companyName) {
@@ -142,7 +141,7 @@ export class AddCustomerPage extends Homepage {
             throw new Error('email box not shown');
         }
         if (details.customerGroup){
-        await this.clickElement(this.customerGroupSelect,'click customer group');
+        await this.clickElement(this.customerGroupSelect, 'Customer Group Select');
         await this.customerGroupOptionselect.selectOption({label: details.customerGroup})
         }
         else{
@@ -174,7 +173,7 @@ export class AddCustomerPage extends Homepage {
 
     await this.clickElement(this.addCustomerAddressButton, 'Add Customer Address Button');
     await this.clickElement(this.confirmSaveOkButton, 'Confirm Save OK Button');
-    await this.clickElement(this.addAnAddressButton, 'Add An Address Button');
+    await this.clickElement(this.addAnAddressButton, 'Add Address Button');
 
     if (details.address) {
         await this.waitForElement(this.addAddressHeading);
