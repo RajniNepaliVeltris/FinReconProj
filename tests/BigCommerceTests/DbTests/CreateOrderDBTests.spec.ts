@@ -245,15 +245,15 @@ test.describe('Order Database Verification Tests', () => {
         console.log(`[SQL Test] Order Data: OrderId=${orderData?.OrderId}, OrderNumber=${orderData?.OrderNumber}, Total=${orderData?.Total}`);
 
         // Add specific assertions based on expected values
-        expect(orderData?.OrderId).toBeDefined();
+        expect(orderData?.Id).toBeDefined();
         expect(orderData?.OrderNumber).toBeDefined();
         expect(orderData?.Total).toBeGreaterThan(0);
         console.log(`[SQL Test] Assertions passed`);
     });
 
     test('Execute and Verify Order Attributes Query from SQL File', async ({}) => {
-        const entityOrderId = 440599;
-        console.log(`[SQL Test] Executing order attributes query for EntityOrderId: ${entityOrderId}`);
+        const OrderId = 440599;
+        console.log(`[SQL Test] Executing order attributes query for EntityOrderId: ${OrderId}`);
 
         const connection = await getBigCConnection();
         console.log(`[SQL Test] DB connection established`);
@@ -267,7 +267,7 @@ test.describe('Order Database Verification Tests', () => {
         }
 
         // Replace the parameter in the query
-        const formattedQuery = query.replace('@EntityOrderId', entityOrderId.toString());
+        const formattedQuery = query.replace('@EntityOrderId', OrderId.toString());
         console.log(`[SQL Test] Formatted query ready`);
 
         // Execute the query
@@ -290,8 +290,8 @@ test.describe('Order Database Verification Tests', () => {
     });
 
     test('Execute and Verify Billing and Fulfillment Info Queries from SQL File', async ({}) => {
-        const entityOrderId = 440599;
-        console.log(`[SQL Test] Executing billing and fulfillment queries for EntityOrderId: ${entityOrderId}`);
+        const OrderId = 440599;
+        console.log(`[SQL Test] Executing billing and fulfillment queries for EntityOrderId: ${OrderId}`);
 
         const connection = await getBigCConnection();
         console.log(`[SQL Test] DB connection established`);
@@ -305,7 +305,7 @@ test.describe('Order Database Verification Tests', () => {
         }
 
         // Replace the parameter in the billing query
-        const formattedBillingQuery = billingQuery.replace('@EntityOrderId', entityOrderId.toString());
+        const formattedBillingQuery = billingQuery.replace('@EntityOrderId', OrderId.toString());
         console.log(`[SQL Test] Billing query formatted`);
 
         // Execute the billing info query
@@ -327,7 +327,7 @@ test.describe('Order Database Verification Tests', () => {
         }
 
         // Replace the parameter in the fulfillment query
-        const formattedFulfillmentQuery = fulfillmentQuery.replace('@EntityOrderId', entityOrderId.toString());
+        const formattedFulfillmentQuery = fulfillmentQuery.replace('@EntityOrderId', OrderId.toString());
         console.log(`[SQL Test] Fulfillment query formatted`);
 
         // Execute the fulfillment info query
@@ -343,11 +343,11 @@ test.describe('Order Database Verification Tests', () => {
 
         // Add specific assertions based on expected values
         billingData.forEach(billing => {
-            expect(billing.entityorderid).toBe(entityOrderId);
+            expect(billing.entityorderid).toBe(OrderId);
         });
 
         fulfillmentData.forEach(fulfillment => {
-            expect(fulfillment.entityorderid).toBe(entityOrderId);
+            expect(fulfillment.entityorderid).toBe(OrderId);
         });
         console.log(`[SQL Test] Billing and fulfillment assertions passed`);
     });
@@ -357,7 +357,7 @@ test.describe('Order Database Verification Tests', () => {
         const excelReader = ExcelReader.getInstance();
 
         // Fetch test case data from Excel
-        const sheetName = 'Custom Product'; // Replace with the actual sheet name
+        const sheetName = 'Standard Product'; // Replace with the actual sheet name
         const testCaseName = 'Order Comparison Test'; // Replace with the actual test case name
         console.log(`[Comparison Test] Fetching test case: ${testCaseName} from sheet: ${sheetName}`);
 
