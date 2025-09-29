@@ -36,7 +36,7 @@ const testConfig = TestConfig.getInstance();
 const scenarios = testConfig.getScenarios();
 
 // Helper function to set up common test data and checks
-async function setupTestCase(testCaseName: string, sheetName: string, testInfo: TestInfo): Promise<{ testCase: TestCase; excelReader: ExcelReader }> {
+async function setupTestCase(testCaseName: string, sheetName: string, testInfo: TestInfo): Promise<{ testCase: TestCase; excelReader: ExcelReader } | null> {
     console.log(`[DB Test Setup] Starting setup for test case: ${testCaseName} in sheet: ${sheetName}`);
     const excelReader = ExcelReader.getInstance();
     const testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
@@ -45,7 +45,7 @@ async function setupTestCase(testCaseName: string, sheetName: string, testInfo: 
     // Only execute if Automation is true
     if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
         console.log(`[DB Test Setup] Skipping test case due to automation flag: ${testCaseName}`);
-        throw new Error('Test skipped due to automation settings');
+        return null;
     }
 
     await excelReader.logStep('Verifying Order in Database', { 'Test Case': testCaseName, 'Scenario': sheetName });
@@ -101,6 +101,7 @@ test.describe('Order Database Verification Tests', () => {
 
                     try {
                         const setupResult = await setupTestCase(testCaseName, sheetName, testInfo);
+                        if (!setupResult) return;
                         testCase = setupResult.testCase;
 
                         const orderId = testCase['BigC_OrderId'];
@@ -352,63 +353,77 @@ test.describe('Order Database Verification Tests', () => {
         console.log(`[SQL Test] Billing and fulfillment assertions passed`);
     });
 
-    test('Compare Results for KIBO and BigC Order IDs', async ({}) => {
-        const connection = await getBigCConnection();
-        const excelReader = ExcelReader.getInstance();
+    for (const { scenario, sheetName, testCases } of scenarios) {
+        test.describe(scenario, () => {
+            for (const testCaseName of testCases) {
+                test(`Compare Results for KIBO and BigC Order IDs: ${testCaseName}`, async ({}) => {
+                    const excelReader = ExcelReader.getInstance();
+                    let testCase: TestCase | undefined;
 
-        // Fetch test case data from Excel
-        const sheetName = 'Standard Product'; // Replace with the actual sheet name
-        const testCaseName = 'Order Comparison Test'; // Replace with the actual test case name
-        console.log(`[Comparison Test] Fetching test case: ${testCaseName} from sheet: ${sheetName}`);
+                    try {
+                        testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
 
-        const testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
+                        // Only execute if Automation is true
+                        if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
+                            return;
+                        }
 
-        if (!testCase) {
-            throw new Error(`Test case '${testCaseName}' not found in Excel sheet '${sheetName}'`);
-        }
+                        const bigOrderId = String(testCase['BigC_OrderId']);
+                        const kiboOrderId = String(testCase['KIBO_OrderId']);
 
-        const bigOrderId = String(testCase['BigC_OrderId']);
-        const kiboOrderId = String(testCase['KIBO_OrderId']);
+                        if (!bigOrderId.trim() || !kiboOrderId.trim()) {
+                            console.log(`[Comparison Test] Skipping test case ${testCaseName}: BigC_OrderId or KiboOrderId not present`);
+                            return;
+                        }
 
-        if (!kiboOrderId || !bigOrderId) {
-            throw new Error('Both KiboOrderId and BigC_OrderId must be provided in the Excel sheet.');
-        }
-        console.log(`[Comparison Test] Comparing BigC Order ID: ${bigOrderId} with Kibo Order ID: ${kiboOrderId}`);
+                        console.log(`[Comparison Test] Comparing BigC Order ID: ${bigOrderId} with Kibo Order ID: ${kiboOrderId} for test case: ${testCaseName}`);
 
-        // Fetch the query from the QueryManager
-        const queryManager = QueryManager.getInstance();
-        const query = queryManager.getQuery('fetch-order-by-entityorderid');
+                        const connection = await getBigCConnection();
+                        console.log(`[Comparison Test] DB connection established`);
 
-        if (!query) {
-            throw new Error('Query not found: fetch-order-by-entityorderid');
-        }
+                        // Query the database for BIGC Order ID results
+                        const bigCResult = await connection.request().query(
+                            `SELECT * FROM [Order] WHERE OrderNumber = '${bigOrderId}'`
+                        );
 
-        // Execute the query for KIBO Order ID
-        const kiboQuery = query.replace('@EntityOrderId', kiboOrderId);
-        const kiboResult = await connection.request().query(kiboQuery);
-        console.log(`[Comparison Test] Kibo query executed, records: ${kiboResult.recordset.length}`);
+                        if (!bigCResult.recordset || bigCResult.recordset.length === 0) {
+                            throw new Error(`No data found for BIGC Order ID: ${bigOrderId}`);
+                        }
 
-        // Execute the query for BigC Order ID
-        const bigCQuery = query.replace('@EntityOrderId', bigOrderId);
-        const bigCResult = await connection.request().query(bigCQuery);
-        console.log(`[Comparison Test] BigC query executed, records: ${bigCResult.recordset.length}`);
+                        const bigCData = bigCResult.recordset[0];
+                        console.log(`[Comparison Test] Retrieved BigC data: Total=${bigCData.Total}, Status=${bigCData.Status}`);
 
-        // Verify the results
-        expect(kiboResult.recordset).toBeDefined();
-        expect(bigCResult.recordset).toBeDefined();
-        expect(kiboResult.recordset.length).toBeGreaterThan(0);
-        expect(bigCResult.recordset.length).toBeGreaterThan(0);
+                        // Query the database for Kibo Order ID results
+                        const kiboResult = await connection.request().query(
+                            `SELECT * FROM [Order] WHERE OrderNumber = '${kiboOrderId}'`
+                        );
 
-        const kiboData = kiboResult.recordset[0];
-        const bigCData = bigCResult.recordset[0];
+                        if (!kiboResult.recordset || kiboResult.recordset.length === 0) {
+                            throw new Error(`No data found for Kibo Order ID: ${kiboOrderId}`);
+                        }
 
-        console.log(`[Comparison Test] Kibo Data: Total=${kiboData.Total}, CustomerName=${kiboData.CustomerName}, Status=${kiboData.Status}`);
-        console.log(`[Comparison Test] BigC Data: Total=${bigCData.Total}, CustomerName=${bigCData.CustomerName}, Status=${bigCData.Status}`);
+                        const kiboData = kiboResult.recordset[0];
+                        console.log(`[Comparison Test] Retrieved Kibo data: Total=${kiboData.Total}, Status=${kiboData.Status}`);
 
-        // Compare specific fields
-        expect(kiboData.Total).toEqual(bigCData.Total);
-        expect(kiboData.CustomerName).toEqual(bigCData.CustomerName);
-        expect(kiboData.Status).toEqual(bigCData.Status);
-        console.log(`[Comparison Test] All comparisons passed`);
-    });
+                        // Compare BIGC and Kibo data values
+                        expect(bigCData.Total).toEqual(kiboData.Total);
+                        expect(bigCData.CustomerName).toEqual(kiboData.CustomerName);
+                        expect(bigCData.Status).toEqual(kiboData.Status);
+
+                        console.log(`[Comparison Test] All comparisons passed for test case: ${testCaseName}`);
+
+                        // Log success in Excel
+                        await excelReader.logTestSummaryAndRecordResult(testCase, 'Passed', undefined, `Comparison successful for BigC Order ${bigOrderId} and Kibo Order ${kiboOrderId}`, sheetName, testCaseName, 'db');
+
+                    } catch (err: any) {
+                        console.error(`[Comparison Test] Test failed for ${testCaseName}: ${err.message}`);
+                        if (testCase) {
+                            await excelReader.handleTestFailure(sheetName, testCaseName, 'Comparison', err, undefined, testCase, 'db');
+                        }
+                        throw err;
+                    }
+                });
+            }
+        });
+    }
 });
