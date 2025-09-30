@@ -133,9 +133,9 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
           }
 
           // Search BIGC order id
-          //await settlementPage.setOrderNumber(bigOrderId);
-          //await settlementPage.clickSearch();
-         // await settlementPage.waitForElement(settlementPage.resultsTable, 5000);
+          await settlementPage.setOrderNumber(bigOrderId);
+          await settlementPage.clickSearch();
+          await settlementPage.waitForElement(settlementPage.resultsTable, 5000);
 
           const bigRowCount = await settlementPage.getRowCount();
           if (bigRowCount === 0) throw new Error(`No results found for BIGC Order ID: ${bigOrderId}`);

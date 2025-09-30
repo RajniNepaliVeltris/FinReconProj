@@ -35,9 +35,8 @@ import { TestConfig } from '../../../utils/testConfig';
 const testConfig = TestConfig.getInstance();
 const scenarios = testConfig.getScenarios();
 
-// Helper function to fetch order data by order number
-async function fetchOrderData(orderNumber: string) {
-    const connection = await getBigCConnection();
+// Helper function to fetch order data by order number, using an existing connection
+async function fetchOrderData(orderNumber: string, connection: any) {
     const request = connection.request();
     request.input('OrderNumber', orderNumber);
     const result = await request.query('SELECT * FROM [Order] WHERE OrderNumber = @OrderNumber');
@@ -258,11 +257,12 @@ test.describe('Order Database Verification Tests', () => {
                             console.log(`[Comparison Test] Comparing BigC Order ID: ${bigCOrderId} with Kibo Order ID: ${kiboOrderId} for test case: ${testCaseName}`);
 
                             // Fetch order data using helper function
+                            // Fetch order data using helper function and a shared connection
+                            const connection = await getBigCConnection();
                             const [bigCData, kiboData] = await Promise.all([
-                                fetchOrderData(bigCOrderId),
-                                fetchOrderData(kiboOrderId)
+                                fetchOrderData(bigCOrderId, connection),
+                                fetchOrderData(kiboOrderId, connection)
                             ]);
-
                             console.log(`[Comparison Test] Retrieved BigC data: Total=${bigCData.Total}, Status=${bigCData.Status}`);
                             console.log(`[Comparison Test] Retrieved Kibo data: Total=${kiboData.Total}, Status=${kiboData.Status}`);
 
@@ -279,6 +279,8 @@ test.describe('Order Database Verification Tests', () => {
                             for (const field of keyFields) {
                                 const bigCValue = bigCData[field];
                                 const kiboValue = kiboData[field];
+
+                                console.log(`[Comparison Test] Comparing field '${field}': BigC='${bigCValue}' vs Kibo='${kiboValue}'`);
 
                                 if (String(bigCValue) !== String(kiboValue)) {
                                     differences.push(`${field}: BigC=${bigCValue}, Kibo=${kiboValue}`);
