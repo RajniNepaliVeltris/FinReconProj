@@ -47,6 +47,103 @@ async function fetchOrderData(orderNumber: string) {
     return result.recordset[0];
 }
 
+// Helper function to validate test execution scenarios
+function validateTestExecutionScenario(testCase: TestCase): { isValid: boolean; reason: string } {
+    const manualTest = String(testCase['Manual Test'] || '').toLowerCase() === 'true';
+    const bigCOrderId = String(testCase['BigC_OrderId'] || '').trim();
+    const kiboOrderId = String(testCase['KIBO_OrderId'] || '').trim();
+
+    console.log(`[Scenario Validation] ===== EXCEL VALUES FETCHED =====`);
+    console.log(`[Scenario Validation] Manual Test (raw): '${testCase['Manual Test']}'`);
+    console.log(`[Scenario Validation] BigC_OrderId (raw): '${testCase['BigC_OrderId']}'`);
+    console.log(`[Scenario Validation] KIBO_OrderId (raw): '${testCase['KIBO_OrderId']}'`);
+
+    console.log(`[Scenario Validation] ===== PROCESSED VALUES =====`);
+    console.log(`[Scenario Validation] Manual Test (processed): '${testCase['Manual Test']}' -> ${manualTest} (${manualTest ? 'TRUE' : 'FALSE'})`);
+    console.log(`[Scenario Validation] BigC_OrderId (processed): '${testCase['BigC_OrderId']}' -> '${bigCOrderId}' (${bigCOrderId ? 'PRESENT' : 'MISSING'})`);
+    console.log(`[Scenario Validation] KIBO_OrderId (processed): '${testCase['KIBO_OrderId']}' -> '${kiboOrderId}' (${kiboOrderId ? 'PRESENT' : 'MISSING'})`);
+
+    console.log(`[Scenario Validation] ===== SCENARIO EVALUATION =====`);
+
+    // Scenario 1: Manual Test=false, both BigC and KIBO Order IDs present
+    const scenario1Condition1 = !manualTest;
+    const scenario1Condition2 = bigCOrderId;
+    const scenario1Condition3 = kiboOrderId;
+    const scenario1 = scenario1Condition1 && scenario1Condition2 && scenario1Condition3;
+
+    console.log(`[Scenario Validation] SCENARIO 1: Manual Test=false + BigC_OrderId present + KIBO_OrderId present`);
+    console.log(`[Scenario Validation]   - Manual Test=false: ${scenario1Condition1} (${scenario1Condition1 ? 'PASS' : 'FAIL'} - Manual Test is ${manualTest ? 'TRUE' : 'FALSE'})`);
+    console.log(`[Scenario Validation]   - BigC_OrderId present: ${scenario1Condition2} (${scenario1Condition2 ? 'PASS' : 'FAIL'} - BigC_OrderId is ${bigCOrderId ? `'${bigCOrderId}'` : 'empty'})`);
+    console.log(`[Scenario Validation]   - KIBO_OrderId present: ${scenario1Condition3} (${scenario1Condition3 ? 'PASS' : 'FAIL'} - KIBO_OrderId is ${kiboOrderId ? `'${kiboOrderId}'` : 'empty'})`);
+    console.log(`[Scenario Validation]   - SCENARIO 1 RESULT: ${scenario1} (${scenario1 ? 'PASS - Can run BigC vs Kibo comparison' : 'FAIL - Missing required data for comparison'})`);
+
+    // Scenario 2: Manual Test=true, BigC Order ID present
+    const scenario2Condition1 = manualTest;
+    const scenario2Condition2 = bigCOrderId;
+    const scenario2 = scenario2Condition1 && scenario2Condition2;
+
+    console.log(`[Scenario Validation] SCENARIO 2: Manual Test=true + BigC_OrderId present`);
+    console.log(`[Scenario Validation]   - Manual Test=true: ${scenario2Condition1} (${scenario2Condition1 ? 'PASS' : 'FAIL'} - Manual Test is ${manualTest ? 'TRUE' : 'FALSE'})`);
+    console.log(`[Scenario Validation]   - BigC_OrderId present: ${scenario2Condition2} (${scenario2Condition2 ? 'PASS' : 'FAIL'} - BigC_OrderId is ${bigCOrderId ? `'${bigCOrderId}'` : 'empty'})`);
+    console.log(`[Scenario Validation]   - SCENARIO 2 RESULT: ${scenario2} (${scenario2 ? 'PASS - Can run BigC-only verification' : 'FAIL - Missing required data'})`);
+
+    console.log(`[Scenario Validation] ===== FINAL DECISION =====`);
+    if (scenario1 || scenario2) {
+        console.log(`[Scenario Validation] ✅ EXECUTION ALLOWED: Test meets execution criteria`);
+        return { isValid: true, reason: '' };
+    }
+
+    console.log(`[Scenario Validation] ❌ EXECUTION BLOCKED: Test does not meet any execution criteria`);
+
+    let explanation = 'Test execution blocked because:\n';
+    if (!scenario1 && !scenario2) {
+        explanation += '  - Neither Scenario 1 nor Scenario 2 conditions are met\n';
+    }
+    if (!scenario1) {
+        const reasons = [];
+        if (manualTest) reasons.push('Manual Test is TRUE (should be FALSE for Scenario 1)');
+        if (!bigCOrderId) reasons.push('BigC_OrderId is missing');
+        if (!kiboOrderId) reasons.push('KIBO_OrderId is missing');
+        explanation += `  - Scenario 1 failed: ${reasons.join(', ')}\n`;
+    }
+    if (!scenario2) {
+        const reasons = [];
+        if (!manualTest) reasons.push('Manual Test is FALSE (should be TRUE for Scenario 2)');
+        if (!bigCOrderId) reasons.push('BigC_OrderId is missing');
+        explanation += `  - Scenario 2 failed: ${reasons.join(', ')}\n`;
+    }
+
+    return {
+        isValid: false,
+        reason: explanation.trim()
+    };
+}
+
+// Helper function for common test setup and validation
+async function setupAndValidateTest(testCaseName: string, sheetName: string, test: any): Promise<TestCase> {
+    const excelReader = ExcelReader.getInstance();
+    const testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
+
+    // Check automation flag
+    if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
+        const errorMsg = 'Test skipped: Automation flag is not set to true';
+        console.log(`[Test Setup] Skipping test case due to automation flag: ${testCaseName}`);
+        await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, errorMsg, sheetName, testCaseName, 'db');
+        throw new Error(errorMsg);
+    }
+
+    // Check execution scenario
+    const scenarioValidation = validateTestExecutionScenario(testCase);
+    if (!scenarioValidation.isValid) {
+        const errorMsg = `Test skipped: ${scenarioValidation.reason}`;
+        console.log(`[Test Setup] Skipping test case ${testCaseName}: ${scenarioValidation.reason}`);
+        await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, errorMsg, sheetName, testCaseName, 'db');
+        throw new Error(errorMsg);
+    }
+
+    return testCase;
+}
+
 test.describe('Order Database Verification Tests', () => {
     test('Database Connection and Schema Check', async ({}, testInfo) => {
         testInfo.annotations.push(
@@ -84,98 +181,57 @@ test.describe('Order Database Verification Tests', () => {
             test.describe('DB Verification', () => {
                 for (const testCaseName of testCases) {
                     test(`Verify Order in Database: ${testCaseName}`, async ({}, testInfo: TestInfo) => {
-                    testInfo.annotations.push(
-                        { type: 'test-type', description: 'DB Verification' },
-                        { type: 'feature', description: 'Order Verification' }
-                    );
-                    testInfo.setTimeout(testInfo.timeout + 30000);
-                    let testCase: TestCase | undefined;
-                    const excelReader = ExcelReader.getInstance();
-                    let dbTestResult = 'Passed';
-                    let dbExecutionNotes = '';
-                    let failedStep = '';
+                        testInfo.annotations.push(
+                            { type: 'test-type', description: 'DB Verification' },
+                            { type: 'feature', description: 'Order Verification' }
+                        );
+                        testInfo.setTimeout(testInfo.timeout + 30000);
 
-                    try {
                         const excelReader = ExcelReader.getInstance();
-                        testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
+                        let testCase: TestCase | undefined;
+                        let dbExecutionNotes = '';
 
-                        // Only execute if Automation is true
-                        if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
-                            console.log(`[DB Test Setup] Skipping test case due to automation flag: ${testCaseName}`);
-                            await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, 'Test skipped: Automation flag is not set to true', sheetName, testCaseName, 'db');
-                            throw new Error('Test skipped: Automation flag is not set to true');
+                        try {
+                            testCase = await setupAndValidateTest(testCaseName, sheetName, test);
+                            await excelReader.logStep('Verifying Order in Database', { 'Test Case': testCaseName, 'Scenario': sheetName });
+
+                            const orderId = testCase['BigC_OrderId'];
+                            if (!orderId || orderId.trim() === '') {
+                                throw new Error('BigC_OrderId not found in Excel sheet. Ensure the order has been created first.');
+                            }
+
+                            console.log(`[DB Verification] Verifying order ID: ${orderId} for test case: ${testCaseName}`);
+                            const verificationResult = await verifyOrderInDatabase(orderId);
+
+                            if (verificationResult.error) {
+                                throw new Error(`Database verification failed: ${verificationResult.error}`);
+                            }
+
+                            expect(verificationResult.exists).toBe(true);
+
+                            if (verificationResult.details && verificationResult.details.length > 0) {
+                                const firstDetail = verificationResult.details[0];
+                                const dbEntityOrderId = firstDetail.EntityOrderId ?? firstDetail.entityorderid ??
+                                    firstDetail.OrderNumber ?? firstDetail.OrderId ?? firstDetail.OrderNumber;
+
+                                expect(String(dbEntityOrderId)).toBe(String(orderId));
+                            }
+
+                            dbExecutionNotes = `Order ${orderId} successfully verified in BigCommerce database. Found ${verificationResult.details?.length || 0} detail records.`;
+                            console.log('[DB Verification] Order verification completed successfully.');
+
+                            await excelReader.logTestSummaryAndRecordResult(testCase, 'Passed', undefined, dbExecutionNotes, sheetName, testCaseName, 'db');
+
+                        } catch (err: any) {
+                            dbExecutionNotes = `Failed to verify order in database: ${err.message}`;
+                            console.error(`[DB Verification] Test failed: ${err.message}`);
+
+                            if (testCase) {
+                                await excelReader.handleTestFailure(sheetName, testCaseName, 'Database Verification', err, undefined, testCase, 'db');
+                            }
+                            throw err;
                         }
-
-                        await excelReader.logStep('Verifying Order in Database', { 'Test Case': testCaseName, 'Scenario': sheetName });
-                        console.log(`[DB Test Setup] Setup complete for test case: ${testCaseName}`);
-
-                        // Check execution criteria for database tests
-                        const manualTest = String(testCase['Manual Test'] || '').toLowerCase() === 'true';
-                        const bigCOrderId = String(testCase['BigC_OrderId'] || '').trim();
-                        const kiboOrderId = String(testCase['KIBO_OrderId'] || '').trim();
-
-                        // Scenario 1: Automation=true, Manual Test=false, both BigC and KIBO Order IDs present
-                        const scenario1 = !manualTest && bigCOrderId && kiboOrderId;
-                        
-                        // Scenario 2: Automation=true, Manual Test=true, BigC Order ID present
-                        const scenario2 = manualTest && bigCOrderId;
-
-                        if (!scenario1 && !scenario2) {
-                            console.log(`[DB Verification] Skipping test case ${testCaseName}: Does not match execution criteria (Scenario 1: Manual=false + both IDs, or Scenario 2: Manual=true + BigC ID)`);
-                            dbTestResult = 'Failed';
-                            dbExecutionNotes = 'Test skipped: Does not match execution criteria (Scenario 1: Manual=false + both IDs, or Scenario 2: Manual=true + BigC ID)';
-                            throw new Error('Test skipped: Does not match execution criteria');
-                        }
-
-                        const orderId = testCase['BigC_OrderId'];
-                        if (!orderId || orderId.trim() === '') {
-                            throw new Error('BigC_OrderId not found in Excel sheet. Ensure the order has been created first.');
-                        }
-                        console.log(`[DB Verification] Verifying order ID: ${orderId} for test case: ${testCaseName}`);
-
-                        const verificationResult = await verifyOrderInDatabase(orderId);
-                        console.log(`[DB Verification] Verification result: exists=${verificationResult.exists}, details count=${verificationResult.details?.length || 0}`);
-
-                        if (verificationResult.error) {
-                            console.error(`[DB Verification] Database verification failed: ${verificationResult.error}`);
-                            throw new Error(`Database verification failed: ${verificationResult.error}`);
-                        }
-
-                        expect(verificationResult.exists).toBe(true);
-
-                        if (verificationResult.details && verificationResult.details.length > 0) {
-                            console.log(`[DB Verification] Order ${orderId} found with ${verificationResult.details.length} detail records`);
-
-                            const firstDetail = verificationResult.details[0];
-                            console.log(`[DB Verification] First detail keys: ${Object.keys(firstDetail).join(', ')}`);
-
-                            const dbEntityOrderId = firstDetail.EntityOrderId ?? firstDetail.entityorderid ?? firstDetail.OrderNumber ?? firstDetail.OrderId ?? firstDetail.OrderNumber;
-                            console.log(`[DB Verification] Comparing DB EntityOrderId: '${dbEntityOrderId}' (type: ${typeof dbEntityOrderId}) with expected: '${orderId}' (type: ${typeof orderId})`);
-
-                            // Coerce both sides to string for a safe, type-insensitive comparison
-                            expect(String(dbEntityOrderId)).toBe(String(orderId));
-                            console.log(`[DB Verification] Order ID match confirmed`);
-                        }
-
-                        console.log('[DB Verification] Order verification completed successfully.');
-                        dbExecutionNotes = `Order ${orderId} successfully verified in BigCommerce database. Found ${verificationResult.details?.length || 0} detail records.`;
-
-                    } catch (err: any) {
-                        dbTestResult = 'Failed';
-                        failedStep = 'Database Verification';
-                        console.error(`[DB Verification] Test failed at step: ${failedStep}, error: ${err.message}`);
-                        dbExecutionNotes = `Failed to verify order in database: ${err.message}`;
-
-                        await excelReader.handleTestFailure(sheetName, testCaseName, failedStep, err, undefined, testCase, 'db');
-
-                        throw err;
-                    } finally {
-                        if (testCase) {
-                            console.log(`[DB Verification] Recording test result: ${dbTestResult} for test case: ${testCaseName}`);
-                            await excelReader.logTestSummaryAndRecordResult(testCase, dbTestResult, undefined, dbExecutionNotes, sheetName, testCaseName, 'db');
-                        }
-                    }
-                });
+                    });
                 }
             });
 
@@ -187,66 +243,43 @@ test.describe('Order Database Verification Tests', () => {
                         let testCase: TestCase | undefined;
 
                         try {
-                            testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
+                            testCase = await setupAndValidateTest(testCaseName, sheetName, test);
 
-                            // Only execute if Automation is true
-                            if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
-                                console.log(`[Comparison Test Setup] Skipping test case due to automation flag: ${testCaseName}`);
-                                await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, 'Test skipped: Automation flag is not set to true', sheetName, testCaseName, 'db');
-                                throw new Error('Test skipped: Automation flag is not set to true');
-                            }
-
-                            // Check execution criteria for database tests
-                            const manualTest = String(testCase['Manual Test'] || '').toLowerCase() === 'true';
                             const bigCOrderId = String(testCase['BigC_OrderId'] || '').trim();
                             const kiboOrderId = String(testCase['KIBO_OrderId'] || '').trim();
 
-                            // Scenario 1: Automation=true, Manual Test=false, both BigC and KIBO Order IDs present
-                            const scenario1 = !manualTest && bigCOrderId && kiboOrderId;
-                            
-                            // Scenario 2: Automation=true, Manual Test=true, BigC Order ID present
-                            const scenario2 = manualTest && bigCOrderId;
-
-                            if (!scenario1 && !scenario2) {
-                                console.log(`[Comparison Test] Skipping test case ${testCaseName}: Does not match execution criteria`);
-                                await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, 'Test skipped: Does not match execution criteria (Scenario 1: Manual=false + both IDs, or Scenario 2: Manual=true + BigC ID)', sheetName, testCaseName, 'db');
-                                throw new Error('Test skipped: Does not match execution criteria');
+                            if (!bigCOrderId || !kiboOrderId) {
+                                const errorMsg = 'Test skipped: BigC_OrderId or KIBO_OrderId not present in Excel data';
+                                console.log(`[Comparison Test] ${errorMsg} for ${testCaseName}`);
+                                await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, errorMsg, sheetName, testCaseName, 'db');
+                                throw new Error(errorMsg);
                             }
 
-                            const bigOrderId = bigCOrderId;
-                            const kiboOrderIdFinal = kiboOrderId;
-
-                            if (!bigOrderId.trim() || !kiboOrderIdFinal.trim()) {
-                                console.log(`[Comparison Test] Skipping test case ${testCaseName}: BigC_OrderId or KIBO_OrderId not present`);
-                                await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, 'Test skipped: BigC_OrderId or KIBO_OrderId not present in Excel data', sheetName, testCaseName, 'db');
-                                throw new Error('Test skipped: BigC_OrderId or KIBO_OrderId not present in Excel data');
-                            }
-
-                            console.log(`[Comparison Test] Comparing BigC Order ID: ${bigOrderId} with Kibo Order ID: ${kiboOrderId} for test case: ${testCaseName}`);
+                            console.log(`[Comparison Test] Comparing BigC Order ID: ${bigCOrderId} with Kibo Order ID: ${kiboOrderId} for test case: ${testCaseName}`);
 
                             // Fetch order data using helper function
-                            const bigCData = await fetchOrderData(bigOrderId);
-                            console.log(`[Comparison Test] Retrieved BigC data: Total=${bigCData.Total}, Status=${bigCData.Status}`);
+                            const [bigCData, kiboData] = await Promise.all([
+                                fetchOrderData(bigCOrderId),
+                                fetchOrderData(kiboOrderId)
+                            ]);
 
-                            const kiboData = await fetchOrderData(kiboOrderId);
+                            console.log(`[Comparison Test] Retrieved BigC data: Total=${bigCData.Total}, Status=${bigCData.Status}`);
                             console.log(`[Comparison Test] Retrieved Kibo data: Total=${kiboData.Total}, Status=${kiboData.Status}`);
 
-                            // Perform targeted comparison of key fields instead of full object comparison
+                            // Perform targeted comparison of key fields
                             const keyFields = [
-                                'OrderNumber', 'EntityOrderId', 'Total', 'Status', 'PaymentStatus', 
+                                'OrderNumber', 'EntityOrderId', 'Total', 'Status', 'PaymentStatus',
                                 'FulfillmentStatus', 'SubTotal', 'TaxTotal', 'ShippingTotal',
                                 'CustomerAccountId', 'Email', 'SiteId', 'TenantId'
                             ];
 
                             const differences: string[] = [];
                             let matchCount = 0;
-                            let totalFields = 0;
 
                             for (const field of keyFields) {
-                                totalFields++;
                                 const bigCValue = bigCData[field];
                                 const kiboValue = kiboData[field];
-                                
+
                                 if (String(bigCValue) !== String(kiboValue)) {
                                     differences.push(`${field}: BigC=${bigCValue}, Kibo=${kiboValue}`);
                                 } else {
@@ -255,16 +288,15 @@ test.describe('Order Database Verification Tests', () => {
                             }
 
                             if (differences.length > 0) {
-                                const errorMsg = `Order data mismatch for BigC Order ${bigOrderId} vs Kibo Order ${kiboOrderId}. ` +
-                                    `${matchCount}/${totalFields} key fields matched. ` +
+                                const errorMsg = `Order data mismatch for BigC Order ${bigCOrderId} vs Kibo Order ${kiboOrderId}. ` +
+                                    `${matchCount}/${keyFields.length} key fields matched. ` +
                                     `Differences: ${differences.join('; ')}`;
                                 throw new Error(errorMsg);
                             }
 
-                            console.log(`[Comparison Test] All key field comparisons passed (${matchCount}/${totalFields} fields matched) for test case: ${testCaseName}`);
-
-                            // Log success in Excel
-                            await excelReader.logTestSummaryAndRecordResult(testCase, 'Passed', undefined, `Comparison successful for BigC Order ${bigOrderId} and Kibo Order ${kiboOrderId}`, sheetName, testCaseName, 'db');
+                            const successMsg = `Comparison successful for BigC Order ${bigCOrderId} and Kibo Order ${kiboOrderId} (${matchCount}/${keyFields.length} fields matched)`;
+                            console.log(`[Comparison Test] ${successMsg}`);
+                            await excelReader.logTestSummaryAndRecordResult(testCase, 'Passed', undefined, successMsg, sheetName, testCaseName, 'db');
 
                         } catch (err: any) {
                             console.error(`[Comparison Test] Test failed for ${testCaseName}: ${err.message}`);
@@ -280,75 +312,59 @@ test.describe('Order Database Verification Tests', () => {
             // Group: SQL Query Verification
             test.describe('SQL Query Verification', () => {
                 for (const testCaseName of testCases) {
-                    // Test for all SQL queries
                     test(`Execute and Verify All SQL Queries from SQL File: ${testCaseName}`, async ({}, testInfo: TestInfo) => {
                         const excelReader = ExcelReader.getInstance();
-                        const testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
+                        let testCase: TestCase | undefined;
 
-                        // Only execute if Automation is true
-                        if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {
-                            console.log(`[SQL Test Setup] Skipping test case due to automation flag: ${testCaseName}`);
-                            await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, 'Test skipped: Automation flag is not set to true', sheetName, testCaseName, 'db');
-                            throw new Error('Test skipped: Automation flag is not set to true');
+                        try {
+                            testCase = await setupAndValidateTest(testCaseName, sheetName, test);
+
+                            const orderId = testCase['BigC_OrderId'];
+                            if (!orderId || orderId.trim() === '') {
+                                const errorMsg = 'Test skipped: BigC_OrderId not found in Excel sheet';
+                                console.log(`[SQL Test] ${errorMsg} for ${testCaseName}`);
+                                await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, errorMsg, sheetName, testCaseName, 'db');
+                                throw new Error(errorMsg);
+                            }
+
+                            const queryManager = QueryManager.getInstance();
+                            const queries = [
+                                { name: 'fetch-order-by-entityorderid', params: { OrderNumber: orderId }, validator: (result: any) => {
+                                    expect(result.length).toBeGreaterThan(0);
+                                    expect(String(result[0].OrderNumber)).toBe(String(orderId));
+                                }},
+                                { name: 'fetch-order-attributes-by-entityorderid', params: { EntityOrderId: orderId }, validator: (result: any) => {
+                                    expect(result).toBeDefined();
+                                    console.log(`Executed 'fetch-order-attributes-by-entityorderid' for Order ID: ${orderId}. Found ${result.length} attributes.`);
+                                }},
+                                { name: 'fetch-billing-info-by-entityorderid', params: { EntityOrderId: orderId }, validator: (result: any) => {
+                                    expect(result).toBeDefined();
+                                    expect(result.length).toBeGreaterThan(0);
+                                    expect(String(result[0].entityorderid)).toBe(String(orderId));
+                                }},
+                                { name: 'fetch-fulfillment-info-by-entityorderid', params: { EntityOrderId: orderId }, validator: (result: any) => {
+                                    expect(result).toBeDefined();
+                                    expect(result.length).toBeGreaterThan(0);
+                                    expect(String(result[0].entityorderid)).toBe(String(orderId));
+                                }}
+                            ];
+
+                            for (const query of queries) {
+                                console.log(`[SQL Test] Executing '${query.name}' for Order ID: ${orderId}`);
+                                const result = await queryManager.executeQuery(query.name, query.params);
+                                query.validator(result);
+                                console.log(`[SQL Test] Verified '${query.name}' for Order ID: ${orderId}`);
+                            }
+
+                            console.log(`[SQL Test] All SQL queries executed successfully for test case: ${testCaseName}`);
+
+                        } catch (err: any) {
+                            console.error(`[SQL Test] Test failed for ${testCaseName}: ${err.message}`);
+                            if (testCase) {
+                                await excelReader.handleTestFailure(sheetName, testCaseName, 'SQL Query Verification', err, undefined, testCase, 'db');
+                            }
+                            throw err;
                         }
-
-                        // Check execution criteria for database tests
-                        const manualTest = String(testCase['Manual Test'] || '').toLowerCase() === 'true';
-                        const bigCOrderId = String(testCase['BigC_OrderId'] || '').trim();
-                        const kiboOrderId = String(testCase['KIBO_OrderId'] || '').trim();
-
-                        // Scenario 1: Automation=true, Manual Test=false, both BigC and KIBO Order IDs present
-                        const scenario1 = !manualTest && bigCOrderId && kiboOrderId;
-                        
-                        // Scenario 2: Automation=true, Manual Test=true, BigC Order ID present
-                        const scenario2 = manualTest && bigCOrderId;
-
-                        if (!scenario1 && !scenario2) {
-                            console.log(`[SQL Test] Skipping test case ${testCaseName}: Does not match execution criteria`);
-                            const excelReader = ExcelReader.getInstance();
-                            await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, 'Test skipped: Does not match execution criteria (Scenario 1: Manual=false + both IDs, or Scenario 2: Manual=true + BigC ID)', sheetName, testCaseName, 'db');
-                            throw new Error('Test skipped: Does not match execution criteria');
-                        }
-
-                        const orderId = testCase['BigC_OrderId'];
-                        if (!orderId || orderId.trim() === '') {
-                            console.log(`[SQL Test] Skipping '${testCaseName}' - BigC_OrderId not found.`);
-                            const excelReader = ExcelReader.getInstance();
-                            await excelReader.logTestSummaryAndRecordResult(testCase, 'Failed', undefined, 'Test skipped: BigC_OrderId not found in Excel sheet', sheetName, testCaseName, 'db');
-                            throw new Error('Test skipped: BigC_OrderId not found in Excel sheet');
-                        }
-
-                        const queryManager = QueryManager.getInstance();
-
-                        // Test for 'fetch-order-by-entityorderid'
-                        console.log(`[SQL Test] Executing 'fetch-order-by-entityorderid' for Order ID: ${orderId}`);
-                        const orderResult = await queryManager.executeQuery('fetch-order-by-entityorderid', { OrderNumber: orderId });
-                        expect(orderResult).toBeDefined();
-                        expect(orderResult.length).toBeGreaterThan(0);
-                        expect(String(orderResult[0].OrderNumber)).toBe(String(orderId));
-                        console.log(`[SQL Test] Verified 'fetch-order-by-entityorderid' for Order ID: ${orderId}`);
-
-                        // Test for 'fetch-order-attributes-by-entityorderid'
-                        console.log(`[SQL Test] Executing 'fetch-order-attributes-by-entityorderid' for Order ID: ${orderId}`);
-                        const attributesResult = await queryManager.executeQuery('fetch-order-attributes-by-entityorderid', { EntityOrderId: orderId });
-                        expect(attributesResult).toBeDefined();
-                        console.log(`[SQL Test] Executed 'fetch-order-attributes-by-entityorderid' for Order ID: ${orderId}. Found ${attributesResult.length} attributes.`);
-
-                        // Billing Info
-                        console.log(`[SQL Test] Executing 'fetch-billing-info-by-entityorderid' for Order ID: ${orderId}`);
-                        const billingResult = await queryManager.executeQuery('fetch-billing-info-by-entityorderid', { EntityOrderId: orderId });
-                        expect(billingResult).toBeDefined();
-                        expect(billingResult.length).toBeGreaterThan(0);
-                        expect(String(billingResult[0].entityorderid)).toBe(String(orderId));
-                        console.log(`[SQL Test] Verified 'fetch-billing-info-by-entityorderid' for Order ID: ${orderId}`);
-
-                        // Fulfillment Info
-                        console.log(`[SQL Test] Executing 'fetch-fulfillment-info-by-entityorderid' for Order ID: ${orderId}`);
-                        const fulfillmentResult = await queryManager.executeQuery('fetch-fulfillment-info-by-entityorderid', { EntityOrderId: orderId });
-                        expect(fulfillmentResult).toBeDefined();
-                        expect(fulfillmentResult.length).toBeGreaterThan(0);
-                        expect(String(fulfillmentResult[0].entityorderid)).toBe(String(orderId));
-                        console.log(`[SQL Test] Verified 'fetch-fulfillment-info-by-entityorderid' for Order ID: ${orderId}`);
                     });
                 }
             });

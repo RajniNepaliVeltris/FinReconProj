@@ -139,7 +139,7 @@ test.describe('Settlement Report - Compare BIGC and KIBO order results', () => {
 
           const bigRowCount = await settlementPage.getRowCount();
           if (bigRowCount === 0) throw new Error(`No results found for BIGC Order ID: ${bigOrderId}`);
-
+//360296
           // Extract comparison values for BigC
           const bigRowData = await settlementPage.getRowData(0);
           const bigValues: Record<string, string> = {};
