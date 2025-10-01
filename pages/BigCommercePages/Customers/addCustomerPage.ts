@@ -206,27 +206,21 @@ export class AddCustomerPage extends Homepage {
 
     async clickAllCustomers(details: CustomerDetails) {
     try {
-        // Open menu and search for customer
-        //await this.allCustomerMenu.click({ force: true });
        await this.searchCustomerInputBox.fill(details.email);
-
         // Press Enter key to trigger search
         await this.searchCustomerInputBox.press('Enter');
         // Get all rows in the grid
         await expect(this.rows, `Expected exactly 1 row for email ${details.email}`)
             .toHaveCount(1, { timeout: 10000 });
-
         // Once row is confirmed, validate email cell
         const emailCell = this.rows.first().locator('td.email-cell a.mail-to-link');
         await expect(emailCell).toBeVisible({ timeout: 5000 });
-
-        // Log the text
         const emailText = await emailCell.textContent();
         console.log(`Email found: ${emailText?.trim()}`);
 
     }   catch (error) {
         console.error(`Error in clickAllCustomers for email ${details.email}:`, error);
-        throw error; // Re-throw to fail the test
+        throw error;
     }
 }   
 }
