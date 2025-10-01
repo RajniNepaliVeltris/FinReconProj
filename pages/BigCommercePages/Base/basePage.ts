@@ -1,5 +1,6 @@
 import { Locator, Page } from '@playwright/test';
 import { Console, error } from 'console';
+import path from 'path/win32';
 
 // This file represents the base page functionality for BigCommerce.
 
@@ -84,6 +85,81 @@ export class BasePage {
     }
   }
 
+ 
+// Method to select categories dynamically
+async selectCategories(categories: string[][]) {
+  if (!categories || categories.length === 0) return;
+
+  // Access iframe
+  const iframe = this.page.frameLocator('#content-iframe');
+  if (!iframe) throw new Error('Iframe not found. Ensure the iframe is loaded and accessible.');
+
+  for (const categoryGroup of categories) {
+    const parentCategory = categoryGroup[0];
+    const childCategories = categoryGroup.slice(1);
+
+    // Locate parent <li> by its <p> text inside iframe
+    const parentNode = iframe.locator(
+      `xpath=//li[.//p[normalize-space(text())="${parentCategory}"]]`
+    );
+
+    if ((await parentNode.count()) === 0) {
+      console.warn(`Parent category "${parentCategory}" not found`);
+      continue;
+    }
+
+    // Expand parent category
+    //await parentNode.scrollIntoViewIfNeeded();
+    await parentNode.click({ timeout: 5000 });
+    console.log(`Expanded parent category: ${parentCategory}`);
+
+    // Loop through child categories under this parent
+    for (const child of childCategories) {
+    // Locate the input inside the iframe
+    const childInput = iframe.locator(`xpath=//li[.//p[normalize-space(text())="${child}"]]//input[@type="checkbox"]`);
+
+    const count = await childInput.count();
+    if (count === 0) {
+        console.warn(`Child category "${child}" not found`);
+        continue;
+    }
+
+    // Get the id attribute to locate the label
+    const inputId = await childInput.getAttribute('id');
+    if (!inputId) {
+        console.warn(`Checkbox for "${child}" has no id`);
+        continue;
+    }
+
+    const label = iframe.locator(`label[for="${inputId}"]`);
+
+    // Wait for label to be visible and enabled
+    await label.waitFor({ state: 'visible', timeout: 10000 });
+
+     const isChecked = await childInput.isChecked();
+            if (!isChecked) {
+                // Use evaluate to bypass blinking issues
+                await label.evaluate((el: HTMLElement) => el.click());
+
+                // Poll until checkbox is actually checked
+                await childInput.evaluate((input: HTMLInputElement) => new Promise<void>((resolve) => {
+                    const interval = setInterval(() => {
+                        if (input.checked) {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, 50);
+                }));
+
+
+        console.log(`Checked child category: ${child}`);
+    } else {
+        console.log(`Child category already checked: ${child}`);
+    }
+}
+
+  }
+}
 
 
 
@@ -149,6 +225,19 @@ export class BasePage {
     }
   }
 
+  async getFilePath(fileName: string, folder: string = "pages/BigCommercePages/Products/productImages"): Promise<string> {
+    try {
+      const filePath = path.join(__dirname, "..", folder, fileName);
+      console.log(`Resolved file path: ${filePath}`);
+      return filePath;
+    } catch (error) {
+      console.error(`Failed to resolve file path for ${fileName}`, error);
+      throw new Error(`File path resolution failed: ${error}`);
+    }
+  }
+
+  
+
   async verifyPageTitle(expectedTitle: string): Promise<void> {
     try {
       const actualTitle = await this.page.title();
@@ -161,6 +250,14 @@ export class BasePage {
       throw error;
     }
   }
+
+  async fillDescription(description: string) {
+    const parentFrame = this.page.frameLocator('//iframe[@id="content-iframe"]');
+    const tinyMCEFrame = parentFrame.frameLocator('//iframe[contains(@title,"Rich Text Area")]');
+    const editableBody = tinyMCEFrame.locator('body[contenteditable="true"]');
+    await editableBody.waitFor({ state: 'visible', timeout: 10000 });
+    await editableBody.fill(description);
+}
 
   async logout(): Promise<void> {
     try {

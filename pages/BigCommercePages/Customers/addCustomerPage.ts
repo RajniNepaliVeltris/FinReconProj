@@ -22,32 +22,33 @@ export class AddCustomerPage extends Homepage {
     private confirmPasswordInput: Locator;
     private cancelButton: Locator;
     private saveAndAddAnotherButton: Locator;
-    channeloptionselect: Locator;
-    customerGroupOptionselect: Locator;
-    paymentTermsOptionInput: Locator;
-    addCustomerAddressButton: Locator;
-    confirmSaveOkButton: Locator;
-    addAnAddressButton: Locator;
-    addAddressFirstNameInput: Locator;
-    addAddressLastNameInput: Locator;
-    addAddressCompanyNameInput: Locator;
-    addAddressPhoneNumberInput: Locator;
-    addAddressLine1Input: Locator;
-    addAddressLine2Input: Locator;
-    addAddressSuburbOrCityInput: Locator;
-    addAddressStateOrProvinceInput: Locator;
-    addCountryInputDropDown: Locator;
-    addTypeRadioButtonInput: Locator;
-    addPONumberInput: Locator;
-    addTaxIDInput: Locator;
-    addAddressHeading: Locator;
-    addAddressZipOrPostcodeInput: Locator;
-    addcountryinputhardcoded: Locator;
-    saveAddressButton: Locator;
-    allCustomerMenu: Locator;
-    searchCustomerInputBox: Locator;
-    rows: Locator;
-    searchCustomerButton: Locator;
+    private channeloptionselect: Locator;
+    private customerGroupOptionselect: Locator;
+    private paymentTermsOptionInput: Locator;
+    private addCustomerAddressButton: Locator;
+    private confirmSaveOkButton: Locator;
+    private addAnAddressButton: Locator;
+    private addAddressFirstNameInput: Locator;
+    private addAddressLastNameInput: Locator;
+    private addAddressCompanyNameInput: Locator;
+    private addAddressPhoneNumberInput: Locator;
+    private addAddressLine1Input: Locator;
+    private addAddressLine2Input: Locator;
+    private addAddressSuburbOrCityInput: Locator;
+    private addAddressStateOrProvinceInput: Locator;
+    private addCountryInputDropDown: Locator;
+    private addTypeRadioButtonInput: Locator;
+    private addPONumberInput: Locator;
+    private addTaxIDInput: Locator;
+    private addAddressHeading: Locator;
+    private addAddressZipOrPostcodeInput: Locator;
+    private addcountryinputhardcoded: Locator;
+    private saveAddressButton: Locator;
+    private allCustomerMenu: Locator;
+    private searchCustomerInputBox: Locator;
+    private rows: Locator;
+    private searchCustomerButton: Locator;
+    private generatedEmail: string | null = null;
 
     constructor(page: Page) {
         super(page);
@@ -106,12 +107,10 @@ export class AddCustomerPage extends Homepage {
         this.rows = initLocator('tr.tableRow');
     }
 
-    async navigateToAddCustomerPage() {
-        await this.page.goto('https://YOUR_BIGCOMMERCE_URL/admin/customers/add');
-    }
 
 
-    public getNextEmail(base: string = 'johndoe', domain: string = '@gmail.com'): string {
+
+    public getNextEmail(base: string, domain: string): string {
         const uniqueNumber = Date.now(); // milliseconds
         return `${base}${uniqueNumber}${domain}`;
     }
@@ -134,12 +133,18 @@ export class AddCustomerPage extends Homepage {
         }else{
             await this.enterText(this.companyNameInput, 'Default Company');
         }
-        if (details.email) {
-            await this.enterText(this.emailInput, details.email);
-        }
-        else{
-            throw new Error('email box not shown');
-        }
+        if (!details.email) {
+            console.log("emailBase:", details.emailBase, "emailDomain:", details.emailDomain);
+                if (!details.emailBase || !details.emailDomain) {
+                    throw new Error("Either 'email' must be provided, or 'emailBase' and 'emailDomain' must be set in JSON");
+                }
+                this.generatedEmail = this.getNextEmail(details.emailBase, details.emailDomain);
+            } else {
+                this.generatedEmail = details.email;
+            }
+
+            await this.enterText(this.emailInput, this.generatedEmail);
+
         if (details.customerGroup){
         await this.clickElement(this.customerGroupSelect, 'Customer Group Select');
         await this.customerGroupOptionselect.selectOption({label: details.customerGroup})
@@ -204,23 +209,50 @@ export class AddCustomerPage extends Homepage {
     }
 }
 
-    async clickAllCustomers(details: CustomerDetails) {
-    try {
-       await this.searchCustomerInputBox.fill(details.email);
-        // Press Enter key to trigger search
-        await this.searchCustomerInputBox.press('Enter');
-        // Get all rows in the grid
-        await expect(this.rows, `Expected exactly 1 row for email ${details.email}`)
-            .toHaveCount(1, { timeout: 10000 });
-        // Once row is confirmed, validate email cell
-        const emailCell = this.rows.first().locator('td.email-cell a.mail-to-link');
-        await expect(emailCell).toBeVisible({ timeout: 5000 });
-        const emailText = await emailCell.textContent();
-        console.log(`Email found: ${emailText?.trim()}`);
+ async verifyCustomerExistsByEmail(email?: string) {
+    const searchEmail = email || this.generatedEmail;
+    if (!searchEmail) {
+        console.error("Error: Email not provided. Did you fill customer details first?");
+        throw new Error("Email not provided");
+    }
 
-    }   catch (error) {
-        console.error(`Error in clickAllCustomers for email ${details.email}:`, error);
+    try {
+        // Locate iframe dynamically
+        const iframe = this.page.frameLocator('#content-iframe');
+        const searchInput = iframe.locator('//customers-list//div[@class="form-prefixPostfix"]//input[contains(@class, "form-input")]');
+        const rowsLocator = iframe.locator('tr.tableRow');
+
+        // Wait for input to be visible
+        await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+        await searchInput.fill(searchEmail);
+
+        // Press Enter safely
+        await searchInput.press('Enter');
+        await this.page.waitForTimeout(2000); // Wait for search results to load
+
+        // Wait for at least 1 row to appear
+        await expect(rowsLocator.first()).toBeVisible({ timeout: 10000 });
+
+        const rowCount = await rowsLocator.count();
+        console.log(`Found ${rowCount} rows for email search: ${searchEmail}`);
+        let found = false;
+        for (let i = 0; i < rowCount; i++) {
+            const emailCell = rowsLocator.nth(i).locator('td.email-cell a.mail-to-link');
+            await expect(emailCell).toBeVisible({ timeout: 5000 });
+            const emailText = (await emailCell.textContent())?.trim();
+            console.log(`Row ${i + 1} email: ${emailText}`);
+             if (emailText === searchEmail) {
+        console.log(`JSON email matched UI: ${emailText}`);
+        found = true;
+        break;
+    }
+    expect(found).toBeTruthy();
+        }
+    } catch (error) {
+        console.error(`Error in clickAllCustomers for email ${searchEmail}:`, error);
         throw error;
     }
-}   
+}
+
+
 }

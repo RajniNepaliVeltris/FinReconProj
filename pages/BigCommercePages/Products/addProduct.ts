@@ -1,353 +1,268 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
+import { Homepage } from '../Dashboard/homepage';
+import { ProductData } from './productType';
+import path from 'path';
+import * as fs from 'fs';
 
-export class AddProductPage {
-
-		readonly page: Page;
+export class AddProductPage extends Homepage {
+	// Fill all product details from ProductData
 		// Basic Info
-		readonly productNameInput: Locator;
-		readonly skuInput: Locator;
-		readonly defaultPriceInput: Locator;
-		readonly productTypeDropdown: Locator;
-		readonly brandDropdown: Locator;
-		readonly weightInput: Locator;
-		readonly visibleOnStorefrontCheckbox: Locator;
-		readonly assignToChannelsButton: Locator;
+		private productNameInput: Locator;
+		private skuInput: Locator;
+		private defaultPriceInput: Locator;
+		private productTypeDropdown: Locator;
+		private brandDropdown: Locator;
+		private weightInput: Locator;
+		private visibleOnStorefrontCheckbox: Locator;
+		private assignToChannelsButton: Locator;
 		// Categories
-		readonly categoriesSection: Locator;
-		readonly categoryCheckboxes: Locator;
+		private categoriesSection: Locator;
+		private categoryCheckboxes: Locator;
 		// Description
-        readonly descriptionTextarea: Locator;
+		private descriptionFrameBody: Locator;
+        private descriptionTextarea: Locator;
 		// Product Identifiers
-        readonly prodIdentifiers_sku: Locator;
-		readonly mpnInput: Locator;
-		readonly upcInput: Locator;
-		readonly gtinInput: Locator;
-		readonly bpnInput: Locator;
+        private prodIdentifiers_sku: Locator;
+		private mpnInput: Locator;
+		private upcInput: Locator;
+		private gtinInput: Locator;
+		private bpnInput: Locator;
 		// Pricing
-        readonly defaultPriceInclTaxInput: Locator;
-		readonly taxClassDropdown: Locator;
-		readonly showAdvancedPricingLink: Locator;
+        private defaultPriceInclTaxInput: Locator;
+		private taxClassDropdown: Locator;
+		private showAdvancedPricingLink: Locator;
 		// Inventory
-		readonly trackInventoryCheckbox: Locator;
-		readonly editInventoryButton: Locator;
+		private trackInventoryCheckbox: Locator;
+		private editInventoryButton: Locator;
 		// Variations & Customizations
-		readonly addVariantOptionButton: Locator;
-		readonly addModifierOptionButton: Locator;
+		private addVariantOptionButton: Locator;
+		private addModifierOptionButton: Locator;
 		// Storefront Details
-		readonly featuredProductCheckbox: Locator;
-		readonly searchKeywordsInput: Locator;
-		readonly sortOrderInput: Locator;
-		readonly warrantyInfoInput: Locator;
-		readonly availabilityTextInput: Locator;
-		readonly conditionDropdown: Locator;
-		readonly showConditionCheckbox: Locator;
+		private featuredProductCheckbox: Locator;
+		private searchKeywordsInput: Locator;
+		private sortOrderInput: Locator;
+		private warrantyInfoInput: Locator;
+		private availabilityTextInput: Locator;
+		private conditionDropdown: Locator;
+		private showConditionCheckbox: Locator;
 		// Custom Fields
-		readonly addCustomFieldsButton: Locator;
 		// Related Products
-		readonly showRelatedProductsCheckbox: Locator;
+		private showRelatedProductsCheckbox: Locator;
 		// Fulfillment (Dimensions & Weight)
-		readonly widthInput: Locator;
-		readonly heightInput: Locator;
-		readonly depthInput: Locator;
+		private widthInput: Locator;
+		private heightInput: Locator;
+		private depthInput: Locator;
 		// Shipping Details
-		readonly fixedShippingPriceInput: Locator;
-		readonly freeShippingCheckbox: Locator;
+		private fixedShippingPriceInput: Locator;
+		private freeShippingCheckbox: Locator;
 		// Purchasability
-		readonly purchasabilityRadios: Locator;
-		readonly minPurchaseQtyInput: Locator;
-		readonly maxPurchaseQtyInput: Locator;
+		private purchasabilityRadios: Locator;
+		private minPurchaseQtyInput: Locator;
+		private maxPurchaseQtyInput: Locator;
 		// Gift Wrapping
-		readonly giftWrappingRadios: Locator;
+		private giftWrappingRadios: Locator;
 		// Customs Information
-		readonly manageCustomsInfoCheckbox: Locator;
+		private manageCustomsInfoCheckbox: Locator;
 		// SEO
-		readonly pageTitleInput: Locator;
-		readonly productUrlInput: Locator;
-		readonly metaDescriptionInput: Locator;
+		private pageTitleInput: Locator;
+		private productUrlInput: Locator;
+		private metaDescriptionInput: Locator;
 		// Open Graph Sharing
-		readonly objectTypeDropdown: Locator;
-		readonly useProductNameCheckbox: Locator;
-		readonly useMetaDescriptionCheckbox: Locator;
-		readonly useThumbnailImageRadio: Locator;
-		readonly dontUseImageRadio: Locator;
+		private objectTypeDropdown: Locator;
+		private useProductNameCheckbox: Locator;
+		private useMetaDescriptionCheckbox: Locator;
+		private useThumbnailImageRadio: Locator;
+		private dontUseImageRadio: Locator;
+		private addImageBtn: Locator;
+		private addFromUrlBtn: Locator;
+		private fileInput: Locator;
+		private costPriceInput: Locator;
+		private msrpInput: Locator;
+		private salePriceInput: Locator;
+		private shippingWeightInput: Locator;
+		private imageModalTitle: Locator;
+		private imageThumbPreview: Locator;
+	enterUrlInput: Locator;
+	AddImageButton: any;
+	AssignandSaveBtn: Locator;
 
 		constructor(page: Page) {
-			this.page = page;
+			 super(page);
+        	const iframe = this.page.frameLocator('#content-iframe');
+        	if (!iframe) throw new Error('Iframe not found. Ensure the iframe is loaded and accessible.');
+			this.descriptionFrameBody = this.page.frameLocator("//iframe[@id='productInput-description']").locator("body");
 			// Basic Info
-			this.productNameInput = page.locator('input[id="productInput-name"]');
-			this.skuInput = page.locator('input[id="productInput-sku"]');
-			this.defaultPriceInput = page.locator('input[id="productInput-price"]');
-			this.productTypeDropdown = page.locator('input[id="productInput-type"]');
-			this.brandDropdown = page.locator('input[id="productInput-brand"]');
-			this.weightInput = page.locator('input[id="productInput-weight"]');
-			this.visibleOnStorefrontCheckbox = page.locator('//div[@id="add-edit-details"]//input[@type="checkbox"]');
-			this.assignToChannelsButton = page.locator('//channel-toolbar//button/span[text()="Assign to channels"]');
+			const initLocator = (xpath: string) => iframe.locator(xpath);
+			this.productNameInput = initLocator('//input[@id="productInput-name"]');
+			this.skuInput = initLocator('//input[@id="productInput-sku"]');
+			this.defaultPriceInput = initLocator('//input[@id="productInput-price"]');
+			this.productTypeDropdown = initLocator('//input[@id="productInput-type"]');
+			this.brandDropdown = initLocator('//input[@id="productInput-brand"]');
+			this.weightInput = initLocator('//input[@id="productInput-weight"]');
+			this.visibleOnStorefrontCheckbox = initLocator('//div[@id="add-edit-details"]//input[@type="checkbox"]');
+			this.assignToChannelsButton = initLocator('//channel-toolbar//button/span[text()="Assign to channels"]');
 			// Categories
-			this.categoriesSection = page.locator('text=Categories');
-			this.categoryCheckboxes = page.locator('section:has-text("Categories") input[type="checkbox"]');
+			this.categoriesSection = initLocator('//div//p[contains(text(), "VueEcom - Sandbox 3")]');
+			this.categoryCheckboxes = initLocator('//li[.//p[normalize-space(text())="All Products"]]//input[@type="checkbox"]');
+			const iframe1 = this.page.frameLocator('//iframe[contains(@title,"Rich Text Area")]');
+			const initLocator1 = (xpath: string) => iframe1.locator(xpath);
 			// Description (WYSIWYG editor in iframe)
-			this.descriptionTextarea = page.locator('//textarea[@name="productInput-description"]');
+			this.descriptionTextarea = initLocator1('//textarea[@name="productInput-description"]');
+			this.addImageBtn = initLocator('//button//span[text()="Add"]');
+			this.addFromUrlBtn = initLocator('//div[contains(@class, "styled__StyledBox")]//button[normalize-space(text())="Add from URL"]'); // inside image modal
+			this.enterUrlInput = initLocator('//input[@placeholder="https://www..."]'); // inside image modal
+			this.AddImageButton = initLocator('//button//span[text()="Add image"]');
+			this.AssignandSaveBtn = initLocator('//button//span[text()="Assign & Save"]');
+			// We'll attempt multiple strategies; start with a generic page-level locator.
+			this.fileInput = initLocator('input[type="file"]');   // hidden file input (global)
+			this.imageModalTitle = initLocator('text=Add images to product');
+			this.imageThumbPreview = initLocator('img[alt*="product"], img[alt*="thumbnail"], [data-test*="image-thumbnail"] img').first();
 			// Product Identifiers
-			this.prodIdentifiers_sku = page.locator('input[id="productInput-identifierSku"]');
-            this.mpnInput = page.locator('input[id="productInput-mpn"]');
-			this.upcInput = page.locator('input[id="productInput-upc"]');
-			this.gtinInput = page.locator('input[id="productInput-gtin"]');
-			this.bpnInput = page.locator('input[id="productInput-bpn"]');
+			this.prodIdentifiers_sku = initLocator('//input[@id="productInput-identifierSku"]');
+            this.mpnInput = initLocator('//input[@id="productInput-mpn"]');
+			this.upcInput = initLocator('//input[@id="productInput-upc"]');
+			this.gtinInput = initLocator('//input[@id="productInput-gtin"]');
+			this.bpnInput = initLocator('//input[@id="productInput-bpn"]');
 			// Pricing
-			this.defaultPriceInclTaxInput = page.locator('input[id="productInput-defaultPrice"]');
-			this.taxClassDropdown = page.locator('input[id="productInput-tax_class_id"]');
-			this.showAdvancedPricingLink = page.locator('a:has-text("Show Advanced Pricing")');
+			this.defaultPriceInclTaxInput = initLocator('//input[@id="productInput-defaultPrice"]');
+			this.taxClassDropdown = initLocator('//input[@id="productInput-tax_class_id"]');
+			this.showAdvancedPricingLink = initLocator('//span[text()="Show Advanced Pricing"]');
+			this.costPriceInput = initLocator('//input[@id="productInput-cost_price"]');
+			this.msrpInput = initLocator('//input[@id="productInput-retail_price"]');
+			this.salePriceInput = initLocator('//input[@id="productInput-sale_price"]');
 			// Inventory
-			this.trackInventoryCheckbox = page.locator('label:has-text("Track inventory") input[type="checkbox"]');
-			this.editInventoryButton = page.locator('button:has-text("Edit inventory")');
+			this.trackInventoryCheckbox = initLocator('label:has-text("Track inventory") input[type="checkbox"]');
+			this.editInventoryButton = initLocator('button:has-text("Edit inventory")');
 			// Variations & Customizations
-			this.addVariantOptionButton = page.locator('button:has-text("Add Variant Option")');
-			this.addModifierOptionButton = page.locator('button:has-text("Add Modifier Option")');
+			this.addVariantOptionButton = initLocator('button:has-text("Add Variant Option")');
+			this.addModifierOptionButton = initLocator('button:has-text("Add Modifier Option")');
 			// Storefront Details
-			this.featuredProductCheckbox = page.locator('label:has-text("Set as a Featured Product") input[type="checkbox"]');
-			this.searchKeywordsInput = page.locator('input[placeholder*="Search Keywords"]');
-			this.sortOrderInput = page.locator('input[placeholder*="Sort Order"]');
-			this.warrantyInfoInput = page.locator('textarea[placeholder*="Warranty Information"]');
-			this.availabilityTextInput = page.locator('input[placeholder*="Availability Text"]');
-			this.conditionDropdown = page.locator('select[aria-label="Condition"]');
-			this.showConditionCheckbox = page.locator('label:has-text("Show condition on storefront") input[type="checkbox"]');
+			this.featuredProductCheckbox = initLocator('label:has-text("Set as a Featured Product") input[type="checkbox"]');
+			this.searchKeywordsInput = initLocator('//input[@id="productInput-search_keywords"]');
+			this.sortOrderInput = initLocator('//input[@id="productInput-sort_order"]');
+			this.warrantyInfoInput = initLocator('//textarea[@id="productInput-warranty"]');
+			this.availabilityTextInput = initLocator('//input[@id="productInput-availability_text"]');
+			this.conditionDropdown = initLocator('//input[@id="productInput-condition"]');
+			this.showConditionCheckbox = initLocator('//input[@id="productInput-is_condition_shown"]');
 			// Custom Fields
-			this.addCustomFieldsButton = page.locator('button:has-text("Add Custom Fields")');
 			// Related Products
-			this.showRelatedProductsCheckbox = page.locator('label:has-text("Automatically show related products") input[type="checkbox"]');
+			this.showRelatedProductsCheckbox = initLocator('label:has-text("Automatically show related products") input[type="checkbox"]');
 			// Fulfillment (Dimensions & Weight)
-			this.widthInput = page.locator('input[placeholder*="Width"]');
-			this.heightInput = page.locator('input[placeholder*="Height"]');
-			this.depthInput = page.locator('input[placeholder*="Depth"]');
+			this.shippingWeightInput = initLocator('//input[@id="productInput-shippingWeight"]');
+			this.widthInput = initLocator('//input[@id="productInput-width"]');
+			this.heightInput = initLocator('//input[@id="productInput-height"]');
+			this.depthInput = initLocator('//input[@id="productInput-depth"]');
 			// Shipping Details
-			this.fixedShippingPriceInput = page.locator('input[placeholder*="Fixed Shipping Price"]');
-			this.freeShippingCheckbox = page.locator('label:has-text("Free Shipping") input[type="checkbox"]');
+			this.fixedShippingPriceInput = initLocator('//input[@id="productInput-fixed_cost_shipping_price"]');
+			this.freeShippingCheckbox = initLocator('label:has-text("Free Shipping") input[type="checkbox"]');
 			// Purchasability
-			this.purchasabilityRadios = page.locator('section:has-text("Purchasability") input[type="radio"]');
-			this.minPurchaseQtyInput = page.locator('input[placeholder*="Minimum Purchase Quantity"]');
-			this.maxPurchaseQtyInput = page.locator('input[placeholder*="Maximum Purchase Quantity"]');
+			this.purchasabilityRadios = initLocator('section:has-text("Purchasability") input[type="radio"]');
+			this.minPurchaseQtyInput = initLocator('input[placeholder*="Minimum Purchase Quantity"]');
+			this.maxPurchaseQtyInput = initLocator('input[placeholder*="Maximum Purchase Quantity"]');
 			// Gift Wrapping
-			this.giftWrappingRadios = page.locator('section:has-text("Gift Wrapping options") input[type="radio"]');
+			this.giftWrappingRadios = initLocator('section:has-text("Gift Wrapping options") input[type="radio"]');
 			// Customs Information
-			this.manageCustomsInfoCheckbox = page.locator('label:has-text("Manage customs information") input[type="checkbox"]');
+			this.manageCustomsInfoCheckbox = initLocator('label:has-text("Manage customs information") input[type="checkbox"]');
 			// SEO
-			this.pageTitleInput = page.locator('input[placeholder*="Page Title"]');
-			this.productUrlInput = page.locator('input[placeholder*="Product URL"]');
-			this.metaDescriptionInput = page.locator('input[placeholder*="Meta Description"]');
+			this.pageTitleInput = initLocator('//input[@id="productInput-page_title"]');
+			this.productUrlInput = initLocator('//input[@id="productInput-custom_url"]');
+			this.metaDescriptionInput = initLocator('//input[@id="productInput-meta_description"]');
 			// Open Graph Sharing
-			this.objectTypeDropdown = page.locator('select[aria-label="Object Type"]');
-			this.useProductNameCheckbox = page.locator('label:has-text("Use product name") input[type="checkbox"]');
-			this.useMetaDescriptionCheckbox = page.locator('label:has-text("Use meta description") input[type="checkbox"]');
-			this.useThumbnailImageRadio = page.locator('label:has-text("Use thumbnail image") input[type="radio"]');
-			this.dontUseImageRadio = page.locator('label:has-text("Don\'t use an image") input[type="radio"]');
-		}
-	// Categories
-	async selectCategoryByName(name: string) {
-		await this.page.locator(`section:has-text('Categories') label:has-text('${name}') input[type="checkbox"]`).check();
-	}
-
-	// Description
+			this.objectTypeDropdown = initLocator('//input[@id="productInput-facebook_type"]');
+			this.useProductNameCheckbox = initLocator('label:has-text("Use product name") input[type="checkbox"]');
+			this.useMetaDescriptionCheckbox = initLocator('label:has-text("Use meta description") input[type="checkbox"]');
+			this.useThumbnailImageRadio = initLocator('label:has-text("Use thumbnail image") input[type="radio"]');
+			this.dontUseImageRadio = initLocator('label:has-text("Don\'t use an image") input[type="radio"]');
+			}
 		
-		async enterDescription(text: string) {
-			await this.descriptionTextarea.fill(text);
+			getCategoryCheckbox(category: string): Locator {
+				const iframe = this.page.frameLocator('#content-iframe');
+				return iframe.locator(`//p[contains(normalize-space(.), "${category}")]`);
+			}
+async fillProductDetails(product: ProductData) {
+	try { 
+	await this.enterText (this.productNameInput, product.productName);
+	await this.enterText (this.skuInput, product.sku);
+	await this.enterText (this.defaultPriceInput, product.defaultPrice);
+	await this.enterText (this.productTypeDropdown, product.productType);
+	//await this.enterText (this.brandDropdown, product.brand);
+	await this.enterText (this.weightInput, product.weight);
+	if (product.visibleOnStorefront) {
+		if (!(await this.visibleOnStorefrontCheckbox.isChecked())) {
+			await this.visibleOnStorefrontCheckbox.click();
 		}
-
-	// Product Identifiers
-	async enterMPN(mpn: string) {
-		await this.mpnInput.fill(mpn);
-	}
-	async enterUPC(upc: string) {
-		await this.upcInput.fill(upc);
-	}
-	async enterGTIN(gtin: string) {
-		await this.gtinInput.fill(gtin);
-	}
-	async enterBPN(bpn: string) {
-		await this.bpnInput.fill(bpn);
-	}
-
-	// Pricing
-	async selectTaxClass(taxClass: string) {
-		await this.taxClassDropdown.selectOption({ label: taxClass });
-	}
-	async clickShowAdvancedPricing() {
-		await this.showAdvancedPricingLink.click();
-	}
-
-	// Inventory
-	async setTrackInventory(track: boolean) {
-		const checked = await this.trackInventoryCheckbox.isChecked();
-		if (checked !== track) {
-			await this.trackInventoryCheckbox.click();
-		}
-	}
-	async clickEditInventory() {
-		await this.editInventoryButton.click();
-	}
-
-	// Variations & Customizations
-	async clickAddVariantOption() {
-		await this.addVariantOptionButton.click();
-	}
-	async clickAddModifierOption() {
-		await this.addModifierOptionButton.click();
-	}
-
-	// Storefront Details
-	async setFeaturedProduct(featured: boolean) {
-		const checked = await this.featuredProductCheckbox.isChecked();
-		if (checked !== featured) {
-			await this.featuredProductCheckbox.click();
-		}
-	}
-	async enterSearchKeywords(keywords: string) {
-		await this.searchKeywordsInput.fill(keywords);
-	}
-	async enterSortOrder(order: string) {
-		await this.sortOrderInput.fill(order);
-	}
-	async enterWarrantyInfo(info: string) {
-		await this.warrantyInfoInput.fill(info);
-	}
-	async enterAvailabilityText(text: string) {
-		await this.availabilityTextInput.fill(text);
-	}
-	async selectCondition(condition: string) {
-		await this.conditionDropdown.selectOption({ label: condition });
-	}
-	async setShowConditionOnStorefront(show: boolean) {
-		const checked = await this.showConditionCheckbox.isChecked();
-		if (checked !== show) {
-			await this.showConditionCheckbox.click();
-		}
-	}
-
-	// Custom Fields
-	async clickAddCustomFields() {
-		await this.addCustomFieldsButton.click();
-	}
-
-	// Related Products
-	async setShowRelatedProducts(show: boolean) {
-		const checked = await this.showRelatedProductsCheckbox.isChecked();
-		if (checked !== show) {
-			await this.showRelatedProductsCheckbox.click();
-		}
-	}
-
-	// Fulfillment (Dimensions & Weight)
-	async enterWidth(width: string) {
-		await this.widthInput.fill(width);
-	}
-	async enterHeight(height: string) {
-		await this.heightInput.fill(height);
-	}
-	async enterDepth(depth: string) {
-		await this.depthInput.fill(depth);
-	}
-
-	// Shipping Details
-	async enterFixedShippingPrice(price: string) {
-		await this.fixedShippingPriceInput.fill(price);
-	}
-	async setFreeShipping(free: boolean) {
-		const checked = await this.freeShippingCheckbox.isChecked();
-		if (checked !== free) {
-			await this.freeShippingCheckbox.click();
-		}
-	}
-
-	// Purchasability
-	async selectPurchasability(optionIndex: number) {
-		await this.purchasabilityRadios.nth(optionIndex).check();
-	}
-	async enterMinPurchaseQty(qty: string) {
-		await this.minPurchaseQtyInput.fill(qty);
-	}
-	async enterMaxPurchaseQty(qty: string) {
-		await this.maxPurchaseQtyInput.fill(qty);
-	}
-
-	// Gift Wrapping
-	async selectGiftWrappingOption(optionIndex: number) {
-		await this.giftWrappingRadios.nth(optionIndex).check();
-	}
-
-	// Customs Information
-	async setManageCustomsInfo(manage: boolean) {
-		const checked = await this.manageCustomsInfoCheckbox.isChecked();
-		if (checked !== manage) {
-			await this.manageCustomsInfoCheckbox.click();
-		}
-	}
-
-	// SEO
-	async enterPageTitle(title: string) {
-		await this.pageTitleInput.fill(title);
-	}
-	async enterProductUrl(url: string) {
-		await this.productUrlInput.fill(url);
-	}
-	async enterMetaDescription(desc: string) {
-		await this.metaDescriptionInput.fill(desc);
-	}
-
-	// Open Graph Sharing
-	async selectObjectType(type: string) {
-		await this.objectTypeDropdown.selectOption({ label: type });
-	}
-	async setUseProductName(use: boolean) {
-		const checked = await this.useProductNameCheckbox.isChecked();
-		if (checked !== use) {
-			await this.useProductNameCheckbox.click();
-		}
-	}
-	async setUseMetaDescription(use: boolean) {
-		const checked = await this.useMetaDescriptionCheckbox.isChecked();
-		if (checked !== use) {
-			await this.useMetaDescriptionCheckbox.click();
-		}
-	}
-	async selectUseThumbnailImage() {
-		await this.useThumbnailImageRadio.check();
-	}
-	async selectDontUseImage() {
-		await this.dontUseImageRadio.check();
-	}
-
-	async enterProductName(name: string) {
-		await this.productNameInput.fill(name);
-	}
-
-	async enterSKU(sku: string) {
-		await this.skuInput.fill(sku);
-	}
-
-	async enterDefaultPrice(price: string) {
-		await this.defaultPriceInput.fill(price);
-	}
-
-	async selectProductType(type: string) {
-		await this.productTypeDropdown.selectOption({ label: type });
-	}
-
-	async selectBrand(brand: string) {
-		await this.brandDropdown.fill(brand);
-		// Optionally select from dropdown if needed
-	}
-
-	async enterWeight(weight: string) {
-		await this.weightInput.fill(weight);
-	}
-
-	async setVisibleOnStorefront(visible: boolean) {
-		const checked = await this.visibleOnStorefrontCheckbox.isChecked();
-		if (checked !== visible) {
+	} else {
+		if (await this.visibleOnStorefrontCheckbox.isChecked()) {
 			await this.visibleOnStorefrontCheckbox.click();
 		}
 	}
 
-	async clickAssignToChannels() {
-		await this.assignToChannelsButton.click();
+	// Usage inside your loop
+	await this.selectCategories([product.categories]);
+	await this.fillDescription(product.description);
+	//await this.enterText(this.descriptionTextarea, product.description);
+	await this.clickElement(this.addImageBtn,"Add Image");
+	await this.clickElement(this.addFromUrlBtn,"Add from URL");
+	await this.enterText(this.enterUrlInput, product.imageUrl || "");
+	await this.clickElement(this.AddImageButton,"Add Image");
+	await this.clickElement(this.AssignandSaveBtn,"Assign and Save");
+		// await this.descriptionFrameBody.fill(product.description);
+	
+
+		await this.enterText(this.prodIdentifiers_sku, product.sku);
+		await this.enterText(this.mpnInput, product.mpn);
+		await this.enterText(this.upcInput, product.upc);
+		await this.enterText(this.gtinInput, product.gtin);
+		await this.enterText(this.bpnInput, product.bpn);
+		await this.enterText(this.defaultPriceInclTaxInput, product.defaultPrice);
+		//await this.selectFromInputDropdownDynamic(this.taxClassDropdown, product.taxClass);
+		await this.showAdvancedPricingLink.click();
+		await this.enterText(this.costPriceInput, product.defaultPrice);
+		await this.enterText(this.msrpInput, product.defaultPrice);
+		await this.enterText(this.salePriceInput, product.defaultPrice);
+		await this.enterText(this.searchKeywordsInput, product.searchKeywords);
+		await this.enterText(this.sortOrderInput, product.sortOrder);
+		await this.enterText(this.warrantyInfoInput, product.warrantyInfo);
+		await this.enterText(this.availabilityTextInput, product.availabilityText);
+		await this.selectFromInputDropdownDynamic(this.conditionDropdown, product.condition);
+		if (product.visibleOnStorefront) {
+		if (!(await this.showConditionCheckbox.isChecked())) {
+			await this.showConditionCheckbox.click();
+		}
+	} else {
+		if (await this.showConditionCheckbox.isChecked()) {
+			await this.showConditionCheckbox.click();
+		}
 	}
+		//await this.showConditionCheckbox.setChecked(product.showConditionOnStorefront);
+		// Custom fields logic can be added here if needed
+		//await this.showRelatedProductsCheckbox.setChecked(product.showRelatedProducts);
+		await this.enterText(this.shippingWeightInput, product.weight);
+		await this.enterText(this.widthInput, product.dimensions.width);
+		await this.enterText(this.heightInput, product.dimensions.height);
+		await this.enterText(this.depthInput, product.dimensions.depth);
+		await this.enterText(this.fixedShippingPriceInput, product.fixedShippingPrice);
+		await this.freeShippingCheckbox.setChecked(product.freeShipping);
+		await this.purchasabilityRadios.nth(product.purchasability).check();
+		await this.enterText(this.minPurchaseQtyInput, product.minPurchaseQty);
+		await this.enterText(this.maxPurchaseQtyInput, product.maxPurchaseQty);
+		await this.giftWrappingRadios.nth(product.giftWrapping).check();
+		//await this.manageCustomsInfoCheckbox.setChecked(product.manageCustomsInfo);
+		await this.enterText(this.pageTitleInput, product.pageTitle);
+		await this.enterText(this.productUrlInput, product.productUrl);
+		await this.enterText(this.metaDescriptionInput, product.metaDescription);
+		await this.objectTypeDropdown.selectOption({ label: product.objectType });
+		await this.useProductNameCheckbox.setChecked(product.useProductName);
+		await this.useMetaDescriptionCheckbox.setChecked(product.useMetaDescription);
+		if (product.useThumbnailImage) {
+			await this.useThumbnailImageRadio.check();
+		} else {
+			await this.dontUseImageRadio.check();
+		}
+	} catch (error) {
+		console.error('Error filling product details:', error);
+		throw error;	
+	}
+}
+
 }
