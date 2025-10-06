@@ -24,6 +24,7 @@ export class SettlementReportPage extends BasePage {
   readonly tableRows: Locator;
   readonly paginationPrev: Locator;
   readonly paginationNext: Locator;
+  readonly noDataMessage: Locator;
 
   // Cached headers for performance
   private cachedHeaders: string[] | null = null;
@@ -49,10 +50,11 @@ export class SettlementReportPage extends BasePage {
 
     // Results
     this.resultsContainer = page.locator('#myTable_wrapper');
-    this.resultsTable = this.resultsContainer.locator('#myTable');
+    this.resultsTable = this.resultsContainer.locator("//table[@id='myTable']");
     this.tableRows = this.resultsTable.locator('tbody tr');
     this.paginationPrev = this.resultsContainer.locator('button:has-text("Previous"), a:has-text("Previous")').first();
     this.paginationNext = this.resultsContainer.locator('button:has-text("Next"), a:has-text("Next")').first();
+    this.noDataMessage = this.resultsTable.locator('#myTable_info');
   }
 
   async setMonth(value: string): Promise<void> {
@@ -279,5 +281,84 @@ export class SettlementReportPage extends BasePage {
       data[header] = texts[index] || '';
     });
     return data;
+  }
+
+  async filterAndSearch(filters: { month?: string; fromDate?: string; toDate?: string; client?: string; settlementStatus?: string; productUsage?: string; orderNumber?: string; }): Promise<Record<string, string> | void> {
+    try {
+      if (filters.month) {
+        try {
+          await this.setMonth(filters.month);
+        } catch (error) {
+          console.warn(`Skipping month filter '${filters.month}': ${error}`);
+        }
+      }
+      if (filters.fromDate) {
+        try {
+          await this.setFromDate(filters.fromDate);
+          //close the date picker if it remains open
+          await this.clickElement(this.fromDateInput, 'fromDate input');
+          await this.page.keyboard.press('Escape');
+        } catch (error) {
+          console.warn(`Skipping fromDate filter '${filters.fromDate}': ${error}`);
+        }
+      }
+      if (filters.toDate) {
+        try {
+          await this.setToDate(filters.toDate);
+          //close the date picker if it remains open
+          await this.clickElement(this.toDateInput, 'toDate input');
+          await this.page.keyboard.press('Escape');
+        } catch (error) {
+          console.warn(`Skipping toDate filter '${filters.toDate}': ${error}`);
+        }
+      }
+      if (filters.client) {
+        try {
+          await this.setClient(filters.client);
+        } catch (error) {
+          console.warn(`Skipping client filter '${filters.client}': ${error}`);
+        }
+      }
+      if (filters.settlementStatus) {
+        try {
+          await this.setSettlementStatus(filters.settlementStatus);
+        } catch (error) {
+          console.warn(`Skipping settlementStatus filter '${filters.settlementStatus}': ${error}`);
+        }
+      }
+      if (filters.productUsage) {
+        try {
+          await this.setProductUsage(filters.productUsage);
+        } catch (error) {
+          console.warn(`Skipping productUsage filter '${filters.productUsage}': ${error}`);
+        }
+      }
+      if (filters.orderNumber) {
+        try {
+          await this.setOrderNumber(filters.orderNumber);
+        } catch (error) {
+          console.warn(`Skipping orderNumber filter '${filters.orderNumber}': ${error}`);
+        }
+      }
+      await this.page.waitForTimeout(1000);
+      await this.clickSearch();
+      //wait extra time for results to load
+
+      await this.waitForElement(this.resultsTable, 5000);
+      //if no results found, throw error
+      
+      const rowCount = await this.getRowCount();
+      if (rowCount === 0) {
+         console.error('No results found');
+
+      }
+      else if (rowCount === 1) {
+        return await this.getRowData(0);
+
+      }
+    } catch (error) {
+      console.error('Error filtering and searching:', error);
+      throw new Error(`Failed to apply filters: ${error}`);
+    }
   }
 }
