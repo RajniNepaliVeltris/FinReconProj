@@ -86,6 +86,7 @@ export class AddProductPage extends Homepage {
 		private AddImageButton: any;
 		private AssignandSaveBtn: Locator;
 		private saveButtonClck: any;
+		private searchInputbox: any;
 
 		constructor(page: Page) {
 			 super(page);
@@ -216,7 +217,7 @@ async fillProductDetails(product: ProductData) {
 		await this.enterText(this.upcInput, product.upc);
 		await this.enterText(this.gtinInput, product.gtin);
 		await this.enterText(this.bpnInput, product.bpn);
-		await this.enterText(this.defaultPriceInclTaxInput, product.defaultPrice);
+		//await this.enterText(this.defaultPriceInclTaxInput, product.defaultPrice);
 		//await this.selectFromInputDropdownDynamic(this.taxClassDropdown, product.taxClass);
 		await this.showAdvancedPricingLink.click();
 		await this.enterText(this.costPriceInput, product.defaultPrice);
@@ -257,37 +258,34 @@ async verifyProductExistsBySKU(sku: string) {
     }
 
     try {
-        await this.page.goto('https://your-site.com/admin/products'); // replace with actual URL
-        await this.page.waitForLoadState('networkidle');
 
         const iframe = this.page.frameLocator('#content-iframe');
+		const searchInput = iframe.locator('//input[@placeholder="Search products"]');
 
-        const searchInput = iframe.locator('//input[@placeholder="Search products"]');
-        await searchInput.waitFor({ state: 'visible', timeout: 10000 });
-        await searchInput.fill(sku);
+		
 
-        await searchInput.press('Enter');
-        await this.page.waitForTimeout(2000); // wait for results to appear
+		await searchInput.fill(sku); // actually enter the SKU
+		await searchInput.press('Enter');
 
-        // Locate all rows
-        const rowsLocator = iframe.locator('tr'); // adjust selector if needed
-        await expect(rowsLocator.first()).toBeVisible({ timeout: 10000 });
+		const rowsLocator = iframe.locator('tbody tr'); // target only tbody rows
+		await expect(rowsLocator.first()).toBeVisible({ timeout: 10000 });
 
-        const rowCount = await rowsLocator.count();
-        console.log(`Found ${rowCount} rows for SKU search: ${sku}`);
+		const rowCount = await rowsLocator.count();
+		console.log(`Found ${rowCount} rows for SKU search: ${sku}`);
 
-        let found = false;
-        for (let i = 0; i < rowCount; i++) {
-            const skuCell = rowsLocator.nth(i).locator('td:nth-child(2)'); // adjust column index for SKU
-            const skuText = (await skuCell.textContent())?.trim();
-            console.log(`Row ${i + 1} SKU: ${skuText}`);
-            if (skuText === sku) {
-                console.log(`Product SKU matched UI: ${skuText}`);
-                found = true;
-                break;
-            }
-        }
-        expect(found).toBeTruthy();
+		let found = false;
+		for (let i = 0; i < rowCount; i++) {
+			const skuCell = rowsLocator.nth(i).locator('td[data-testid="sku"] div'); // inner div text
+			const skuText = (await skuCell.textContent())?.trim();
+			console.log(`Row ${i + 1} SKU: ${skuText}`);
+			if (skuText === sku) {
+				console.log(`Product SKU matched UI: ${skuText}`);
+				found = true;
+				break; // stop after first match
+			}
+		}
+		expect(found).toBeTruthy();
+
 
     } catch (error) {
         console.error(`Error verifying product for SKU ${sku}:`, error);
