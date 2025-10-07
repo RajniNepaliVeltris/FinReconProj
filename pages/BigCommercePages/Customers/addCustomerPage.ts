@@ -253,6 +253,4 @@ export class AddCustomerPage extends Homepage {
         throw error;
     }
 }
-
-
 }

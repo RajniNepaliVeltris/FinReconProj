@@ -47,10 +47,11 @@ test.describe('Create New Product', () => {
                 await test.step('Fill Product Details', async () => {
                     await addProductPage.fillProductDetails(product);
                 });
-
-                await test.step('Save Product', async () => {
-                    await page.click('button:has-text("Save")');
-                    await expect(page.locator('text=Product added successfully')).toBeVisible();
+                await test.step('Verify Customer Exists By Email', async () => {
+                    await homepage.navigateToSideMenuOption('Products', 'All Products');
+                    const url = await page.url();
+                    expect(url).toContain('/manage/Products');
+                    await addProductPage.verifyProductExistsBySKU();
                 });
             });
         });

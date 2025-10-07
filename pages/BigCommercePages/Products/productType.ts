@@ -10,6 +10,7 @@ export type ProductCustomField = {
 };
 
 export type ProductData = {
+  giftWrappingOption: string;
   productName: string;
   sku: string;
   defaultPrice: string;

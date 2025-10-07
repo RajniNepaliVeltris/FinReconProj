@@ -1,7 +1,7 @@
 {
   "config": {
-    "configFile": "C:\\FinReconAutomation\\playwright.config.ts",
-    "rootDir": "C:/FinReconAutomation/tests",
+    "configFile": "C:\\Big C automation\\FinReconProj\\playwright.config.ts",
+    "rootDir": "C:/Big C automation/FinReconProj/tests",
     "forbidOnly": false,
     "fullyParallel": true,
     "globalSetup": null,
@@ -45,7 +45,7 @@
     "quiet": false,
     "projects": [
       {
-        "outputDir": "C:/FinReconAutomation/test-results",
+        "outputDir": "C:/Big C automation/FinReconProj/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -53,7 +53,7 @@
         },
         "id": "existing-chrome",
         "name": "existing-chrome",
-        "testDir": "C:/FinReconAutomation/tests",
+        "testDir": "C:/Big C automation/FinReconProj/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -65,149 +65,25 @@
     "updateSnapshots": "missing",
     "updateSourceMethod": "3way",
     "version": "1.55.0",
-    "workers": 1,
+    "workers": 6,
     "webServer": null
   },
   "suites": [
     {
-      "title": "BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts",
-      "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
+      "title": "BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
+      "file": "BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Standard Product Order Tests",
-          "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
-          "line": 13,
+          "title": "Create New Product",
+          "file": "BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts",
+          "line": 28,
           "column": 6,
-          "specs": [],
-          "suites": [
+          "specs": [
             {
-              "title": "Order with Standard product - Fulfillment using Billing Address",
-              "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
-              "line": 15,
-              "column": 14,
-              "specs": [
-                {
-                  "title": "Execute: Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon",
-                  "ok": false,
-                  "tags": [],
-                  "tests": [
-                    {
-                      "timeout": 60000,
-                      "annotations": [
-                        {
-                          "type": "test-type",
-                          "description": "E2E"
-                        },
-                        {
-                          "type": "feature",
-                          "description": "Order Creation"
-                        }
-                      ],
-                      "expectedStatus": "passed",
-                      "projectId": "existing-chrome",
-                      "projectName": "existing-chrome",
-                      "results": [
-                        {
-                          "workerIndex": 0,
-                          "parallelIndex": 0,
-                          "status": "failed",
-                          "duration": 28000,
-                          "error": {
-                            "message": "Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?",
-                            "stack": "Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:26:19)\n    at NodeBufferReader.checkOffset (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:17:14)\n    at NodeBufferReader.readData (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\NodeBufferReader.js:14:10)\n    at NodeBufferReader.readString (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:75:49)\n    at ZipEntries.isSignature (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:39:37)\n    at ZipEntries.readEndOfCentral (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:164:35)\n    at ZipEntries.load (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:255:14)\n    at C:\\FinReconAutomation\\node_modules\\jszip\\lib\\load.js:48:24\n    at XLSX.load (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:280:17)\n    at XLSX.readFile (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:55:24)\n    at ExcelReader.readWorkbook (C:\\FinReconAutomation\\utils\\excelReader.ts:151:13)\n    at ExcelReader.getAllTestCases (C:\\FinReconAutomation\\utils\\excelReader.ts:223:26)\n    at ExcelReader.fetchTestCaseDataByName (C:\\FinReconAutomation\\utils\\excelReader.ts:202:22)\n    at C:\\FinReconAutomation\\tests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32",
-                            "location": {
-                              "file": "C:\\FinReconAutomation\\utils\\excelReader.ts",
-                              "column": 13,
-                              "line": 151
-                            },
-                            "snippet": "\u001b[90m   at \u001b[39m..\\utils\\excelReader.ts:151\n\n\u001b[0m \u001b[90m 149 |\u001b[39m             \u001b[36mconst\u001b[39m filePath \u001b[33m=\u001b[39m path\u001b[33m.\u001b[39mjoin(__dirname\u001b[33m,\u001b[39m \u001b[32m'../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 150 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Attempting to load Excel file:'\u001b[39m\u001b[33m,\u001b[39m filePath)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 151 |\u001b[39m             \u001b[36mawait\u001b[39m workbook\u001b[33m.\u001b[39mxlsx\u001b[33m.\u001b[39mreadFile(filePath)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 152 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Excel file loaded successfully'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 153 |\u001b[39m         } \u001b[36mcatch\u001b[39m (err) {\n \u001b[90m 154 |\u001b[39m             console\u001b[33m.\u001b[39merror(\u001b[32m'Error loading Excel file:'\u001b[39m\u001b[33m,\u001b[39m err)\u001b[33m;\u001b[39m\u001b[0m"
-                          },
-                          "errors": [
-                            {
-                              "location": {
-                                "file": "C:\\FinReconAutomation\\utils\\excelReader.ts",
-                                "column": 13,
-                                "line": 151
-                              },
-                              "message": "Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n\n\u001b[90m   at \u001b[39m..\\utils\\excelReader.ts:151\n\n\u001b[0m \u001b[90m 149 |\u001b[39m             \u001b[36mconst\u001b[39m filePath \u001b[33m=\u001b[39m path\u001b[33m.\u001b[39mjoin(__dirname\u001b[33m,\u001b[39m \u001b[32m'../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 150 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Attempting to load Excel file:'\u001b[39m\u001b[33m,\u001b[39m filePath)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 151 |\u001b[39m             \u001b[36mawait\u001b[39m workbook\u001b[33m.\u001b[39mxlsx\u001b[33m.\u001b[39mreadFile(filePath)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 152 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Excel file loaded successfully'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 153 |\u001b[39m         } \u001b[36mcatch\u001b[39m (err) {\n \u001b[90m 154 |\u001b[39m             console\u001b[33m.\u001b[39merror(\u001b[32m'Error loading Excel file:'\u001b[39m\u001b[33m,\u001b[39m err)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at NodeBufferReader.checkIndex (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:26:19)\u001b[22m\n\u001b[2m    at NodeBufferReader.checkOffset (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:17:14)\u001b[22m\n\u001b[2m    at NodeBufferReader.readData (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\NodeBufferReader.js:14:10)\u001b[22m\n\u001b[2m    at NodeBufferReader.readString (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:75:49)\u001b[22m\n\u001b[2m    at ZipEntries.isSignature (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:39:37)\u001b[22m\n\u001b[2m    at ZipEntries.readEndOfCentral (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:164:35)\u001b[22m\n\u001b[2m    at ZipEntries.load (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:255:14)\u001b[22m\n\u001b[2m    at C:\\FinReconAutomation\\node_modules\\jszip\\lib\\load.js:48:24\u001b[22m\n\u001b[2m    at XLSX.load (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:280:17)\u001b[22m\n\u001b[2m    at XLSX.readFile (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:55:24)\u001b[22m\n\u001b[2m    at ExcelReader.readWorkbook (C:\\FinReconAutomation\\utils\\excelReader.ts:151:13)\u001b[22m\n\u001b[2m    at ExcelReader.getAllTestCases (C:\\FinReconAutomation\\utils\\excelReader.ts:223:26)\u001b[22m\n\u001b[2m    at ExcelReader.fetchTestCaseDataByName (C:\\FinReconAutomation\\utils\\excelReader.ts:202:22)\u001b[22m\n\u001b[2m    at C:\\FinReconAutomation\\tests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32\u001b[22m"
-                            }
-                          ],
-                          "stdout": [
-                            {
-                              "text": "Attempting to load Excel file: C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
-                            },
-                            {
-                              "text": "Updating test result for \"Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon\" in sheet \"Standard Product\"\n"
-                            },
-                            {
-                              "text": "Attempting to load Excel file: C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
-                            }
-                          ],
-                          "stderr": [
-                            {
-                              "text": "Error reading file C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.getAllTestCases \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:223:26\u001b[90m)\u001b[39m\n    at ExcelReader.fetchTestCaseDataByName \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:202:22\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
-                            },
-                            {
-                              "text": "Error loading Excel file: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.getAllTestCases \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:223:26\u001b[90m)\u001b[39m\n    at ExcelReader.fetchTestCaseDataByName \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:202:22\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
-                            },
-                            {
-                              "text": "Error reading file C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
-                            },
-                            {
-                              "text": "Error loading Excel file: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
-                            },
-                            {
-                              "text": "Error updating test results: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
-                            },
-                            {
-                              "text": "Error details: {\n  sheetName: \u001b[32m'Standard Product'\u001b[39m,\n  testCaseName: \u001b[32m'Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon'\u001b[39m,\n  result: \u001b[32m'Failed'\u001b[39m,\n  error: \u001b[32m'End of data reached (data length = 0, asked index = 4). Corrupted zip ?'\u001b[39m\n}\n"
-                            },
-                            {
-                              "text": "Failed to record test failure in Excel: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
-                            },
-                            {
-                              "text": "Excel Error: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
-                            }
-                          ],
-                          "retry": 0,
-                          "startTime": "2025-09-27T20:34:04.066Z",
-                          "annotations": [
-                            {
-                              "type": "test-type",
-                              "description": "E2E"
-                            },
-                            {
-                              "type": "feature",
-                              "description": "Order Creation"
-                            }
-                          ],
-                          "attachments": [
-                            {
-                              "name": "screenshot",
-                              "contentType": "image/png",
-                              "path": "C:\\FinReconAutomation\\test-results\\BigCommerceTests-UITests-O-01388-elivery-NoDiscount-NoCoupon-existing-chrome\\test-failed-1.png"
-                            }
-                          ],
-                          "errorLocation": {
-                            "file": "C:\\FinReconAutomation\\utils\\excelReader.ts",
-                            "column": 13,
-                            "line": 151
-                          }
-                        }
-                      ],
-                      "status": "unexpected"
-                    }
-                  ],
-                  "id": "f25725089d33fc2f113d-faeb7cb5c7d00a328392",
-                  "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
-                  "line": 17,
-                  "column": 17
-                }
-              ]
-              "title": "Create customer with all fields",
+              "title": "Test Comptia",
               "ok": false,
               "tags": [],
               "tests": [
@@ -219,176 +95,215 @@
                   "projectName": "existing-chrome",
                   "results": [
                     {
-                      "workerIndex": 11,
+                      "workerIndex": 23,
                       "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 30002,
+                      "status": "failed",
+                      "duration": 27761,
                       "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:53:33\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:50:17",
+                        "location": {
+                          "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
+                          "column": 33,
+                          "line": 53
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 51 |\u001b[39m                     \u001b[36mawait\u001b[39m homepage\u001b[33m.\u001b[39mnavigateToSideMenuOption(\u001b[32m'Products'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'All Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m                     \u001b[36mconst\u001b[39m url \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39murl()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m                     expect(url)\u001b[33m.\u001b[39mtoContain(\u001b[32m'/manage/Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m                     \u001b[36mawait\u001b[39m addProductPage\u001b[33m.\u001b[39mverifyProductExistsBySKU()\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m                 })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m             })\u001b[33m;\u001b[39m\u001b[0m"
                       },
                       "errors": [
                         {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                          "location": {
+                            "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
+                            "column": 33,
+                            "line": 53
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m\n\n\u001b[0m \u001b[90m 51 |\u001b[39m                     \u001b[36mawait\u001b[39m homepage\u001b[33m.\u001b[39mnavigateToSideMenuOption(\u001b[32m'Products'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'All Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m                     \u001b[36mconst\u001b[39m url \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39murl()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m                     expect(url)\u001b[33m.\u001b[39mtoContain(\u001b[32m'/manage/Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m                     \u001b[36mawait\u001b[39m addProductPage\u001b[33m.\u001b[39mverifyProductExistsBySKU()\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m                 })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m             })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:53:33\u001b[22m\n\u001b[2m    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:50:17\u001b[22m"
                         }
                       ],
                       "stdout": [
                         {
-                          "text": "Clicked on element: Side Menu Option: Customers\n"
+                          "text": "Clicked on element: Side Menu Option: Products\n"
                         },
                         {
-                          "text": "Clicked on element: Customers submenu option: Add\n"
+                          "text": "Clicked on element: Products Submenu Option: Add\n"
                         },
                         {
-                          "text": "Clicked on element: undefined\n"
+                          "text": "Navigated to Products submenu option: Add\n"
                         },
                         {
-                          "text": "Clicked on element: undefined\n"
+                          "text": "Entered text: Test Comptia into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-name\"]')\n"
                         },
                         {
-                          "text": "Entered text: John into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"firstName\"]')\n"
+                          "text": "Entered text: TW-1003 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sku\"]')\n"
                         },
                         {
-                          "text": "Entered text: Doe into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"lastName\"]')\n"
+                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-price\"]')\n"
                         },
                         {
-                          "text": "Entered text: Acme Inc into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"companyName\"]')\n"
+                          "text": "Entered text: Physical into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-type\"]')\n"
                         },
                         {
-                          "text": "Entered text: johndoe1758625762190@gmail.com into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"emailAddress\"]')\n"
+                          "text": "Entered text: 2.5 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-weight\"]')\n"
                         },
                         {
-                          "text": "Clicked on element: undefined\n"
+                          "text": "Expanded parent category: VueEcom - Sandbox 3\n"
                         },
                         {
-                          "text": "Entered text: 1234567890 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"phoneNumber\"]')\n"
+                          "text": "Checked child category: Exam Vouchers\n"
                         },
                         {
-                          "text": "Entered text: 10.00 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"storeCredit\"]')\n"
+                          "text": "Clicked on element: Add Image\n"
                         },
                         {
-                          "text": "Entered text: TAX123 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"taxExemptCategory\"]')\n"
+                          "text": "Clicked on element: Add from URL\n"
                         },
                         {
-                          "text": "Entered text: 5000 into element: locator('#content-iframe').contentFrame().locator('//form-field[label[contains(normalize-space(.), \"Line of Credit\")]]//input')\n"
+                          "text": "Entered text: https://myitsuccess.com/wp-content/uploads/2024/08/Comptia-cloud-logo.jpg into element: locator('#content-iframe').contentFrame().locator('//input[@placeholder=\"https://www...\"]')\n"
                         },
                         {
-                          "text": "Entered text: Jhon@53674 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Password\\']//..//..//input[@id=\"password\"]')\n"
+                          "text": "Clicked on element: Add Image\n"
                         },
                         {
-                          "text": "Entered text: Jhon@53674 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Password\\']//..//..//input[@name=\"passwordConfirm\"]')\n"
+                          "text": "Clicked on element: Assign and Save\n"
                         },
                         {
-                          "text": "Clicked on element: undefined\n"
+                          "text": "Entered text: TW-1003 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-identifierSku\"]')\n"
                         },
                         {
-                          "text": "Clicked on element: undefined\n"
+                          "text": "Entered text: MPN-12345 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-mpn\"]')\n"
                         },
                         {
-                          "text": "Clicked on element: undefined\n"
+                          "text": "Entered text: 123456789012 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-upc\"]')\n"
                         },
                         {
-                          "text": "Waited for element: locator('#content-iframe').contentFrame().locator('//h1[text()=\"Add address\"]')\n"
+                          "text": "Entered text: 9876543210987 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-gtin\"]')\n"
                         },
                         {
-                          "text": "Entered text: John into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"firstName\"]')\n"
+                          "text": "Entered text: BPN-001 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-bpn\"]')\n"
                         },
                         {
-                          "text": "First name entered: Doe\n"
+                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-defaultPrice\"]')\n"
                         },
                         {
-                          "text": "Xpath for  Last Name input: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"lastName\"]')\n"
+                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-cost_price\"]')\n"
                         },
                         {
-                          "text": "Entered text: Doe into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"lastName\"]')\n"
+                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-retail_price\"]')\n"
                         },
                         {
-                          "text": "Entered text: Acme Inc into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"company\"]')\n"
+                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sale_price\"]')\n"
                         },
                         {
-                          "text": "Entered text: 1234567890 into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"phoneNumber\"]')\n"
+                          "text": "Entered text: widget, test, automation into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-search_keywords\"]')\n"
                         },
                         {
-                          "text": "Entered text: 123 Main Street into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"addressLine1\"]')\n"
+                          "text": "Entered text: 1 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sort_order\"]')\n"
                         },
                         {
-                          "text": "Entered text: Suite 100 into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"addressLine2\"]')\n"
+                          "text": "Entered text: 1 year warranty included. into element: locator('#content-iframe').contentFrame().locator('//textarea[@id=\"productInput-warranty\"]')\n"
                         },
                         {
-                          "text": "Entered text: New York into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"suburbOrCity\"]')\n"
+                          "text": "Entered text: Ships in 24 hours. into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-availability_text\"]')\n"
                         },
                         {
-                          "text": "Entered text: 10001 into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"zipOrPostcode\"]')\n"
+                          "text": "Clicked on element: clicked the checkbox \n"
                         },
                         {
-                          "text": "Entered text: PO12345 into element: locator('#content-iframe').contentFrame().locator('//label[normalize-space(text())=\"PO Number\"]/following-sibling::span//input')\n"
+                          "text": "Entered text: 10 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-width\"]')\n"
                         },
                         {
-                          "text": "Entered text: TX9999 into element: locator('#content-iframe').contentFrame().locator('//label[normalize-space(text())=\"Tax ID\"]/following-sibling::span//input')\n"
+                          "text": "Entered text: 5 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-height\"]')\n"
                         },
                         {
-                          "text": "Selected radio option: Residential\n"
+                          "text": "Entered text: 3 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-depth\"]')\n"
                         },
                         {
-                          "text": "Clicked on element: undefined\n"
+                          "text": "Entered text: 5.00 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-fixed_cost_shipping_price\"]')\n"
                         },
                         {
-                          "text": "Clicked on element: Side Menu Option: Customers\n"
+                          "text": "Entered text: 1 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-min_purchase_quantity\"]')\n"
                         },
                         {
-                          "text": "Clicked on element: Customers submenu option: All customers\n"
+                          "text": "Entered text: 10 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-max_purchase_quantity\"]')\n"
                         },
                         {
-                          "text": "Email found: johndoe1758625762190@gmail.com\n"
+                          "text": " Option \"any\" already selected.\n"
+                        },
+                        {
+                          "text": "Entered text: Buy the best test widget for your automation needs. into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-meta_description\"]')\n"
+                        },
+                        {
+                          "text": "Clicked on element: Product Saved\n"
+                        },
+                        {
+                          "text": "Clicked on element: Side Menu Option: Products\n"
                         }
                       ],
-                      "stderr": [],
+                      "stderr": [
+                        {
+                          "text": "Products submenu option not found: All Products\n"
+                        }
+                      ],
                       "retry": 0,
                       "steps": [
                         {
                           "title": "Bring page to front",
-                          "duration": 13
+                          "duration": 147
                         },
                         {
-                          "title": "Navigate to Add Customer page",
-                          "duration": 1171
+                          "title": "Navigate to Add Product page",
+                          "duration": 1667
                         },
                         {
-                          "title": "Fill Customer Details",
-                          "duration": 27016
+                          "title": "Fill Product Details",
+                          "duration": 25354
                         },
                         {
-                          "title": "Verify Customer",
-                          "duration": 5092
+                          "title": "Verify Customer Exists By Email",
+                          "duration": 565,
+                          "error": {
+                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m",
+                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:53:33\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:50:17",
+                            "location": {
+                              "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
+                              "column": 33,
+                              "line": 53
+                            },
+                            "snippet": "\u001b[0m \u001b[90m 51 |\u001b[39m                     \u001b[36mawait\u001b[39m homepage\u001b[33m.\u001b[39mnavigateToSideMenuOption(\u001b[32m'Products'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'All Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m                     \u001b[36mconst\u001b[39m url \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39murl()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m                     expect(url)\u001b[33m.\u001b[39mtoContain(\u001b[32m'/manage/Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m                     \u001b[36mawait\u001b[39m addProductPage\u001b[33m.\u001b[39mverifyProductExistsBySKU()\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m                 })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m             })\u001b[33m;\u001b[39m\u001b[0m"
+                          }
                         }
                       ],
-                      "startTime": "2025-09-23T11:09:19.862Z",
+                      "startTime": "2025-10-07T05:04:39.273Z",
                       "annotations": [],
                       "attachments": [
                         {
                           "name": "screenshot",
                           "contentType": "image/png",
-                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\test-finished-1.png"
+                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-439bf-te-New-Product-Test-Comptia-existing-chrome\\test-finished-1.png"
                         },
                         {
                           "name": "error-context",
                           "contentType": "text/markdown",
-                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\error-context.md"
+                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-439bf-te-New-Product-Test-Comptia-existing-chrome\\error-context.md"
                         },
                         {
                           "name": "trace",
                           "contentType": "application/zip",
-                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\trace.zip"
+                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-439bf-te-New-Product-Test-Comptia-existing-chrome\\trace.zip"
                         }
-                      ]
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
+                        "column": 33,
+                        "line": 53
+                      }
                     }
                   ],
                   "status": "unexpected"
                 }
               ],
-              "id": "2039b9334856eff2f7c8-98c20f515e41c0c0e7f3",
-              "file": "BigCommerceTests/UITests/CustomerTests/createNewCustomerWithAddress.spec.ts",
-              "line": 68,
+              "id": "ebdc4baa015ceb15ab76-bc37303248260fec4348",
+              "file": "BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts",
+              "line": 31,
               "column": 17
             }
           ]
@@ -398,14 +313,10 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-09-27T20:34:00.501Z",
-    "duration": 31685.025999999998,
-    "expected": 0,
-    "startTime": "2025-09-23T11:09:17.344Z",
-    "duration": 37811.56300000101,
+    "startTime": "2025-10-07T05:04:35.576Z",
+    "duration": 38239.00900000334,
     "expected": 0,
     "skipped": 0,
-    "unexpected": 1,
     "unexpected": 1,
     "flaky": 0
   }

@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { FrameLocator, Locator, Page } from '@playwright/test';
 import { Console, error } from 'console';
 import path from 'path/win32';
 
@@ -324,7 +324,6 @@ async selectCategories(categories: string[][]) {
       console.log(`Screenshot saved to: ${fileName}`);
     } catch (error) {
       console.error(`Failed to take screenshot: ${fileName}`, error);
-      // Not throwing here as screenshot failure shouldn't stop test execution
       console.log("Continuing despite screenshot failure");
     }
   }
@@ -345,28 +344,17 @@ async selectCategories(categories: string[][]) {
     }
   }
 
-  /**
-   * Handles input-based dropdown elements where clicking opens a dropdown menu.
-   * Selects an option from the dropdown list based on matching text.
-   * @param inputLocator - Locator for the input element that triggers the dropdown
-   * @param optionText - Text of the option to select from the dropdown
-   * @param dropdownOptionsSelector - CSS selector for the dropdown options (default: 'li, [role="option"]')
-   * @param timeout - Maximum time to wait for elements (default: 5000ms)
-   */
 
   async selectFromInputDropdownDynamic(inputLocator: Locator, optionText: string): Promise<void> {
-  // Type into the input
+
   await inputLocator.fill(optionText);
 
-  // Get all matching options
   const options = this.page
     .frameLocator('#content-iframe')
     .locator(`//ul[@role="listbox"]//li[normalize-space(.)='${optionText}']`);
 
-  // Wait for at least one option
   await options.first().waitFor({ state: 'visible', timeout: 5000 });
 
-  // ✅ Click the first matching option
   await options.first().click();
 }
 
@@ -378,16 +366,12 @@ async selectCategories(categories: string[][]) {
     timeout: number = 5000
   ): Promise<void> {
     try {
-      // Wait for and click the input to open dropdown
       await this.waitForElement(inputLocator, timeout);
       await this.clickElement(inputLocator, 'Input Dropdown');
 
-      // Wait for the listbox to be visible
       const listbox = this.page.locator('//ul[@role="listbox"]');
       console.log(`Waiting for listbox to be visible: ${listbox}`);
-      //await listbox.waitFor({ state: 'visible', timeout });
 
-      // Get all child elements of the listbox
       const options = listbox.locator('[role="option"], li, div, span');
       const count = await options.count();
       let found = false;
@@ -409,6 +393,64 @@ async selectCategories(categories: string[][]) {
       throw new Error(`Input dropdown selection failed: ${error}`);
     }
   }
+  
+
+  async selectFromInputDropdownoverlay(
+    inputLocator: Locator,
+    optionText: string,
+    timeout: number = 10000
+) {
+
+    await inputLocator.waitFor({ state: 'visible', timeout });
+    await inputLocator.click();
+    await inputLocator.fill(optionText);
+
+
+    const listbox = inputLocator.locator('xpath=ancestor::custom-dropdown//ul[@role="listbox"]');
+    await listbox.waitFor({ state: 'visible', timeout });
+
+    const option = listbox.locator(`li:has-text("${optionText}")`).first();
+    await option.scrollIntoViewIfNeeded();
+    await option.click();
+}
+
+async selectGiftWrappingOptionDynamic(optionText: string): Promise<void> {
+  const iframe = this.page.frameLocator('#content-iframe');
+  const option = optionText.trim().toLowerCase();
+
+  // Map JSON value → element ID
+  const optionMap: Record<string, string> = {
+    any: '#productInput-gift_wrapping_all',
+    none: '#productInput-gift_wrapping_any',
+    list: '#productInput-gift_wrapping_custom'
+  };
+
+  const selector = optionMap[option];
+  if (!selector) throw new Error(` Invalid gift wrapping option: "${optionText}"`);
+
+  const radio = iframe.locator(selector);
+
+  // Wait for it to appear
+  await radio.waitFor({ state: 'attached', timeout: 5000 });
+
+  // Check if disabled
+  if (await radio.isDisabled()) {
+    console.warn(` Option "${option}" is disabled, skipping selection.`);
+    return;
+  }
+
+  // Select only if not already checked
+  if (!(await radio.isChecked())) {
+    await radio.click({ force: true });
+    console.log(` Selected gift wrapping option: "${option}"`);
+  } else {
+    console.log(` Option "${option}" already selected.`);
+  }
+}
+
+
+
+
 
   async collapseSideMenuOption(locator: Locator): Promise<void> {
     try {

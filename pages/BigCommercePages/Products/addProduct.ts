@@ -82,9 +82,10 @@ export class AddProductPage extends Homepage {
 		private shippingWeightInput: Locator;
 		private imageModalTitle: Locator;
 		private imageThumbPreview: Locator;
-	enterUrlInput: Locator;
-	AddImageButton: any;
-	AssignandSaveBtn: Locator;
+		private enterUrlInput: Locator;
+		private AddImageButton: any;
+		private AssignandSaveBtn: Locator;
+		private saveButtonClck: any;
 
 		constructor(page: Page) {
 			 super(page);
@@ -143,7 +144,7 @@ export class AddProductPage extends Homepage {
 			this.warrantyInfoInput = initLocator('//textarea[@id="productInput-warranty"]');
 			this.availabilityTextInput = initLocator('//input[@id="productInput-availability_text"]');
 			this.conditionDropdown = initLocator('//input[@id="productInput-condition"]');
-			this.showConditionCheckbox = initLocator('//input[@id="productInput-is_condition_shown"]');
+			this.showConditionCheckbox = iframe.locator('//label[@for="productInput-is_condition_shown"]');
 			// Custom Fields
 			// Related Products
 			this.showRelatedProductsCheckbox = initLocator('label:has-text("Automatically show related products") input[type="checkbox"]');
@@ -157,8 +158,8 @@ export class AddProductPage extends Homepage {
 			this.freeShippingCheckbox = initLocator('label:has-text("Free Shipping") input[type="checkbox"]');
 			// Purchasability
 			this.purchasabilityRadios = initLocator('section:has-text("Purchasability") input[type="radio"]');
-			this.minPurchaseQtyInput = initLocator('input[placeholder*="Minimum Purchase Quantity"]');
-			this.maxPurchaseQtyInput = initLocator('input[placeholder*="Maximum Purchase Quantity"]');
+			this.minPurchaseQtyInput = initLocator('//input[@id="productInput-min_purchase_quantity"]');
+			this.maxPurchaseQtyInput = initLocator('//input[@id="productInput-max_purchase_quantity"]');
 			// Gift Wrapping
 			this.giftWrappingRadios = initLocator('section:has-text("Gift Wrapping options") input[type="radio"]');
 			// Customs Information
@@ -173,6 +174,7 @@ export class AddProductPage extends Homepage {
 			this.useMetaDescriptionCheckbox = initLocator('label:has-text("Use meta description") input[type="checkbox"]');
 			this.useThumbnailImageRadio = initLocator('label:has-text("Use thumbnail image") input[type="radio"]');
 			this.dontUseImageRadio = initLocator('label:has-text("Don\'t use an image") input[type="radio"]');
+			this.saveButtonClck = initLocator('//button[contains(@class,"main-button") and text()="Save"]');
 			}
 		
 			getCategoryCheckbox(category: string): Locator {
@@ -224,45 +226,72 @@ async fillProductDetails(product: ProductData) {
 		await this.enterText(this.sortOrderInput, product.sortOrder);
 		await this.enterText(this.warrantyInfoInput, product.warrantyInfo);
 		await this.enterText(this.availabilityTextInput, product.availabilityText);
-		await this.selectFromInputDropdownDynamic(this.conditionDropdown, product.condition);
+		await this.selectFromInputDropdownoverlay(this.conditionDropdown, product.condition); // ensure checkbox is rendered
 		if (product.visibleOnStorefront) {
 		if (!(await this.showConditionCheckbox.isChecked())) {
-			await this.showConditionCheckbox.click();
+			await this.clickElement(this.showConditionCheckbox,"clicked the checkbox ");
 		}
 	} else {
 		if (await this.showConditionCheckbox.isChecked()) {
-			await this.showConditionCheckbox.click();
+			await this.clickElement(this.showConditionCheckbox,"clicked the checkbox ");
 		}
 	}
-		//await this.showConditionCheckbox.setChecked(product.showConditionOnStorefront);
-		// Custom fields logic can be added here if needed
-		//await this.showRelatedProductsCheckbox.setChecked(product.showRelatedProducts);
-		await this.enterText(this.shippingWeightInput, product.weight);
 		await this.enterText(this.widthInput, product.dimensions.width);
 		await this.enterText(this.heightInput, product.dimensions.height);
 		await this.enterText(this.depthInput, product.dimensions.depth);
 		await this.enterText(this.fixedShippingPriceInput, product.fixedShippingPrice);
-		await this.freeShippingCheckbox.setChecked(product.freeShipping);
-		await this.purchasabilityRadios.nth(product.purchasability).check();
 		await this.enterText(this.minPurchaseQtyInput, product.minPurchaseQty);
 		await this.enterText(this.maxPurchaseQtyInput, product.maxPurchaseQty);
-		await this.giftWrappingRadios.nth(product.giftWrapping).check();
-		//await this.manageCustomsInfoCheckbox.setChecked(product.manageCustomsInfo);
-		await this.enterText(this.pageTitleInput, product.pageTitle);
-		await this.enterText(this.productUrlInput, product.productUrl);
+		await this.selectGiftWrappingOptionDynamic(product.giftWrappingOption);
 		await this.enterText(this.metaDescriptionInput, product.metaDescription);
-		await this.objectTypeDropdown.selectOption({ label: product.objectType });
-		await this.useProductNameCheckbox.setChecked(product.useProductName);
-		await this.useMetaDescriptionCheckbox.setChecked(product.useMetaDescription);
-		if (product.useThumbnailImage) {
-			await this.useThumbnailImageRadio.check();
-		} else {
-			await this.dontUseImageRadio.check();
-		}
+		await this.clickElement(this.saveButtonClck,"Product Saved");
 	} catch (error) {
 		console.error('Error filling product details:', error);
 		throw error;	
 	}
 }
+async verifyProductExistsBySKU(sku: string) {
+    if (!sku) {
+        console.error("Error: SKU not provided. Did you create the product first?");
+        throw new Error("SKU not provided");
+    }
 
+    try {
+        await this.page.goto('https://your-site.com/admin/products'); // replace with actual URL
+        await this.page.waitForLoadState('networkidle');
+
+        const iframe = this.page.frameLocator('#content-iframe');
+
+        const searchInput = iframe.locator('//input[@placeholder="Search products"]');
+        await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+        await searchInput.fill(sku);
+
+        await searchInput.press('Enter');
+        await this.page.waitForTimeout(2000); // wait for results to appear
+
+        // Locate all rows
+        const rowsLocator = iframe.locator('tr'); // adjust selector if needed
+        await expect(rowsLocator.first()).toBeVisible({ timeout: 10000 });
+
+        const rowCount = await rowsLocator.count();
+        console.log(`Found ${rowCount} rows for SKU search: ${sku}`);
+
+        let found = false;
+        for (let i = 0; i < rowCount; i++) {
+            const skuCell = rowsLocator.nth(i).locator('td:nth-child(2)'); // adjust column index for SKU
+            const skuText = (await skuCell.textContent())?.trim();
+            console.log(`Row ${i + 1} SKU: ${skuText}`);
+            if (skuText === sku) {
+                console.log(`Product SKU matched UI: ${skuText}`);
+                found = true;
+                break;
+            }
+        }
+        expect(found).toBeTruthy();
+
+    } catch (error) {
+        console.error(`Error verifying product for SKU ${sku}:`, error);
+        throw error;
+    }
+}
 }
