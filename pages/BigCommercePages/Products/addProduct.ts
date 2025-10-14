@@ -299,4 +299,35 @@ async verifyProductExistsBySKU(sku: string) {
         throw error;
     }
 }
+
+async addBundleModifiers(modifiers: string) {
+    if (!modifiers) return; // nothing to do for non-bundle products
+
+    const modifierList = modifiers.split(',').map(m => m.trim()).filter(Boolean);
+
+    for (const modSku of modifierList) {
+        // Click "Add Modifier Option"
+        await this.addModifierOptionButton.click();
+
+        // Wait for modal to appear
+        const modal = this.page.locator('div[role="dialog"]:has-text("Select Product")');
+        await modal.waitFor({ state: 'visible', timeout: 5000 });
+
+        // Search and select modifier product
+        const searchInput = modal.locator('input[placeholder="Search products"]');
+        await searchInput.fill(modSku);
+        await searchInput.press('Enter');
+
+        const firstResult = modal.locator('table tbody tr').first();
+        await firstResult.waitFor({ state: 'visible', timeout: 5000 });
+        await firstResult.click();
+
+        // Confirm add
+        const addBtn = modal.locator('button:has-text("Add")');
+        await addBtn.click();
+
+        // Wait for modal to close before next iteration
+        await modal.waitFor({ state: 'detached', timeout: 5000 });
+    }
+}
 }

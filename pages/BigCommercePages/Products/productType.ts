@@ -10,6 +10,7 @@ export type ProductCustomField = {
 };
 
 export type ProductData = {
+  modifiers: boolean;
   giftWrappingOption: string;
   productName: string;
   sku: string;
