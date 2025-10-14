@@ -87,6 +87,7 @@ export class AddProductPage extends Homepage {
 		private AssignandSaveBtn: Locator;
 		private saveButtonClck: any;
 		private searchInputbox: any;
+	productHeader: Locator;
 
 		constructor(page: Page) {
 			 super(page);
@@ -95,6 +96,7 @@ export class AddProductPage extends Homepage {
 			this.descriptionFrameBody = this.page.frameLocator("//iframe[@id='productInput-description']").locator("body");
 			// Basic Info
 			const initLocator = (xpath: string) => iframe.locator(xpath);
+			this.productHeader = initLocator('//div[@class="appContainer"]//div[@class="addEdit-column-container panel-body"]')
 			this.productNameInput = initLocator('//input[@id="productInput-name"]');
 			this.skuInput = initLocator('//input[@id="productInput-sku"]');
 			this.defaultPriceInput = initLocator('//input[@id="productInput-price"]');
@@ -183,7 +185,11 @@ export class AddProductPage extends Homepage {
 				return iframe.locator(`//p[contains(normalize-space(.), "${category}")]`);
 			}
 async fillProductDetails(product: ProductData) {
-	try { 
+	try {
+		 await this.isElementVisible(this.productHeader);
+        if (await this.productHeader.isVisible() === false) {
+            throw new Error('Add Customer page is not loaded properly.');
+        }else{ 
 	await this.enterText (this.productNameInput, product.productName);
 	await this.enterText (this.skuInput, product.sku);
 	await this.enterText (this.defaultPriceInput, product.defaultPrice);
@@ -246,6 +252,7 @@ async fillProductDetails(product: ProductData) {
 		await this.selectGiftWrappingOptionDynamic(product.giftWrappingOption);
 		await this.enterText(this.metaDescriptionInput, product.metaDescription);
 		await this.clickElement(this.saveButtonClck,"Product Saved");
+}
 	} catch (error) {
 		console.error('Error filling product details:', error);
 		throw error;	
