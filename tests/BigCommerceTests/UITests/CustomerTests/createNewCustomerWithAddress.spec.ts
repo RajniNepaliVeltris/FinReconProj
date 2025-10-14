@@ -9,41 +9,6 @@ if (!customerTestData || !Array.isArray(customerTestData)) {
     throw new Error('customerTestData is undefined or not an array. Check the import path and JSON file.');
 }
 
-type AddressData = {
-    firstName: string;
-    lastName: string;
-    companyName?: string;
-    phone?: string;
-    street: string;
-    line2?: string;
-    city: string;
-    state: string;
-    zip: string;
-    country: string;
-    type: string;
-    poNumber?: string;
-    taxId?: string;
-};
-// Type definition for customer data
-type CustomerData = {
-    description: string;
-    originChannel?: string;
-    firstName: string;
-    lastName: string;
-    companyName?: string;
-    email: string;
-    customerGroup?: string;
-    phone?: string;
-    storeCredit?: string;
-    receiveACSEmails?: string;
-    forcePasswordReset?: string;
-    taxExemptCode?: string;
-    lineOfCredit?: string;
-    paymentTerms?: string;
-    password: string;
-    confirmPassword: string;
-    address?: AddressData;
-};
 
 let browser: import('@playwright/test').Browser;
 let context: import('@playwright/test').BrowserContext;
@@ -64,7 +29,7 @@ test.afterAll(async () => {
 
 test.describe('Create New Customer With Address', () => {
     if (Array.isArray(customerTestData)) {
-        (customerTestData as CustomerData[]).forEach((customerData) => {
+        (customerTestData as CustomerDetails[]).forEach((customerData) => {
             test(customerData.description, async () => {
                 const pages = await context.pages();
                 const page = pages.length > 0 ? pages[0] : await context.newPage();
@@ -75,20 +40,20 @@ test.describe('Create New Customer With Address', () => {
                 const homepage = new Homepage(page);
                 await test.step('Navigate to Add Customer page', async () => {
                     await homepage.navigateToSideMenuOption('Customers', 'Add');
-                    await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/customers/add');
-                    await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+                    const url = await page.url();
+                    expect(url).toContain('/manage/customers/add');
                 });
 
                 const addCustomerPage = new AddCustomerPage(page);
                 await test.step('Fill Customer Details', async () => {
-                    customerData.email = addCustomerPage.getNextEmail();
                     await addCustomerPage.fillCustomerDetails(customerData as CustomerDetails);
                 });
 
-                await test.step('Verify Customer', async () => {
-                    await homepage.navigateToSideMenuOption('Customers', 'All Customers');
-                    await expect(page).toHaveURL('https://store-5nfoomf2b4.mybigcommerce.com/manage/customers');
-                    await addCustomerPage.clickAllCustomers(customerData as CustomerDetails);
+                await test.step('Verify Customer Exists By Email', async () => {
+                    await homepage.navigateToSideMenuOption('Customers', 'All customers');
+                    const url = await page.url();
+                    expect(url).toContain('/manage/customers');
+                    await addCustomerPage.verifyCustomerExistsByEmail();
                 });
             });
         });

@@ -1,5 +1,6 @@
-import { Locator, Page } from '@playwright/test';
+import { FrameLocator, Locator, Page } from '@playwright/test';
 import { Console, error } from 'console';
+import path from 'path/win32';
 
 // This file represents the base page functionality for BigCommerce.
 
@@ -84,6 +85,81 @@ export class BasePage {
     }
   }
 
+ 
+// Method to select categories dynamically
+async selectCategories(categories: string[][]) {
+  if (!categories || categories.length === 0) return;
+
+  // Access iframe
+  const iframe = this.page.frameLocator('#content-iframe');
+  if (!iframe) throw new Error('Iframe not found. Ensure the iframe is loaded and accessible.');
+
+  for (const categoryGroup of categories) {
+    const parentCategory = categoryGroup[0];
+    const childCategories = categoryGroup.slice(1);
+
+    // Locate parent <li> by its <p> text inside iframe
+    const parentNode = iframe.locator(
+      `xpath=//li[.//p[normalize-space(text())="${parentCategory}"]]`
+    );
+
+    if ((await parentNode.count()) === 0) {
+      console.warn(`Parent category "${parentCategory}" not found`);
+      continue;
+    }
+
+    // Expand parent category
+    //await parentNode.scrollIntoViewIfNeeded();
+    await parentNode.click({ timeout: 5000 });
+    console.log(`Expanded parent category: ${parentCategory}`);
+
+    // Loop through child categories under this parent
+    for (const child of childCategories) {
+    // Locate the input inside the iframe
+    const childInput = iframe.locator(`xpath=//li[.//p[normalize-space(text())="${child}"]]//input[@type="checkbox"]`);
+
+    const count = await childInput.count();
+    if (count === 0) {
+        console.warn(`Child category "${child}" not found`);
+        continue;
+    }
+
+    // Get the id attribute to locate the label
+    const inputId = await childInput.getAttribute('id');
+    if (!inputId) {
+        console.warn(`Checkbox for "${child}" has no id`);
+        continue;
+    }
+
+    const label = iframe.locator(`label[for="${inputId}"]`);
+
+    // Wait for label to be visible and enabled
+    await label.waitFor({ state: 'visible', timeout: 10000 });
+
+     const isChecked = await childInput.isChecked();
+            if (!isChecked) {
+                // Use evaluate to bypass blinking issues
+                await label.evaluate((el: HTMLElement) => el.click());
+
+                // Poll until checkbox is actually checked
+                await childInput.evaluate((input: HTMLInputElement) => new Promise<void>((resolve) => {
+                    const interval = setInterval(() => {
+                        if (input.checked) {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, 50);
+                }));
+
+
+        console.log(`Checked child category: ${child}`);
+    } else {
+        console.log(`Child category already checked: ${child}`);
+    }
+}
+
+  }
+}
 
 
 
@@ -149,6 +225,19 @@ export class BasePage {
     }
   }
 
+  async getFilePath(fileName: string, folder: string = "pages/BigCommercePages/Products/productImages"): Promise<string> {
+    try {
+      const filePath = path.join(__dirname, "..", folder, fileName);
+      console.log(`Resolved file path: ${filePath}`);
+      return filePath;
+    } catch (error) {
+      console.error(`Failed to resolve file path for ${fileName}`, error);
+      throw new Error(`File path resolution failed: ${error}`);
+    }
+  }
+
+  
+
   async verifyPageTitle(expectedTitle: string): Promise<void> {
     try {
       const actualTitle = await this.page.title();
@@ -161,6 +250,14 @@ export class BasePage {
       throw error;
     }
   }
+
+  async fillDescription(description: string) {
+    const parentFrame = this.page.frameLocator('//iframe[@id="content-iframe"]');
+    const tinyMCEFrame = parentFrame.frameLocator('//iframe[contains(@title,"Rich Text Area")]');
+    const editableBody = tinyMCEFrame.locator('body[contenteditable="true"]');
+    await editableBody.waitFor({ state: 'visible', timeout: 10000 });
+    await editableBody.fill(description);
+}
 
   async logout(): Promise<void> {
     try {
@@ -227,7 +324,6 @@ export class BasePage {
       console.log(`Screenshot saved to: ${fileName}`);
     } catch (error) {
       console.error(`Failed to take screenshot: ${fileName}`, error);
-      // Not throwing here as screenshot failure shouldn't stop test execution
       console.log("Continuing despite screenshot failure");
     }
   }
@@ -248,28 +344,17 @@ export class BasePage {
     }
   }
 
-  /**
-   * Handles input-based dropdown elements where clicking opens a dropdown menu.
-   * Selects an option from the dropdown list based on matching text.
-   * @param inputLocator - Locator for the input element that triggers the dropdown
-   * @param optionText - Text of the option to select from the dropdown
-   * @param dropdownOptionsSelector - CSS selector for the dropdown options (default: 'li, [role="option"]')
-   * @param timeout - Maximum time to wait for elements (default: 5000ms)
-   */
 
   async selectFromInputDropdownDynamic(inputLocator: Locator, optionText: string): Promise<void> {
-  // Type into the input
+
   await inputLocator.fill(optionText);
 
-  // Get all matching options
   const options = this.page
     .frameLocator('#content-iframe')
     .locator(`//ul[@role="listbox"]//li[normalize-space(.)='${optionText}']`);
 
-  // Wait for at least one option
   await options.first().waitFor({ state: 'visible', timeout: 5000 });
 
-  // ✅ Click the first matching option
   await options.first().click();
 }
 
@@ -281,16 +366,12 @@ export class BasePage {
     timeout: number = 5000
   ): Promise<void> {
     try {
-      // Wait for and click the input to open dropdown
       await this.waitForElement(inputLocator, timeout);
       await this.clickElement(inputLocator, 'Input Dropdown');
 
-      // Wait for the listbox to be visible
       const listbox = this.page.locator('//ul[@role="listbox"]');
       console.log(`Waiting for listbox to be visible: ${listbox}`);
-      //await listbox.waitFor({ state: 'visible', timeout });
 
-      // Get all child elements of the listbox
       const options = listbox.locator('[role="option"], li, div, span');
       const count = await options.count();
       let found = false;
@@ -312,6 +393,64 @@ export class BasePage {
       throw new Error(`Input dropdown selection failed: ${error}`);
     }
   }
+  
+
+  async selectFromInputDropdownoverlay(
+    inputLocator: Locator,
+    optionText: string,
+    timeout: number = 10000
+) {
+
+    await inputLocator.waitFor({ state: 'visible', timeout });
+    await inputLocator.click();
+    await inputLocator.fill(optionText);
+
+
+    const listbox = inputLocator.locator('xpath=ancestor::custom-dropdown//ul[@role="listbox"]');
+    await listbox.waitFor({ state: 'visible', timeout });
+
+    const option = listbox.locator(`li:has-text("${optionText}")`).first();
+    await option.scrollIntoViewIfNeeded();
+    await option.click();
+}
+
+async selectGiftWrappingOptionDynamic(optionText: string): Promise<void> {
+  const iframe = this.page.frameLocator('#content-iframe');
+  const option = optionText.trim().toLowerCase();
+
+  // Map JSON value → element ID
+  const optionMap: Record<string, string> = {
+    any: '#productInput-gift_wrapping_all',
+    none: '#productInput-gift_wrapping_any',
+    list: '#productInput-gift_wrapping_custom'
+  };
+
+  const selector = optionMap[option];
+  if (!selector) throw new Error(` Invalid gift wrapping option: "${optionText}"`);
+
+  const radio = iframe.locator(selector);
+
+  // Wait for it to appear
+  await radio.waitFor({ state: 'attached', timeout: 5000 });
+
+  // Check if disabled
+  if (await radio.isDisabled()) {
+    console.warn(` Option "${option}" is disabled, skipping selection.`);
+    return;
+  }
+
+  // Select only if not already checked
+  if (!(await radio.isChecked())) {
+    await radio.click({ force: true });
+    console.log(` Selected gift wrapping option: "${option}"`);
+  } else {
+    console.log(` Option "${option}" already selected.`);
+  }
+}
+
+
+
+
 
   async collapseSideMenuOption(locator: Locator): Promise<void> {
     try {

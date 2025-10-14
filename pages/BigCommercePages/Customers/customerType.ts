@@ -1,10 +1,13 @@
 export type CustomerDetails = {
+  description: string;
   customerHeader?: string;
   originChannel?: string;
   firstName: string;
   lastName: string;
   companyName?: string;
-  email: string;
+  email: string; // can be blank in data to auto-generate
+  emailBase?: string; // optional base for generated email (default 'johndoe')
+  emailDomain?: string; // optional domain for generated email (default '@gmail.com')
   customerGroup?: string;
   phone?: string;
   storeCredit?: string;
@@ -15,8 +18,7 @@ export type CustomerDetails = {
   paymentTerms?: string;
   password: string;
   confirmPassword: string;
-
-  // 👇 Nested address object
+  
   address?: {
     firstName: string;
     lastName: string;
