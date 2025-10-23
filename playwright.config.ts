@@ -33,6 +33,7 @@ export default defineConfig({
     video: 'retain-on-failure',
     testIdAttribute: 'data-testid',
     viewport: { width: 1280, height: 720 },
+    headless: false,
   },
   projects: [
     {

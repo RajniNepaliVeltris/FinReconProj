@@ -49,6 +49,7 @@ export interface TestCase {
     'CS_CCV2Value': string;
     'CS_CardExpiryDate(JAN-2025)(JAN-2025)': string;
     'Automation': boolean;
+    'Manual Test': boolean;
     'BigC_OrderId': string;
     'Test_Result': string;
     'Execution_Notes': string;
