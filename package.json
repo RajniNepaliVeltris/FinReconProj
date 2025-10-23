@@ -7,8 +7,10 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@types/xlsx": "^0.0.35",
     "exceljs": "^4.4.0",
-    "mssql": "^11.0.1"
+    "mssql": "^11.0.1",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "test:ui": "npx playwright test --grep @ui",
