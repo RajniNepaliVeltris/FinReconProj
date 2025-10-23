@@ -9,6 +9,13 @@ export type ProductCustomField = {
   value: string;
 };
 
+export type ProductModifier = {
+  name: string;
+  type: string;
+  value: string;
+  required: boolean;
+};
+
 export type ProductData = {
   modifiers: boolean;
   giftWrappingOption: string;

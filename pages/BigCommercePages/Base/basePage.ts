@@ -1,4 +1,4 @@
-import { FrameLocator, Locator, Page } from '@playwright/test';
+import { expect, FrameLocator, Locator, Page } from '@playwright/test';
 import { Console, error } from 'console';
 import path from 'path/win32';
 
@@ -85,84 +85,6 @@ export class BasePage {
     }
   }
 
- 
-// Method to select categories dynamically
-async selectCategories(categories: string[][]) {
-  if (!categories || categories.length === 0) return;
-
-  // Access iframe
-  const iframe = this.page.frameLocator('#content-iframe');
-  if (!iframe) throw new Error('Iframe not found. Ensure the iframe is loaded and accessible.');
-
-  for (const categoryGroup of categories) {
-    const parentCategory = categoryGroup[0];
-    const childCategories = categoryGroup.slice(1);
-
-    // Locate parent <li> by its <p> text inside iframe
-    const parentNode = iframe.locator(
-      `xpath=//li[.//p[normalize-space(text())="${parentCategory}"]]`
-    );
-
-    if ((await parentNode.count()) === 0) {
-      console.warn(`Parent category "${parentCategory}" not found`);
-      continue;
-    }
-
-    // Expand parent category
-    //await parentNode.scrollIntoViewIfNeeded();
-    await parentNode.click({ timeout: 5000 });
-    console.log(`Expanded parent category: ${parentCategory}`);
-
-    // Loop through child categories under this parent
-    for (const child of childCategories) {
-    // Locate the input inside the iframe
-    const childInput = iframe.locator(`xpath=//li[.//p[normalize-space(text())="${child}"]]//input[@type="checkbox"]`);
-
-    const count = await childInput.count();
-    if (count === 0) {
-        console.warn(`Child category "${child}" not found`);
-        continue;
-    }
-
-    // Get the id attribute to locate the label
-    const inputId = await childInput.getAttribute('id');
-    if (!inputId) {
-        console.warn(`Checkbox for "${child}" has no id`);
-        continue;
-    }
-
-    const label = iframe.locator(`label[for="${inputId}"]`);
-
-    // Wait for label to be visible and enabled
-    await label.waitFor({ state: 'visible', timeout: 10000 });
-
-     const isChecked = await childInput.isChecked();
-            if (!isChecked) {
-                // Use evaluate to bypass blinking issues
-                await label.evaluate((el: HTMLElement) => el.click());
-
-                // Poll until checkbox is actually checked
-                await childInput.evaluate((input: HTMLInputElement) => new Promise<void>((resolve) => {
-                    const interval = setInterval(() => {
-                        if (input.checked) {
-                            clearInterval(interval);
-                            resolve();
-                        }
-                    }, 50);
-                }));
-
-
-        console.log(`Checked child category: ${child}`);
-    } else {
-        console.log(`Child category already checked: ${child}`);
-    }
-}
-
-  }
-}
-
-
-
   async waitForElement(locator: Locator, timeout: number = 30000): Promise<void> {
     try {
       await locator.waitFor({ state: 'visible', timeout });
@@ -185,6 +107,13 @@ async selectCategories(categories: string[][]) {
       throw new Error(`Click element failed: ${error}`);
     }
   }
+
+  async waitForElementToBeReady(locator: Locator, name: string, timeout = 10000): Promise<void> {
+  console.log(`Waiting for element: ${name}`);
+  await locator.waitFor({ state: 'visible', timeout });
+  await expect(locator).toBeEnabled({ timeout });
+}
+
 
   async selectRadioButton(locator: Locator, value: string) {
     if (await locator.isVisible()) {
@@ -344,7 +273,6 @@ async selectCategories(categories: string[][]) {
     }
   }
 
-
   async selectFromInputDropdownDynamic(inputLocator: Locator, optionText: string): Promise<void> {
 
   await inputLocator.fill(optionText);
@@ -357,8 +285,6 @@ async selectCategories(categories: string[][]) {
 
   await options.first().click();
 }
-
-
 
   async selectFromInputDropdown(
     inputLocator: Locator,
@@ -394,64 +320,6 @@ async selectCategories(categories: string[][]) {
     }
   }
   
-
-  async selectFromInputDropdownoverlay(
-    inputLocator: Locator,
-    optionText: string,
-    timeout: number = 10000
-) {
-
-    await inputLocator.waitFor({ state: 'visible', timeout });
-    await inputLocator.click();
-    await inputLocator.fill(optionText);
-
-
-    const listbox = inputLocator.locator('xpath=ancestor::custom-dropdown//ul[@role="listbox"]');
-    await listbox.waitFor({ state: 'visible', timeout });
-
-    const option = listbox.locator(`li:has-text("${optionText}")`).first();
-    await option.scrollIntoViewIfNeeded();
-    await option.click();
-}
-
-async selectGiftWrappingOptionDynamic(optionText: string): Promise<void> {
-  const iframe = this.page.frameLocator('#content-iframe');
-  const option = optionText.trim().toLowerCase();
-
-  // Map JSON value → element ID
-  const optionMap: Record<string, string> = {
-    any: '#productInput-gift_wrapping_all',
-    none: '#productInput-gift_wrapping_any',
-    list: '#productInput-gift_wrapping_custom'
-  };
-
-  const selector = optionMap[option];
-  if (!selector) throw new Error(` Invalid gift wrapping option: "${optionText}"`);
-
-  const radio = iframe.locator(selector);
-
-  // Wait for it to appear
-  await radio.waitFor({ state: 'attached', timeout: 5000 });
-
-  // Check if disabled
-  if (await radio.isDisabled()) {
-    console.warn(` Option "${option}" is disabled, skipping selection.`);
-    return;
-  }
-
-  // Select only if not already checked
-  if (!(await radio.isChecked())) {
-    await radio.click({ force: true });
-    console.log(` Selected gift wrapping option: "${option}"`);
-  } else {
-    console.log(` Option "${option}" already selected.`);
-  }
-}
-
-
-
-
-
   async collapseSideMenuOption(locator: Locator): Promise<void> {
     try {
       await locator.scrollIntoViewIfNeeded();

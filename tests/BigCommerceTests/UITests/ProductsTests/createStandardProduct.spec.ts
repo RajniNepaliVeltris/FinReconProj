@@ -1,5 +1,5 @@
 import { test, expect, chromium } from '@playwright/test';
-import { AddProductPage } from '../../../../pages/BigCommercePages/Products/addProduct';
+import { AddProductPage } from '../../../../pages/BigCommercePages/Products/addProductPage';
 import { Homepage } from '../../../../pages/BigCommercePages/Dashboard/homepage';
 import { ProductData } from '../../../../pages/BigCommercePages/Products/productType';
 import * as XLSX from 'xlsx';

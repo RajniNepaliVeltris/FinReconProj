@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator, expect, FrameLocator } from '@playwright/test';
 import { Homepage } from '../Dashboard/homepage';
 import { ProductData } from './productType';
 import path from 'path';
@@ -36,7 +36,6 @@ export class AddProductPage extends Homepage {
 		private editInventoryButton: Locator;
 		// Variations & Customizations
 		private addVariantOptionButton: Locator;
-		private addModifierOptionButton: Locator;
 		// Storefront Details
 		private featuredProductCheckbox: Locator;
 		private searchKeywordsInput: Locator;
@@ -87,7 +86,19 @@ export class AddProductPage extends Homepage {
 		private AssignandSaveBtn: Locator;
 		private saveButtonClck: any;
 		private searchInputbox: any;
-	productHeader: Locator;
+		private productHeader: Locator;
+		private addModifierOptionButton: Locator;
+		private modifierModal: Locator;
+		private modifierNameInput: (index: number) =>Locator;
+		private modifierTypeDropdown: (index: number) => Locator;
+		private modifierTypeOption: (type: string) => Locator;
+		private modifierValueInput: (index: number) => Locator;
+		private requiredCheckbox: (index: number) => Locator;
+		private addModifierConfirmButton: Locator;
+		private addModifierButton: Locator;
+		private searchInput: Locator;
+		private productRows: Locator;
+		private skuCellWithinRow: (row: Locator) => Locator;
 
 		constructor(page: Page) {
 			 super(page);
@@ -134,13 +145,9 @@ export class AddProductPage extends Homepage {
 			this.costPriceInput = initLocator('//input[@id="productInput-cost_price"]');
 			this.msrpInput = initLocator('//input[@id="productInput-retail_price"]');
 			this.salePriceInput = initLocator('//input[@id="productInput-sale_price"]');
-			// Inventory
 			this.trackInventoryCheckbox = initLocator('label:has-text("Track inventory") input[type="checkbox"]');
 			this.editInventoryButton = initLocator('button:has-text("Edit inventory")');
-			// Variations & Customizations
 			this.addVariantOptionButton = initLocator('button:has-text("Add Variant Option")');
-			this.addModifierOptionButton = initLocator('button:has-text("Add Modifier Option")');
-			// Storefront Details
 			this.featuredProductCheckbox = initLocator('label:has-text("Set as a Featured Product") input[type="checkbox"]');
 			this.searchKeywordsInput = initLocator('//input[@id="productInput-search_keywords"]');
 			this.sortOrderInput = initLocator('//input[@id="productInput-sort_order"]');
@@ -148,8 +155,6 @@ export class AddProductPage extends Homepage {
 			this.availabilityTextInput = initLocator('//input[@id="productInput-availability_text"]');
 			this.conditionDropdown = initLocator('//input[@id="productInput-condition"]');
 			this.showConditionCheckbox = iframe.locator('//label[@for="productInput-is_condition_shown"]');
-			// Custom Fields
-			// Related Products
 			this.showRelatedProductsCheckbox = initLocator('label:has-text("Automatically show related products") input[type="checkbox"]');
 			// Fulfillment (Dimensions & Weight)
 			this.shippingWeightInput = initLocator('//input[@id="productInput-shippingWeight"]');
@@ -168,16 +173,35 @@ export class AddProductPage extends Homepage {
 			// Customs Information
 			this.manageCustomsInfoCheckbox = initLocator('label:has-text("Manage customs information") input[type="checkbox"]');
 			// SEO
+			this.searchInput = initLocator('//input[@placeholder="Search products"]');
 			this.pageTitleInput = initLocator('//input[@id="productInput-page_title"]');
 			this.productUrlInput = initLocator('//input[@id="productInput-custom_url"]');
 			this.metaDescriptionInput = initLocator('//input[@id="productInput-meta_description"]');
-			// Open Graph Sharing
 			this.objectTypeDropdown = initLocator('//input[@id="productInput-facebook_type"]');
 			this.useProductNameCheckbox = initLocator('label:has-text("Use product name") input[type="checkbox"]');
 			this.useMetaDescriptionCheckbox = initLocator('label:has-text("Use meta description") input[type="checkbox"]');
 			this.useThumbnailImageRadio = initLocator('label:has-text("Use thumbnail image") input[type="radio"]');
 			this.dontUseImageRadio = initLocator('label:has-text("Don\'t use an image") input[type="radio"]');
 			this.saveButtonClck = initLocator('//button[contains(@class,"main-button") and text()="Save"]');
+			this.addModifierOptionButton = initLocator('//*[@id="add-edit-modifiers"]//button[@id="addEditOptions-add-modifiers"]');
+			this.modifierModal = initLocator('//h3[contains(text(), "Modifier Options")]');
+			this.addModifierButton = initLocator('//div[@class="table-actions-container"]//button[contains(@class,"addEditOptions-add-button") and contains(text(),"+ Add Modifier Option")]');
+			this.productRows = iframe.locator('tbody tr, table tr'); 
+			this.skuCellWithinRow = (row: Locator) => row.locator('td[data-testid="sku"] div');
+			this.modifierNameInput = (index: number) =>
+			initLocator(`(//label[normalize-space(span/text())="Name"]/following::input[contains(@id,"display_name")])[${index}]`);
+
+			this.modifierTypeDropdown = (index: number) =>
+			initLocator(`(//input[contains(@id, "modifier--") and contains(@id, "-type")])[${index}]`);
+
+			this.modifierValueInput = (index: number) =>
+			initLocator(`(//input[contains(@id,"default_value")])[${index}]`);
+
+			this.requiredCheckbox = (index: number) =>
+			initLocator(`(//label[span[normalize-space(text())="Required"]]/preceding-sibling::input[@type="checkbox"])[${index}]`);
+
+			this.modifierTypeOption = (type: string) => initLocator(`//span[normalize-space(text())="${type}"]`);
+			this.addModifierConfirmButton = initLocator('//button[@id="product-modifiers-submit"]');
 			}
 		
 			getCategoryCheckbox(category: string): Locator {
@@ -215,29 +239,30 @@ async fillProductDetails(product: ProductData) {
 	await this.enterText(this.enterUrlInput, product.imageUrl || "");
 	await this.clickElement(this.AddImageButton,"Add Image");
 	await this.clickElement(this.AssignandSaveBtn,"Assign and Save");
-		// await this.descriptionFrameBody.fill(product.description);
-	
+	await this.enterText(this.prodIdentifiers_sku, product.sku);
+	await this.enterText(this.mpnInput, product.mpn);
+	await this.enterText(this.upcInput, product.upc);
+	await this.enterText(this.gtinInput, product.gtin);
+	await this.enterText(this.bpnInput, product.bpn);
 
-		await this.enterText(this.prodIdentifiers_sku, product.sku);
-		await this.enterText(this.mpnInput, product.mpn);
-		await this.enterText(this.upcInput, product.upc);
-		await this.enterText(this.gtinInput, product.gtin);
-		await this.enterText(this.bpnInput, product.bpn);
-		//await this.enterText(this.defaultPriceInclTaxInput, product.defaultPrice);
-		//await this.selectFromInputDropdownDynamic(this.taxClassDropdown, product.taxClass);
-		await this.showAdvancedPricingLink.click();
-		await this.enterText(this.costPriceInput, product.defaultPrice);
-		await this.enterText(this.msrpInput, product.defaultPrice);
-		await this.enterText(this.salePriceInput, product.defaultPrice);
-		await this.enterText(this.searchKeywordsInput, product.searchKeywords);
-		await this.enterText(this.sortOrderInput, product.sortOrder);
-		await this.enterText(this.warrantyInfoInput, product.warrantyInfo);
-		await this.enterText(this.availabilityTextInput, product.availabilityText);
-		await this.selectFromInputDropdownoverlay(this.conditionDropdown, product.condition); // ensure checkbox is rendered
-		if (product.visibleOnStorefront) {
-		if (!(await this.showConditionCheckbox.isChecked())) {
-			await this.clickElement(this.showConditionCheckbox,"clicked the checkbox ");
-		}
+	await this.showAdvancedPricingLink.click();
+	await this.enterText(this.costPriceInput, product.defaultPrice);
+	await this.enterText(this.msrpInput, product.defaultPrice);
+	await this.enterText(this.salePriceInput, product.defaultPrice);
+	const modifiers = (product as any).modifiers;
+	if (Array.isArray(modifiers) && modifiers.length > 0) {
+	console.log(`Adding ${modifiers.length} modifiers for product: ${product.productName}`);
+	await this.addBundleModifiers(modifiers);
+	}
+	await this.enterText(this.searchKeywordsInput, product.searchKeywords);
+	await this.enterText(this.sortOrderInput, product.sortOrder);
+	await this.enterText(this.warrantyInfoInput, product.warrantyInfo);
+	await this.enterText(this.availabilityTextInput, product.availabilityText);
+	await this.selectFromInputDropdownoverlay(this.conditionDropdown, product.condition); // ensure checkbox is rendered
+	if (product.visibleOnStorefront) {
+	if (!(await this.showConditionCheckbox.isChecked())) {
+		await this.clickElement(this.showConditionCheckbox,"clicked the checkbox ");
+}
 	} else {
 		if (await this.showConditionCheckbox.isChecked()) {
 			await this.clickElement(this.showConditionCheckbox,"clicked the checkbox ");
@@ -258,76 +283,221 @@ async fillProductDetails(product: ProductData) {
 		throw error;	
 	}
 }
+
 async verifyProductExistsBySKU(sku: string) {
-    if (!sku) {
-        console.error("Error: SKU not provided. Did you create the product first?");
-        throw new Error("SKU not provided");
-    }
+	if (!sku) throw new Error("SKU not provided");
 
-    try {
+	try {
+		// Enter SKU and trigger search
+		await this.searchInput.fill(sku);
+		await this.searchInput.press('Enter');
 
-        const iframe = this.page.frameLocator('#content-iframe');
-		const searchInput = iframe.locator('//input[@placeholder="Search products"]');
+		// Wait for the search to complete by waiting for at least one matching row in the refreshed DOM
+		const iframe = this.page.frameLocator('#content-iframe');
 
-		
+		// Wait for table to reload – look for *any* visible SKU cell
+		const firstSkuCell = iframe.locator('td[data-testid="sku"] div').first();
+		await firstSkuCell.waitFor({ state: 'visible', timeout: 15000 });
 
-		await searchInput.fill(sku); // actually enter the SKU
-		await searchInput.press('Enter');
-
-		const rowsLocator = iframe.locator('tbody tr'); // target only tbody rows
-		await expect(rowsLocator.first()).toBeVisible({ timeout: 10000 });
-
-		const rowCount = await rowsLocator.count();
+		// Re-acquire the rows (fresh DOM)
+		const rows = iframe.locator('tbody tr, table tr');
+		const rowCount = await rows.count();
 		console.log(`Found ${rowCount} rows for SKU search: ${sku}`);
 
+		if (rowCount === 0) throw new Error(`No rows found after search for SKU: ${sku}`);
+
 		let found = false;
+
 		for (let i = 0; i < rowCount; i++) {
-			const skuCell = rowsLocator.nth(i).locator('td[data-testid="sku"] div'); // inner div text
-			const skuText = (await skuCell.textContent())?.trim();
+			const row = rows.nth(i);
+			const skuCell = row.locator('td[data-testid="sku"] div');
+
+			if (!(await skuCell.count())) {
+				console.log(`Row ${i + 1}: no SKU cell`);
+				continue;
+			}
+
+			const skuText = (await skuCell.textContent())?.trim() ?? '';
 			console.log(`Row ${i + 1} SKU: ${skuText}`);
-			if (skuText === sku) {
+
+			if (skuText.replace(/\s+/g, '') === sku.replace(/\s+/g, '')) {
 				console.log(`Product SKU matched UI: ${skuText}`);
 				found = true;
-				break; // stop after first match
+				break;
 			}
 		}
-		expect(found).toBeTruthy();
 
+		expect(found, `Product with SKU ${sku} should be present in table`).toBeTruthy();
 
-    } catch (error) {
-        console.error(`Error verifying product for SKU ${sku}:`, error);
-        throw error;
-    }
+	} catch (error) {
+		console.error(`Error verifying product for SKU ${sku}:`, error);
+		throw error;
+	}
 }
 
-async addBundleModifiers(modifiers: string) {
-    if (!modifiers) return; // nothing to do for non-bundle products
+async addBundleModifiers(modifiers: any[]) {
+  if (!modifiers?.length) return;
 
-    const modifierList = modifiers.split(',').map(m => m.trim()).filter(Boolean);
+  console.log(`Adding ${modifiers.length} modifiers dynamically...`);
 
-    for (const modSku of modifierList) {
-        // Click "Add Modifier Option"
-        await this.addModifierOptionButton.click();
+  await this.waitForElementToBeReady(this.addModifierOptionButton, "Add Modifier Button");
+  await this.scrollToElement(this.addModifierOptionButton);
+  await this.clickElement(this.addModifierOptionButton, "Clicked the add modifier option button");
 
-        // Wait for modal to appear
-        const modal = this.page.locator('div[role="dialog"]:has-text("Select Product")');
-        await modal.waitFor({ state: 'visible', timeout: 5000 });
+  for (const [index, mod] of modifiers.entries()) {
+    const modIndex = index + 1; // XPath index starts at 1
+    const { name, type, value, required } = mod;
 
-        // Search and select modifier product
-        const searchInput = modal.locator('input[placeholder="Search products"]');
-        await searchInput.fill(modSku);
-        await searchInput.press('Enter');
+    console.log(`Adding Modifier #${modIndex}:`, mod);
 
-        const firstResult = modal.locator('table tbody tr').first();
-        await firstResult.waitFor({ state: 'visible', timeout: 5000 });
-        await firstResult.click();
+    try {
+      await this.clickElement(this.addModifierButton, "Clicked the Add Modifier button");
 
-        // Confirm add
-        const addBtn = modal.locator('button:has-text("Add")');
-        await addBtn.click();
+      const nameInput = this.modifierNameInput(modIndex);
+      await this.enterText(nameInput, name);
 
-        // Wait for modal to close before next iteration
-        await modal.waitFor({ state: 'detached', timeout: 5000 });
+	  const valueInput = this.modifierValueInput(modIndex);
+      if (await valueInput.isVisible()) {
+  		await valueInput.evaluate((el: HTMLInputElement, val: string) => el.value = val, value);
+	}
+
+      const checkbox = this.requiredCheckbox(modIndex);
+      await checkbox.evaluate((el: HTMLInputElement, val: boolean) => {
+	  el.checked = val;
+  	  el.dispatchEvent(new Event('change', { bubbles: true }));
+	  }, required);
+
+
+    } catch (err) {
+      console.error(`Failed to add modifier "${name}":`, err);
     }
+  }
+  await this.addModifierConfirmButton.click();
+	await this.page.waitForTimeout(800);
+	console.log(`Modifier added`);
 }
+
+async selectFromInputDropdownoverlay(
+    inputLocator: Locator,
+    optionText: string,
+    timeout: number = 10000
+) {
+
+    await inputLocator.waitFor({ state: 'visible', timeout });
+    await inputLocator.click();
+    await inputLocator.fill(optionText);
+
+
+    const listbox = inputLocator.locator('xpath=ancestor::custom-dropdown//ul[@role="listbox"]');
+    await listbox.waitFor({ state: 'visible', timeout });
+
+    const option = listbox.locator(`li:has-text("${optionText}")`).first();
+    await option.scrollIntoViewIfNeeded();
+    await option.click();
+}
+
+async selectGiftWrappingOptionDynamic(optionText: string): Promise<void> {
+  const iframe = this.page.frameLocator('#content-iframe');
+  const option = optionText.trim().toLowerCase();
+  
+  const optionMap: Record<string, string> = {
+    any: '#productInput-gift_wrapping_all',
+    none: '#productInput-gift_wrapping_any',
+    list: '#productInput-gift_wrapping_custom'
+  };
+
+  const selector = optionMap[option];
+  if (!selector) throw new Error(` Invalid gift wrapping option: "${optionText}"`);
+
+  const radio = iframe.locator(selector);
+
+  await radio.waitFor({ state: 'attached', timeout: 5000 });
+
+
+  if (await radio.isDisabled()) {
+    console.warn(` Option "${option}" is disabled, skipping selection.`);
+    return;
+  }
+
+  if (!(await radio.isChecked())) {
+    await radio.click({ force: true });
+    console.log(` Selected gift wrapping option: "${option}"`);
+  } else {
+    console.log(` Option "${option}" already selected.`);
+  }
+}
+
+async selectCategories(categories: string[][]) { 
+	if (!categories || categories.length === 0) return; 
+	// Access iframe 
+	const iframe = this.page.frameLocator('#content-iframe'); 
+  if (!iframe) throw new Error('Iframe not found. Ensure the iframe is loaded and accessible.'); 
+  for (const categoryGroup of categories) { 
+    const parentCategory = categoryGroup[0]; 
+
+    const childCategories = categoryGroup.slice(1); 
+    // Locate parent <li> by its <p> text inside iframe 
+    const parentNode = iframe.locator( 
+      `xpath=//li[.//p[normalize-space(text())="${parentCategory}"]]` 
+    ); 
+
+    if ((await parentNode.count()) === 0) { 
+      console.warn(`Parent category "${parentCategory}" not found`); 
+      continue; 
+    } 
+    // Expand parent category 
+    await parentNode.click({ timeout: 5000 }); 
+    console.log(`Expanded parent category: ${parentCategory}`); 
+    // Loop through child categories under this parent 
+
+    for (const child of childCategories) { 
+    // Locate the input inside the iframe 
+    const childInput = iframe.locator(`xpath=//li[.//p[normalize-space(text())="${child}"]]//input[@type="checkbox"]`); 
+    const count = await childInput.count(); 
+
+    if (count === 0) { 
+        console.warn(`Child category "${child}" not found`); 
+        continue; 
+    } 
+    // Get the id attribute to locate the label 
+    const inputId = await childInput.getAttribute('id'); 
+    if (!inputId) { 
+        console.warn(`Checkbox for "${child}" has no id`); 
+        continue; 
+    } 
+    const label = iframe.locator(`label[for="${inputId}"]`); 
+    // Wait for label to be visible and enabled 
+    await label.waitFor({ state: 'visible', timeout: 10000 }); 
+     const isChecked = await childInput.isChecked(); 
+            if (!isChecked) { 
+                // Use evaluate to bypass blinking issues 
+                await label.evaluate((el: HTMLElement) => el.click()); 
+                // Poll until checkbox is actually checked 
+                await childInput.evaluate((input: HTMLInputElement) => new Promise<void>((resolve) => { 
+
+                    const interval = setInterval(() => { 
+
+                        if (input.checked) { 
+
+                            clearInterval(interval); 
+
+                            resolve(); 
+
+                        } 
+                    }, 50); 
+
+                })); 
+
+        console.log(`Checked child category: ${child}`); 
+
+    } else { 
+
+        console.log(`Child category already checked: ${child}`); 
+
+    } 
+
+} 
+
+}
+} 
 }
