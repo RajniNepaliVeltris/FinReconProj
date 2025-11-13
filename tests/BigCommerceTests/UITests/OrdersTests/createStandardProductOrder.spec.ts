@@ -31,7 +31,7 @@ test.describe('Standard Product Order Tests', () => {
                 let currentStep = '';
 
                 try {
-                    testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName);
+                    testCase = await excelReader.fetchTestCaseDataByName(testCaseName, sheetName, testConfig.productOrderExcelFilePath);
 
                     // Only execute if Automation is true
                     if (!(await excelReader.checkAutomationAndSkipIfNeeded(testCase, sheetName, testCaseName, test))) {

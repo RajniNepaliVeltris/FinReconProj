@@ -1,8 +1,10 @@
+
 // Test configuration for BigCommerce tests
 export interface TestScenario {
     scenario: string;
     sheetName: string;
     testCases: string[];
+    excelFilePath?: string;
 }
 
 export interface Address {
@@ -21,9 +23,10 @@ export interface Address {
     saveaddressCheckbox: boolean;
 }
 
+
 export class TestConfig {
     private static instance: TestConfig;
-    private constructor() {}
+    private constructor() { }
 
     public static getInstance(): TestConfig {
         if (!TestConfig.instance) {
@@ -46,6 +49,9 @@ export class TestConfig {
         return `${this.getBaseUrl()}/manage/orders/add-order`;
     }
 
+    public getAddProductUrl(): string {
+        return `${this.getBaseUrl()}/manage/products/add`;
+    }
     /**
      * Get all orders URL
      */
@@ -82,7 +88,7 @@ export class TestConfig {
         // Example: "Scenario1:SheetName:TC1,TC2,TC3;Scenario2:SheetName:TC4,TC5,TC6"
         const envScenarios = process.env.SCENARIOS;
         let scenarios: TestScenario[] = [];
-        
+
         if (envScenarios) {
             scenarios = envScenarios.split(';').map(scenarioStr => {
                 const [scenario, sheetName, testCases] = scenarioStr.split(':');
@@ -150,6 +156,16 @@ export class TestConfig {
                         'Bundle_FulfillmentusingNewSingleAddress_ManualPayment_NoDiscount_NoCoupon',
                         'Bundle_FulfillmentusingNewSingleAddress_ManualPayment_ManualDiscount_NoCoupon'
                     ]
+                },
+                {
+                    scenario: 'Create Standard Product',
+                    sheetName: 'Create_Standard_Product',
+                    testCases: ['Create Standard product']
+                },
+                {
+                    scenario: 'Create Bundle Product',
+                    sheetName: 'Create_Bundle_Product',
+                    testCases: ['Create Bundle Product In Modifiers With Two Products']
                 }
             ];
         }
@@ -187,7 +203,12 @@ export class TestConfig {
                 'Standard_FulfillmentusingNewSingleAddress_Cybersource_NoDiscount_NoCoupon',
                 'Standard_FulfillmentusingNewSingleAddress_Cybersource_ManualDiscount_NoCoupon',
                 'Standard_FulfillmentusingNewSingleAddress_ManualPayment_NoDiscount_NoCoupon',
-                'Standard_FulfillmentusingNewSingleAddress_ManualPayment_ManualDiscount_NoCoupon'
+                'Standard_FulfillmentusingNewSingleAddress_ManualPayment_ManualDiscount_NoCoupon',
+                
+                'Create Standard product',
+
+                'Create Bundle product in modifiers with 2 products',
+
 
             ];
         }

@@ -70,241 +70,692 @@
   },
   "suites": [
     {
-      "title": "BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
-      "file": "BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts",
+      "title": "BigCommerceTests\\UITests\\ProductsTests\\createStandardProduct.spec.ts",
+      "file": "BigCommerceTests/UITests/ProductsTests/createStandardProduct.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Create New Product",
-          "file": "BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts",
-          "line": 28,
+          "title": "Standard Product Tests",
+          "file": "BigCommerceTests/UITests/ProductsTests/createStandardProduct.spec.ts",
+          "line": 12,
           "column": 6,
-          "specs": [
+          "specs": [],
+          "suites": [
             {
-              "title": "Test Comptia",
-              "ok": false,
-              "tags": [],
-              "tests": [
+              "title": "Create Standard Product",
+              "file": "BigCommerceTests/UITests/ProductsTests/createStandardProduct.spec.ts",
+              "line": 14,
+              "column": 14,
+              "specs": [
                 {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "existing-chrome",
-                  "projectName": "existing-chrome",
-                  "results": [
+                  "title": "Execute: Create Standard product",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
                     {
-                      "workerIndex": 23,
-                      "parallelIndex": 0,
-                      "status": "failed",
-                      "duration": 27761,
-                      "error": {
-                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m",
-                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:53:33\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:50:17",
-                        "location": {
-                          "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
-                          "column": 33,
-                          "line": 53
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 51 |\u001b[39m                     \u001b[36mawait\u001b[39m homepage\u001b[33m.\u001b[39mnavigateToSideMenuOption(\u001b[32m'Products'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'All Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m                     \u001b[36mconst\u001b[39m url \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39murl()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m                     expect(url)\u001b[33m.\u001b[39mtoContain(\u001b[32m'/manage/Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m                     \u001b[36mawait\u001b[39m addProductPage\u001b[33m.\u001b[39mverifyProductExistsBySKU()\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m                 })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m             })\u001b[33m;\u001b[39m\u001b[0m"
-                      },
-                      "errors": [
+                      "timeout": 60000,
+                      "annotations": [
                         {
-                          "location": {
-                            "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
-                            "column": 33,
-                            "line": 53
-                          },
-                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m\n\n\u001b[0m \u001b[90m 51 |\u001b[39m                     \u001b[36mawait\u001b[39m homepage\u001b[33m.\u001b[39mnavigateToSideMenuOption(\u001b[32m'Products'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'All Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m                     \u001b[36mconst\u001b[39m url \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39murl()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m                     expect(url)\u001b[33m.\u001b[39mtoContain(\u001b[32m'/manage/Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m                     \u001b[36mawait\u001b[39m addProductPage\u001b[33m.\u001b[39mverifyProductExistsBySKU()\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m                 })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m             })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:53:33\u001b[22m\n\u001b[2m    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:50:17\u001b[22m"
+                          "type": "test-type",
+                          "description": "E2E"
+                        },
+                        {
+                          "type": "feature",
+                          "description": "Product Creation"
                         }
                       ],
-                      "stdout": [
+                      "expectedStatus": "passed",
+                      "projectId": "existing-chrome",
+                      "projectName": "existing-chrome",
+                      "results": [
                         {
-                          "text": "Clicked on element: Side Menu Option: Products\n"
-                        },
-                        {
-                          "text": "Clicked on element: Products Submenu Option: Add\n"
-                        },
-                        {
-                          "text": "Navigated to Products submenu option: Add\n"
-                        },
-                        {
-                          "text": "Entered text: Test Comptia into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-name\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: TW-1003 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sku\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-price\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: Physical into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-type\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 2.5 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-weight\"]')\n"
-                        },
-                        {
-                          "text": "Expanded parent category: VueEcom - Sandbox 3\n"
-                        },
-                        {
-                          "text": "Checked child category: Exam Vouchers\n"
-                        },
-                        {
-                          "text": "Clicked on element: Add Image\n"
-                        },
-                        {
-                          "text": "Clicked on element: Add from URL\n"
-                        },
-                        {
-                          "text": "Entered text: https://myitsuccess.com/wp-content/uploads/2024/08/Comptia-cloud-logo.jpg into element: locator('#content-iframe').contentFrame().locator('//input[@placeholder=\"https://www...\"]')\n"
-                        },
-                        {
-                          "text": "Clicked on element: Add Image\n"
-                        },
-                        {
-                          "text": "Clicked on element: Assign and Save\n"
-                        },
-                        {
-                          "text": "Entered text: TW-1003 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-identifierSku\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: MPN-12345 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-mpn\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 123456789012 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-upc\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 9876543210987 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-gtin\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: BPN-001 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-bpn\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-defaultPrice\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-cost_price\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-retail_price\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sale_price\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: widget, test, automation into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-search_keywords\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 1 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sort_order\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 1 year warranty included. into element: locator('#content-iframe').contentFrame().locator('//textarea[@id=\"productInput-warranty\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: Ships in 24 hours. into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-availability_text\"]')\n"
-                        },
-                        {
-                          "text": "Clicked on element: clicked the checkbox \n"
-                        },
-                        {
-                          "text": "Entered text: 10 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-width\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 5 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-height\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 3 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-depth\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 5.00 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-fixed_cost_shipping_price\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 1 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-min_purchase_quantity\"]')\n"
-                        },
-                        {
-                          "text": "Entered text: 10 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-max_purchase_quantity\"]')\n"
-                        },
-                        {
-                          "text": " Option \"any\" already selected.\n"
-                        },
-                        {
-                          "text": "Entered text: Buy the best test widget for your automation needs. into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-meta_description\"]')\n"
-                        },
-                        {
-                          "text": "Clicked on element: Product Saved\n"
-                        },
-                        {
-                          "text": "Clicked on element: Side Menu Option: Products\n"
-                        }
-                      ],
-                      "stderr": [
-                        {
-                          "text": "Products submenu option not found: All Products\n"
-                        }
-                      ],
-                      "retry": 0,
-                      "steps": [
-                        {
-                          "title": "Bring page to front",
-                          "duration": 147
-                        },
-                        {
-                          "title": "Navigate to Add Product page",
-                          "duration": 1667
-                        },
-                        {
-                          "title": "Fill Product Details",
-                          "duration": 25354
-                        },
-                        {
-                          "title": "Verify Customer Exists By Email",
-                          "duration": 565,
-                          "error": {
-                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m",
-                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:53:33\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:50:17",
-                            "location": {
-                              "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
-                              "column": 33,
-                              "line": 53
+                          "workerIndex": 2,
+                          "parallelIndex": 0,
+                          "status": "passed",
+                          "duration": 32902,
+                          "errors": [],
+                          "stdout": [
+                            {
+                              "text": "Attempting to load Excel file: C:\\Big C automation\\FinReconProj\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
                             },
-                            "snippet": "\u001b[0m \u001b[90m 51 |\u001b[39m                     \u001b[36mawait\u001b[39m homepage\u001b[33m.\u001b[39mnavigateToSideMenuOption(\u001b[32m'Products'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'All Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m                     \u001b[36mconst\u001b[39m url \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39murl()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m                     expect(url)\u001b[33m.\u001b[39mtoContain(\u001b[32m'/manage/Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m                     \u001b[36mawait\u001b[39m addProductPage\u001b[33m.\u001b[39mverifyProductExistsBySKU()\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m                 })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m             })\u001b[33m;\u001b[39m\u001b[0m"
-                          }
+                            {
+                              "text": "Excel file loaded successfully\n"
+                            },
+                            {
+                              "text": "\n=== Test Case Info ===\n"
+                            },
+                            {
+                              "text": "┌─────────────────┬────────────────────────────────────────┐\n│     (index)     │                 Values                 │\n├─────────────────┼────────────────────────────────────────┤\n│       ID        │                \u001b[32m'SPC001'\u001b[39m                │\n│      Name       │       \u001b[32m'Create Standard product'\u001b[39m        │\n│    Scenario     │       \u001b[32m'Create Standard Product'\u001b[39m        │\n│  Pre-Condition  │ \u001b[32m'Add Single Standard Product in excel'\u001b[39m │\n│ Payment Method  │               \u001b[90mundefined\u001b[39m                │\n│ Expected Result │               \u001b[90mundefined\u001b[39m                │\n└─────────────────┴────────────────────────────────────────┘\n"
+                            },
+                            {
+                              "text": "\n=== Executing Test Case ===\n"
+                            },
+                            {
+                              "text": "┌──────────┬───────────────────────────┐\n│ (index)  │          Values           │\n├──────────┼───────────────────────────┤\n│   Name   │ \u001b[32m'Create Standard product'\u001b[39m │\n│ Scenario │ \u001b[32m'Create Standard Product'\u001b[39m │\n└──────────┴───────────────────────────┘\n"
+                            },
+                            {
+                              "text": "Clicked on element: Side Menu Option: Products\n"
+                            },
+                            {
+                              "text": "Clicked on element: Products Submenu Option: Add\n"
+                            },
+                            {
+                              "text": "Navigated to Products submenu option: Add\n"
+                            },
+                            {
+                              "text": "Filling product: Comptia Standard 1065\n"
+                            },
+                            {
+                              "text": "Entered text: Comptia Standard 1065 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-name\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: CSP-1065 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sku\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-price\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: Physical into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-type\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 2.5 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-weight\"]')\n"
+                            },
+                            {
+                              "text": "Selecting product categories...\n"
+                            },
+                            {
+                              "text": "Expanded parent category: VueEcom - Sandbox 3\n"
+                            },
+                            {
+                              "text": "Checked child category: Exam Vouchers (under VueEcom - Sandbox 3)\n"
+                            },
+                            {
+                              "text": "Clicking Add Image button...\n"
+                            },
+                            {
+                              "text": "Clicked on element: Add Image\n"
+                            },
+                            {
+                              "text": "Waiting for Upload button to be visible...\n"
+                            },
+                            {
+                              "text": "Upload button is visible — skipping click to avoid file explorer.\n"
+                            },
+                            {
+                              "text": "Uploading file directly through hidden input...\n"
+                            },
+                            {
+                              "text": " Image file uploaded successfully.\n"
+                            },
+                            {
+                              "text": "Clicked on element: Assign and Save\n"
+                            },
+                            {
+                              "text": "Entered text: CSP-1065 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-identifierSku\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: MPN-12345 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-mpn\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 123456789012 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-upc\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 9876543210987 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-gtin\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: BPN-001 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-bpn\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-cost_price\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-retail_price\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sale_price\"]')\n"
+                            },
+                            {
+                              "text": "Skipping modifiers — not a bundle product.\n"
+                            },
+                            {
+                              "text": "Entered text: widget, test, automation into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-search_keywords\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 1 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sort_order\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 1 year warranty included. into element: locator('#content-iframe').contentFrame().locator('//textarea[@id=\"productInput-warranty\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: Ships in 24 hours. into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-availability_text\"]')\n"
+                            },
+                            {
+                              "text": "Clicked on element: clicked the checkbox\n"
+                            },
+                            {
+                              "text": "Entered text: 10 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-width\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 5 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-height\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 3 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-depth\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 5 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-fixed_cost_shipping_price\"]')\n"
+                            },
+                            {
+                              "text": "Entered text: 1 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-min_purchase_quantity\"]')\n"
+                            },
+                            {
+                              "text": "No text provided to enter into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-max_purchase_quantity\"]')\n"
+                            },
+                            {
+                              "text": "Entered text:  into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-max_purchase_quantity\"]')\n"
+                            },
+                            {
+                              "text": " Option \"any\" already selected.\n"
+                            },
+                            {
+                              "text": "Entered text: Buy the best test widget for your automation needs. into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-meta_description\"]')\n"
+                            },
+                            {
+                              "text": "Clicked on element: Product Saved\n"
+                            },
+                            {
+                              "text": "Product creation completed for: Comptia Standard 1065\n"
+                            },
+                            {
+                              "text": " Navigating to All Products page to validate SKU...\n"
+                            },
+                            {
+                              "text": "Clicked on element: Side Menu Option: Products\n"
+                            },
+                            {
+                              "text": "Searching for product SKU: CSP-1065\n"
+                            },
+                            {
+                              "text": "Found 2 rows for SKU search: CSP-1065\n"
+                            },
+                            {
+                              "text": "Row 1: no SKU cell\n"
+                            },
+                            {
+                              "text": "Row 2 SKU: CSP-1065\n"
+                            },
+                            {
+                              "text": "Product SKU matched UI: CSP-1065\n"
+                            },
+                            {
+                              "text": "Product with SKU \"CSP-1065\" verified successfully in All Products list.\n"
+                            },
+                            {
+                              "text": "Updating test result for \"Create Standard product\" in sheet \"Create_Standard_Product\"\n"
+                            },
+                            {
+                              "text": "Attempting to load Excel file: C:\\Big C automation\\FinReconProj\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+                            },
+                            {
+                              "text": "Excel file loaded successfully\n"
+                            },
+                            {
+                              "text": "Found original header: \"Test Case ID\" at column 1\n"
+                            },
+                            {
+                              "text": "Found original header: \"Test Scenario\" at column 2\n"
+                            },
+                            {
+                              "text": "Found original header: \"Pre-Condition\" at column 3\n"
+                            },
+                            {
+                              "text": "Found original header: \"Product Type\" at column 4\n"
+                            },
+                            {
+                              "text": "Found original header: \"Test Case Name\" at column 5\n"
+                            },
+                            {
+                              "text": "Mapped \"Test Case Name\" to standard header \"Test Case Name\"\n"
+                            },
+                            {
+                              "text": "Found original header: \"productName\" at column 6\n"
+                            },
+                            {
+                              "text": "Found original header: \"sku\" at column 7\n"
+                            },
+                            {
+                              "text": "Found original header: \"defaultPrice\" at column 8\n"
+                            },
+                            {
+                              "text": "Found original header: \"productType\" at column 9\n"
+                            },
+                            {
+                              "text": "Found original header: \"brand\" at column 10\n"
+                            },
+                            {
+                              "text": "Found original header: \"weight\" at column 11\n"
+                            },
+                            {
+                              "text": "Found original header: \"visibleOnStorefront\" at column 12\n"
+                            },
+                            {
+                              "text": "Found original header: \"categories\" at column 13\n"
+                            },
+                            {
+                              "text": "Found original header: \"sub category\" at column 14\n"
+                            },
+                            {
+                              "text": "Found original header: \"description\" at column 15\n"
+                            },
+                            {
+                              "text": "Found original header: \"imageFilePath\" at column 16\n"
+                            },
+                            {
+                              "text": "Found original header: \"mpn\" at column 17\n"
+                            },
+                            {
+                              "text": "Found original header: \"upc\" at column 18\n"
+                            },
+                            {
+                              "text": "Found original header: \"gtin\" at column 19\n"
+                            },
+                            {
+                              "text": "Found original header: \"bpn\" at column 20\n"
+                            },
+                            {
+                              "text": "Found original header: \"searchKeywords\" at column 21\n"
+                            },
+                            {
+                              "text": "Found original header: \"sortOrder\" at column 22\n"
+                            },
+                            {
+                              "text": "Found original header: \"warrantyInfo\" at column 23\n"
+                            },
+                            {
+                              "text": "Found original header: \"availabilityText\" at column 24\n"
+                            },
+                            {
+                              "text": "Found original header: \"condition\" at column 25\n"
+                            },
+                            {
+                              "text": "Found original header: \"dimensions.weight\" at column 26\n"
+                            },
+                            {
+                              "text": "Found original header: \"dimensions.width\" at column 27\n"
+                            },
+                            {
+                              "text": "Found original header: \"dimensions.height\" at column 28\n"
+                            },
+                            {
+                              "text": "Found original header: \"dimensions.depth\" at column 29\n"
+                            },
+                            {
+                              "text": "Found original header: \"fixedShippingPrice\" at column 30\n"
+                            },
+                            {
+                              "text": "Found original header: \"freeShipping\" at column 31\n"
+                            },
+                            {
+                              "text": "Found original header: \"minPurchaseQty\" at column 32\n"
+                            },
+                            {
+                              "text": "Found original header: \"maxPurchaseQty\" at column 33\n"
+                            },
+                            {
+                              "text": "Found original header: \"giftWrappingOption\" at column 34\n"
+                            },
+                            {
+                              "text": "Found original header: \"manageCustomsInfo\" at column 35\n"
+                            },
+                            {
+                              "text": "Found original header: \"pageTitle\" at column 36\n"
+                            },
+                            {
+                              "text": "Found original header: \"productUrl\" at column 37\n"
+                            },
+                            {
+                              "text": "Found original header: \"metaDescription\" at column 38\n"
+                            },
+                            {
+                              "text": "Found original header: \"objectType\" at column 39\n"
+                            },
+                            {
+                              "text": "Found original header: \"useProductName\" at column 40\n"
+                            },
+                            {
+                              "text": "Found original header: \"useMetaDescription\" at column 41\n"
+                            },
+                            {
+                              "text": "Found original header: \"useThumbnailImage\" at column 42\n"
+                            },
+                            {
+                              "text": "Found original header: \"imageName\" at column 43\n"
+                            },
+                            {
+                              "text": "Found original header: \"Actual Test Result\" at column 44\n"
+                            },
+                            {
+                              "text": "Mapped \"Actual Test Result\" to standard header \"Test_Result\"\n"
+                            },
+                            {
+                              "text": "Found original header: \"Expected Test Result\" at column 45\n"
+                            },
+                            {
+                              "text": "Found original header: \"Execution_Notes\" at column 46\n"
+                            },
+                            {
+                              "text": "Mapped \"Execution_Notes\" to standard header \"Execution_Notes\"\n"
+                            },
+                            {
+                              "text": "All found headers: [\n  \u001b[32m'Test Case ID'\u001b[39m,         \u001b[32m'Test Scenario'\u001b[39m,      \u001b[32m'Pre-Condition'\u001b[39m,\n  \u001b[32m'Product Type'\u001b[39m,         \u001b[32m'Test Case Name'\u001b[39m,     \u001b[32m'productName'\u001b[39m,\n  \u001b[32m'sku'\u001b[39m,                  \u001b[32m'defaultPrice'\u001b[39m,       \u001b[32m'productType'\u001b[39m,\n  \u001b[32m'brand'\u001b[39m,                \u001b[32m'weight'\u001b[39m,             \u001b[32m'visibleOnStorefront'\u001b[39m,\n  \u001b[32m'categories'\u001b[39m,           \u001b[32m'sub category'\u001b[39m,       \u001b[32m'description'\u001b[39m,\n  \u001b[32m'imageFilePath'\u001b[39m,        \u001b[32m'mpn'\u001b[39m,                \u001b[32m'upc'\u001b[39m,\n  \u001b[32m'gtin'\u001b[39m,                 \u001b[32m'bpn'\u001b[39m,                \u001b[32m'searchKeywords'\u001b[39m,\n  \u001b[32m'sortOrder'\u001b[39m,            \u001b[32m'warrantyInfo'\u001b[39m,       \u001b[32m'availabilityText'\u001b[39m,\n  \u001b[32m'condition'\u001b[39m,            \u001b[32m'dimensions.weight'\u001b[39m,  \u001b[32m'dimensions.width'\u001b[39m,\n  \u001b[32m'dimensions.height'\u001b[39m,    \u001b[32m'dimensions.depth'\u001b[39m,   \u001b[32m'fixedShippingPrice'\u001b[39m,\n  \u001b[32m'freeShipping'\u001b[39m,         \u001b[32m'minPurchaseQty'\u001b[39m,     \u001b[32m'maxPurchaseQty'\u001b[39m,\n  \u001b[32m'giftWrappingOption'\u001b[39m,   \u001b[32m'manageCustomsInfo'\u001b[39m,  \u001b[32m'pageTitle'\u001b[39m,\n  \u001b[32m'productUrl'\u001b[39m,           \u001b[32m'metaDescription'\u001b[39m,    \u001b[32m'objectType'\u001b[39m,\n  \u001b[32m'useProductName'\u001b[39m,       \u001b[32m'useMetaDescription'\u001b[39m, \u001b[32m'useThumbnailImage'\u001b[39m,\n  \u001b[32m'imageName'\u001b[39m,            \u001b[32m'Actual Test Result'\u001b[39m, \u001b[32m'Test_Result'\u001b[39m,\n  \u001b[32m'Expected Test Result'\u001b[39m, \u001b[32m'Execution_Notes'\u001b[39m\n]\n"
+                            },
+                            {
+                              "text": "Found matching test case at row 2\n"
+                            },
+                            {
+                              "text": "Current Test_Result value: \"null\"\n"
+                            },
+                            {
+                              "text": "Updated Test_Result from \"null\" to \"Passed\" at row 2\n"
+                            },
+                            {
+                              "text": "Current Execution_Notes value: \"null\"\n"
+                            },
+                            {
+                              "text": "Updated Execution_Notes at row 2\n"
+                            },
+                            {
+                              "text": "Saving changes to Excel file: C:\\Big C automation\\FinReconProj\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+                            },
+                            {
+                              "text": "Successfully saved test results to Excel file\n"
+                            },
+                            {
+                              "text": "Attempting to load Excel file: C:\\Big C automation\\FinReconProj\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+                            },
+                            {
+                              "text": "Excel file loaded successfully\n"
+                            },
+                            {
+                              "text": "Verified test result was correctly written to Excel\n"
+                            },
+                            {
+                              "text": "Attempting to load Excel file: C:\\Big C automation\\FinReconProj\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+                            },
+                            {
+                              "text": "Excel file loaded successfully\n"
+                            },
+                            {
+                              "text": "Wrote \"Passed\" in Expected Test Result for Create Standard product\n"
+                            },
+                            {
+                              "text": "Excel updated successfully for Create Standard product\n"
+                            },
+                            {
+                              "text": "\nTest Summary:\n"
+                            },
+                            {
+                              "text": "┌─────────┬───────────────────────────┬──────────┬───────────────────────────────────────┬─────────────────┐\n│ (index) │         Test Case         │  Result  │              Screenshot               │ Execution_Notes │\n├─────────┼───────────────────────────┼──────────┼───────────────────────────────────────┼─────────────────┤\n│    0    │ \u001b[32m'Create Standard product'\u001b[39m │ \u001b[32m'Passed'\u001b[39m │ \u001b[32m'test-results/screenshots/SPC001.png'\u001b[39m │       \u001b[32m''\u001b[39m        │\n└─────────┴───────────────────────────┴──────────┴───────────────────────────────────────┴─────────────────┘\n"
+                            },
+                            {
+                              "text": "Updating test result for \"Create Standard product\" in sheet \"Create_Standard_Product\"\n"
+                            },
+                            {
+                              "text": "Attempting to load Excel file: C:\\Big C automation\\FinReconProj\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+                            },
+                            {
+                              "text": "Excel file loaded successfully\n"
+                            },
+                            {
+                              "text": "Found original header: \"Test Case ID\" at column 1\n"
+                            },
+                            {
+                              "text": "Found original header: \"Test Scenario\" at column 2\n"
+                            },
+                            {
+                              "text": "Found original header: \"Pre-Condition\" at column 3\n"
+                            },
+                            {
+                              "text": "Found original header: \"Product Type\" at column 4\n"
+                            },
+                            {
+                              "text": "Found original header: \"Test Case Name\" at column 5\n"
+                            },
+                            {
+                              "text": "Mapped \"Test Case Name\" to standard header \"Test Case Name\"\n"
+                            },
+                            {
+                              "text": "Found original header: \"productName\" at column 6\n"
+                            },
+                            {
+                              "text": "Found original header: \"sku\" at column 7\n"
+                            },
+                            {
+                              "text": "Found original header: \"defaultPrice\" at column 8\n"
+                            },
+                            {
+                              "text": "Found original header: \"productType\" at column 9\n"
+                            },
+                            {
+                              "text": "Found original header: \"brand\" at column 10\n"
+                            },
+                            {
+                              "text": "Found original header: \"weight\" at column 11\n"
+                            },
+                            {
+                              "text": "Found original header: \"visibleOnStorefront\" at column 12\n"
+                            },
+                            {
+                              "text": "Found original header: \"categories\" at column 13\n"
+                            },
+                            {
+                              "text": "Found original header: \"sub category\" at column 14\n"
+                            },
+                            {
+                              "text": "Found original header: \"description\" at column 15\n"
+                            },
+                            {
+                              "text": "Found original header: \"imageFilePath\" at column 16\n"
+                            },
+                            {
+                              "text": "Found original header: \"mpn\" at column 17\n"
+                            },
+                            {
+                              "text": "Found original header: \"upc\" at column 18\n"
+                            },
+                            {
+                              "text": "Found original header: \"gtin\" at column 19\n"
+                            },
+                            {
+                              "text": "Found original header: \"bpn\" at column 20\n"
+                            },
+                            {
+                              "text": "Found original header: \"searchKeywords\" at column 21\n"
+                            },
+                            {
+                              "text": "Found original header: \"sortOrder\" at column 22\n"
+                            },
+                            {
+                              "text": "Found original header: \"warrantyInfo\" at column 23\n"
+                            },
+                            {
+                              "text": "Found original header: \"availabilityText\" at column 24\n"
+                            },
+                            {
+                              "text": "Found original header: \"condition\" at column 25\n"
+                            },
+                            {
+                              "text": "Found original header: \"dimensions.weight\" at column 26\n"
+                            },
+                            {
+                              "text": "Found original header: \"dimensions.width\" at column 27\n"
+                            },
+                            {
+                              "text": "Found original header: \"dimensions.height\" at column 28\n"
+                            },
+                            {
+                              "text": "Found original header: \"dimensions.depth\" at column 29\n"
+                            },
+                            {
+                              "text": "Found original header: \"fixedShippingPrice\" at column 30\n"
+                            },
+                            {
+                              "text": "Found original header: \"freeShipping\" at column 31\n"
+                            },
+                            {
+                              "text": "Found original header: \"minPurchaseQty\" at column 32\n"
+                            },
+                            {
+                              "text": "Found original header: \"maxPurchaseQty\" at column 33\n"
+                            },
+                            {
+                              "text": "Found original header: \"giftWrappingOption\" at column 34\n"
+                            },
+                            {
+                              "text": "Found original header: \"manageCustomsInfo\" at column 35\n"
+                            },
+                            {
+                              "text": "Found original header: \"pageTitle\" at column 36\n"
+                            },
+                            {
+                              "text": "Found original header: \"productUrl\" at column 37\n"
+                            },
+                            {
+                              "text": "Found original header: \"metaDescription\" at column 38\n"
+                            },
+                            {
+                              "text": "Found original header: \"objectType\" at column 39\n"
+                            },
+                            {
+                              "text": "Found original header: \"useProductName\" at column 40\n"
+                            },
+                            {
+                              "text": "Found original header: \"useMetaDescription\" at column 41\n"
+                            },
+                            {
+                              "text": "Found original header: \"useThumbnailImage\" at column 42\n"
+                            },
+                            {
+                              "text": "Found original header: \"imageName\" at column 43\n"
+                            },
+                            {
+                              "text": "Found original header: \"Actual Test Result\" at column 44\n"
+                            },
+                            {
+                              "text": "Mapped \"Actual Test Result\" to standard header \"Test_Result\"\n"
+                            },
+                            {
+                              "text": "Found original header: \"Expected Test Result\" at column 45\n"
+                            },
+                            {
+                              "text": "Found original header: \"Execution_Notes\" at column 46\n"
+                            },
+                            {
+                              "text": "Mapped \"Execution_Notes\" to standard header \"Execution_Notes\"\n"
+                            },
+                            {
+                              "text": "All found headers: [\n  \u001b[32m'Test Case ID'\u001b[39m,         \u001b[32m'Test Scenario'\u001b[39m,      \u001b[32m'Pre-Condition'\u001b[39m,\n  \u001b[32m'Product Type'\u001b[39m,         \u001b[32m'Test Case Name'\u001b[39m,     \u001b[32m'productName'\u001b[39m,\n  \u001b[32m'sku'\u001b[39m,                  \u001b[32m'defaultPrice'\u001b[39m,       \u001b[32m'productType'\u001b[39m,\n  \u001b[32m'brand'\u001b[39m,                \u001b[32m'weight'\u001b[39m,             \u001b[32m'visibleOnStorefront'\u001b[39m,\n  \u001b[32m'categories'\u001b[39m,           \u001b[32m'sub category'\u001b[39m,       \u001b[32m'description'\u001b[39m,\n  \u001b[32m'imageFilePath'\u001b[39m,        \u001b[32m'mpn'\u001b[39m,                \u001b[32m'upc'\u001b[39m,\n  \u001b[32m'gtin'\u001b[39m,                 \u001b[32m'bpn'\u001b[39m,                \u001b[32m'searchKeywords'\u001b[39m,\n  \u001b[32m'sortOrder'\u001b[39m,            \u001b[32m'warrantyInfo'\u001b[39m,       \u001b[32m'availabilityText'\u001b[39m,\n  \u001b[32m'condition'\u001b[39m,            \u001b[32m'dimensions.weight'\u001b[39m,  \u001b[32m'dimensions.width'\u001b[39m,\n  \u001b[32m'dimensions.height'\u001b[39m,    \u001b[32m'dimensions.depth'\u001b[39m,   \u001b[32m'fixedShippingPrice'\u001b[39m,\n  \u001b[32m'freeShipping'\u001b[39m,         \u001b[32m'minPurchaseQty'\u001b[39m,     \u001b[32m'maxPurchaseQty'\u001b[39m,\n  \u001b[32m'giftWrappingOption'\u001b[39m,   \u001b[32m'manageCustomsInfo'\u001b[39m,  \u001b[32m'pageTitle'\u001b[39m,\n  \u001b[32m'productUrl'\u001b[39m,           \u001b[32m'metaDescription'\u001b[39m,    \u001b[32m'objectType'\u001b[39m,\n  \u001b[32m'useProductName'\u001b[39m,       \u001b[32m'useMetaDescription'\u001b[39m, \u001b[32m'useThumbnailImage'\u001b[39m,\n  \u001b[32m'imageName'\u001b[39m,            \u001b[32m'Actual Test Result'\u001b[39m, \u001b[32m'Test_Result'\u001b[39m,\n  \u001b[32m'Expected Test Result'\u001b[39m, \u001b[32m'Execution_Notes'\u001b[39m\n]\n"
+                            },
+                            {
+                              "text": "Found matching test case at row 2\n"
+                            },
+                            {
+                              "text": "Current Test_Result value: \"Passed\"\n"
+                            },
+                            {
+                              "text": "Updated Test_Result from \"Passed\" to \"Passed\" at row 2\n"
+                            },
+                            {
+                              "text": "Current Execution_Notes value: \"[\"\",\"Status: Passed\",\"Last Updated: 2025-11-12T06:35:49.332Z\",\"---\"]\"\n"
+                            },
+                            {
+                              "text": "Updated Execution_Notes at row 2\n"
+                            },
+                            {
+                              "text": "Saving changes to Excel file: C:\\Big C automation\\FinReconProj\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+                            },
+                            {
+                              "text": "Successfully saved test results to Excel file\n"
+                            },
+                            {
+                              "text": "Attempting to load Excel file: C:\\Big C automation\\FinReconProj\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+                            },
+                            {
+                              "text": "Excel file loaded successfully\n"
+                            },
+                            {
+                              "text": "Verified test result was correctly written to Excel\n"
+                            },
+                            {
+                              "text": "Successfully recorded test success in Excel\n"
+                            }
+                          ],
+                          "stderr": [
+                            {
+                              "text": "Parent category \"channel3\" not found\n"
+                            },
+                            {
+                              "text": "Products submenu option not found: All Products\n"
+                            }
+                          ],
+                          "retry": 0,
+                          "steps": [
+                            {
+                              "title": "Navigate to Add Product page",
+                              "duration": 828
+                            },
+                            {
+                              "title": "Fill Product Details",
+                              "duration": 21209
+                            },
+                            {
+                              "title": "Validate Product Creation",
+                              "duration": 4671
+                            },
+                            {
+                              "title": "Capture Screenshot",
+                              "duration": 261
+                            },
+                            {
+                              "title": "Record Test Result",
+                              "duration": 3265
+                            }
+                          ],
+                          "startTime": "2025-11-12T06:35:21.168Z",
+                          "annotations": [
+                            {
+                              "type": "test-type",
+                              "description": "E2E"
+                            },
+                            {
+                              "type": "feature",
+                              "description": "Product Creation"
+                            }
+                          ],
+                          "attachments": [
+                            {
+                              "name": "screenshot",
+                              "contentType": "image/png",
+                              "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-c99db-ute-Create-Standard-product-existing-chrome\\attachments\\screenshot-60ad99fae5bdbef7304a799cdd4e57bdf1a8face.png"
+                            },
+                            {
+                              "name": "screenshot",
+                              "contentType": "image/png",
+                              "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-c99db-ute-Create-Standard-product-existing-chrome\\test-finished-1.png"
+                            }
+                          ]
                         }
                       ],
-                      "startTime": "2025-10-07T05:04:39.273Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-439bf-te-New-Product-Test-Comptia-existing-chrome\\test-finished-1.png"
-                        },
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-439bf-te-New-Product-Test-Comptia-existing-chrome\\error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-439bf-te-New-Product-Test-Comptia-existing-chrome\\trace.zip"
-                        }
-                      ],
-                      "errorLocation": {
-                        "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
-                        "column": 33,
-                        "line": 53
-                      }
+                      "status": "expected"
                     }
                   ],
-                  "status": "unexpected"
+                  "id": "6da5cdd46f8fff2070b3-a6aa0f35ef265b38d398",
+                  "file": "BigCommerceTests/UITests/ProductsTests/createStandardProduct.spec.ts",
+                  "line": 16,
+                  "column": 21
                 }
-              ],
-              "id": "ebdc4baa015ceb15ab76-bc37303248260fec4348",
-              "file": "BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts",
-              "line": 31,
-              "column": 17
+              ]
             }
           ]
         }
@@ -313,11 +764,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-10-07T05:04:35.576Z",
-    "duration": 38239.00900000334,
-    "expected": 0,
+    "startTime": "2025-11-12T06:35:17.769Z",
+    "duration": 36376.36800000002,
+    "expected": 1,
     "skipped": 0,
-    "unexpected": 1,
+    "unexpected": 0,
     "flaky": 0
   }
 }

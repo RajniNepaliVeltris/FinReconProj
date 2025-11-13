@@ -180,13 +180,7 @@ export class BasePage {
     }
   }
 
-  async fillDescription(description: string) {
-    const parentFrame = this.page.frameLocator('//iframe[@id="content-iframe"]');
-    const tinyMCEFrame = parentFrame.frameLocator('//iframe[contains(@title,"Rich Text Area")]');
-    const editableBody = tinyMCEFrame.locator('body[contenteditable="true"]');
-    await editableBody.waitFor({ state: 'visible', timeout: 10000 });
-    await editableBody.fill(description);
-}
+  
 
   async logout(): Promise<void> {
     try {
