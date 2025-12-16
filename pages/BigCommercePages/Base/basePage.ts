@@ -1,5 +1,6 @@
-import { Locator, Page } from '@playwright/test';
+import { expect, FrameLocator, Locator, Page } from '@playwright/test';
 import { Console, error } from 'console';
+import path from 'path/win32';
 
 // This file represents the base page functionality for BigCommerce.
 
@@ -84,9 +85,6 @@ export class BasePage {
     }
   }
 
-
-
-
   async waitForElement(locator: Locator, timeout: number = 30000): Promise<void> {
     try {
       await locator.waitFor({ state: 'visible', timeout });
@@ -109,6 +107,13 @@ export class BasePage {
       throw new Error(`Click element failed: ${error}`);
     }
   }
+
+  async waitForElementToBeReady(locator: Locator, name: string, timeout = 10000): Promise<void> {
+  console.log(`Waiting for element: ${name}`);
+  await locator.waitFor({ state: 'visible', timeout });
+  await expect(locator).toBeEnabled({ timeout });
+}
+
 
   async selectRadioButton(locator: Locator, value: string) {
     if (await locator.isVisible()) {
@@ -149,6 +154,19 @@ export class BasePage {
     }
   }
 
+  async getFilePath(fileName: string, folder: string = "pages/BigCommercePages/Products/productImages"): Promise<string> {
+    try {
+      const filePath = path.join(__dirname, "..", folder, fileName);
+      console.log(`Resolved file path: ${filePath}`);
+      return filePath;
+    } catch (error) {
+      console.error(`Failed to resolve file path for ${fileName}`, error);
+      throw new Error(`File path resolution failed: ${error}`);
+    }
+  }
+
+  
+
   async verifyPageTitle(expectedTitle: string): Promise<void> {
     try {
       const actualTitle = await this.page.title();
@@ -161,6 +179,8 @@ export class BasePage {
       throw error;
     }
   }
+
+  
 
   async logout(): Promise<void> {
     try {
@@ -227,7 +247,6 @@ export class BasePage {
       console.log(`Screenshot saved to: ${fileName}`);
     } catch (error) {
       console.error(`Failed to take screenshot: ${fileName}`, error);
-      // Not throwing here as screenshot failure shouldn't stop test execution
       console.log("Continuing despite screenshot failure");
     }
   }
@@ -248,32 +267,18 @@ export class BasePage {
     }
   }
 
-  /**
-   * Handles input-based dropdown elements where clicking opens a dropdown menu.
-   * Selects an option from the dropdown list based on matching text.
-   * @param inputLocator - Locator for the input element that triggers the dropdown
-   * @param optionText - Text of the option to select from the dropdown
-   * @param dropdownOptionsSelector - CSS selector for the dropdown options (default: 'li, [role="option"]')
-   * @param timeout - Maximum time to wait for elements (default: 5000ms)
-   */
-
   async selectFromInputDropdownDynamic(inputLocator: Locator, optionText: string): Promise<void> {
-  // Type into the input
+
   await inputLocator.fill(optionText);
 
-  // Get all matching options
   const options = this.page
     .frameLocator('#content-iframe')
     .locator(`//ul[@role="listbox"]//li[normalize-space(.)='${optionText}']`);
 
-  // Wait for at least one option
   await options.first().waitFor({ state: 'visible', timeout: 5000 });
 
-  // ✅ Click the first matching option
   await options.first().click();
 }
-
-
 
   async selectFromInputDropdown(
     inputLocator: Locator,
@@ -281,16 +286,12 @@ export class BasePage {
     timeout: number = 5000
   ): Promise<void> {
     try {
-      // Wait for and click the input to open dropdown
       await this.waitForElement(inputLocator, timeout);
       await this.clickElement(inputLocator, 'Input Dropdown');
 
-      // Wait for the listbox to be visible
       const listbox = this.page.locator('//ul[@role="listbox"]');
       console.log(`Waiting for listbox to be visible: ${listbox}`);
-      //await listbox.waitFor({ state: 'visible', timeout });
 
-      // Get all child elements of the listbox
       const options = listbox.locator('[role="option"], li, div, span');
       const count = await options.count();
       let found = false;
@@ -312,7 +313,7 @@ export class BasePage {
       throw new Error(`Input dropdown selection failed: ${error}`);
     }
   }
-
+  
   async collapseSideMenuOption(locator: Locator): Promise<void> {
     try {
       await locator.scrollIntoViewIfNeeded();
