@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 
 // This file represents the base page functionality for Pearson Vue application.
 
@@ -20,6 +20,20 @@ export class BasePage {
       throw new Error(`Click element failed: ${error}`);
     }
   }
+
+  async expectVisible(
+    locator: Locator,
+    elementName?: string
+  ): Promise<void> {
+    try {
+      await expect(locator).toBeVisible();
+    } catch (error) {
+      throw new Error(
+        `${elementName ?? 'Element'} is not visible on the page`
+      );
+    }
+  }
+
 
    async enterText(locator: Locator, text: string): Promise<void> {
     try {
@@ -62,9 +76,9 @@ export class BasePage {
     }
   }
 
-    async isElementVisible(locator: Locator, timeout: number = 5000): Promise<boolean> {
+    async isElementVisible(locator: Locator): Promise<boolean> {
     try {
-      await locator.waitFor({ state: 'visible', timeout });
+      await expect(locator).toBeVisible();
       return true;
     } catch (error) {
       console.log(`Element not visible: ${locator}`, error);

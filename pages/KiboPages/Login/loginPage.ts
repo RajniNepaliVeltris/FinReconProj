@@ -9,8 +9,8 @@ export class LoginPage extends BasePage {
   readonly nxtButton: Locator;
 
   // Default test credentials (do not use for production)
-  static readonly DEFAULT_USER = 'sonali.ghodake@pearson.com';
-  static readonly DEFAULT_PASS = 'Kibopvdevacc@42';
+  // static readonly DEFAULT_USER = 'sonali.ghodake@pearson.com';
+  // static readonly DEFAULT_PASS = 'Kibopvdevacc@42';
 
   constructor(page: Page) {
     super(page);
@@ -24,7 +24,11 @@ export class LoginPage extends BasePage {
   }
 
   async navigate(): Promise<void> {
-    await this.page.goto('https://t17181.sandbox.mozu.com/Admin/t-17181/');
+    if (!process.env.KIBO_ADMIN_URL) {
+      throw new Error('KIBO_ADMIN_URL is not defined');
+    }
+
+    await this.page.goto(process.env.KIBO_ADMIN_URL);
     await this.waitForNetworkIdle();
   }
 
@@ -53,14 +57,10 @@ export class LoginPage extends BasePage {
     await this.clickNxtbtn();
     await this.enterPassword(password);
     await this.clickLogin();
-    await this.waitForNetworkIdle(10000);
+    await this.waitForNetworkIdle();
   }
 
-  async loginWithDefaults(): Promise<void> {
-    await this.login(LoginPage.DEFAULT_USER, LoginPage.DEFAULT_PASS);
-  }
-
-  async isLoginButtonVisible(timeout = 5000): Promise<boolean> {
-    return this.isElementVisible(this.loginButton, timeout);
-  }
+  async isLoginButtonVisible(): Promise<boolean> {
+    return this.isElementVisible(this.loginButton);
+  } 
 }
