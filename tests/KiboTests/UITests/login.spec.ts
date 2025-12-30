@@ -20,7 +20,7 @@ test.describe('Kibo - Login', () => {
       process.env.KIBO_ADMIN_USER,
       process.env.KIBO_ADMIN_PASSWORD
     );
-
+    
     // Post-login validation
     const url = page.url();
     const title = await page.title();

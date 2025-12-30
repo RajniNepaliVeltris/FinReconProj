@@ -8,10 +8,7 @@ export class LoginPage extends BasePage {
   readonly forgotPasswordLink: Locator;
   readonly nxtButton: Locator;
 
-  // Default test credentials (do not use for production)
-  // static readonly DEFAULT_USER = 'sonali.ghodake@pearson.com';
-  // static readonly DEFAULT_PASS = 'Kibopvdevacc@42';
-
+  
   constructor(page: Page) {
     super(page);
 
