@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 import { BasePage } from '../Base/basePage';
 
 // This file represents the homepage functionality for BigCommerce.
@@ -160,4 +160,6 @@ export class Homepage extends BasePage {
       console.error(`${menuName} submenu option not found: ${subMenuName}`);
     }
   }
+  
+ 
 }

@@ -1,0 +1,968 @@
+From d001a246f1a2cfbff09c7b7f58d5ab6a6d301b3a Mon Sep 17 00:00:00 2001
+From: Likith G <likith.g@bpktechmail.com>
+Date: Tue, 7 Oct 2025 15:20:31 +0530
+Subject: [PATCH 1/2] Add and verify product
+
+---
+ data/BigCommerceData/addProductData.json      |   1 +
+ pages/BigCommercePages/Base/basePage.ts       |  78 ++++-
+ .../Customers/addCustomerPage.ts              |   2 -
+ pages/BigCommercePages/Products/addProduct.ts |  83 +++--
+ .../BigCommercePages/Products/productType.ts  |   1 +
+ test-results/index.html                       |   2 +-
+ test-results/report.json                      | 311 +++++++-----------
+ .../ProductsTests/createNewProduct.spec.ts    |   9 +-
+ 8 files changed, 235 insertions(+), 252 deletions(-)
+
+diff --git a/data/BigCommerceData/addProductData.json b/data/BigCommerceData/addProductData.json
+index da9a8b0..99966b6 100644
+--- a/data/BigCommerceData/addProductData.json
++++ b/data/BigCommerceData/addProductData.json
+@@ -11,6 +11,7 @@
+     "description": "A high-quality test widget for automation.",
+     "imageUrl": "https://myitsuccess.com/wp-content/uploads/2024/08/Comptia-cloud-logo.jpg",
+     "mpn": "MPN-12345",
++    "giftWrappingOption": "any",
+     "upc": "123456789012",
+     "gtin": "9876543210987",
+     "bpn": "BPN-001",
+diff --git a/pages/BigCommercePages/Base/basePage.ts b/pages/BigCommercePages/Base/basePage.ts
+index fb3d37f..dfec7e9 100644
+--- a/pages/BigCommercePages/Base/basePage.ts
++++ b/pages/BigCommercePages/Base/basePage.ts
+@@ -1,4 +1,4 @@
+-import { Locator, Page } from '@playwright/test';
++import { FrameLocator, Locator, Page } from '@playwright/test';
+ import { Console, error } from 'console';
+ import path from 'path/win32';
+ 
+@@ -324,7 +324,6 @@ async selectCategories(categories: string[][]) {
+       console.log(`Screenshot saved to: ${fileName}`);
+     } catch (error) {
+       console.error(`Failed to take screenshot: ${fileName}`, error);
+-      // Not throwing here as screenshot failure shouldn't stop test execution
+       console.log("Continuing despite screenshot failure");
+     }
+   }
+@@ -345,28 +344,17 @@ async selectCategories(categories: string[][]) {
+     }
+   }
+ 
+-  /**
+-   * Handles input-based dropdown elements where clicking opens a dropdown menu.
+-   * Selects an option from the dropdown list based on matching text.
+-   * @param inputLocator - Locator for the input element that triggers the dropdown
+-   * @param optionText - Text of the option to select from the dropdown
+-   * @param dropdownOptionsSelector - CSS selector for the dropdown options (default: 'li, [role="option"]')
+-   * @param timeout - Maximum time to wait for elements (default: 5000ms)
+-   */
+ 
+   async selectFromInputDropdownDynamic(inputLocator: Locator, optionText: string): Promise<void> {
+-  // Type into the input
++
+   await inputLocator.fill(optionText);
+ 
+-  // Get all matching options
+   const options = this.page
+     .frameLocator('#content-iframe')
+     .locator(`//ul[@role="listbox"]//li[normalize-space(.)='${optionText}']`);
+ 
+-  // Wait for at least one option
+   await options.first().waitFor({ state: 'visible', timeout: 5000 });
+ 
+-  // ✅ Click the first matching option
+   await options.first().click();
+ }
+ 
+@@ -378,16 +366,12 @@ async selectCategories(categories: string[][]) {
+     timeout: number = 5000
+   ): Promise<void> {
+     try {
+-      // Wait for and click the input to open dropdown
+       await this.waitForElement(inputLocator, timeout);
+       await this.clickElement(inputLocator, 'Input Dropdown');
+ 
+-      // Wait for the listbox to be visible
+       const listbox = this.page.locator('//ul[@role="listbox"]');
+       console.log(`Waiting for listbox to be visible: ${listbox}`);
+-      //await listbox.waitFor({ state: 'visible', timeout });
+ 
+-      // Get all child elements of the listbox
+       const options = listbox.locator('[role="option"], li, div, span');
+       const count = await options.count();
+       let found = false;
+@@ -409,6 +393,64 @@ async selectCategories(categories: string[][]) {
+       throw new Error(`Input dropdown selection failed: ${error}`);
+     }
+   }
++  
++
++  async selectFromInputDropdownoverlay(
++    inputLocator: Locator,
++    optionText: string,
++    timeout: number = 10000
++) {
++
++    await inputLocator.waitFor({ state: 'visible', timeout });
++    await inputLocator.click();
++    await inputLocator.fill(optionText);
++
++
++    const listbox = inputLocator.locator('xpath=ancestor::custom-dropdown//ul[@role="listbox"]');
++    await listbox.waitFor({ state: 'visible', timeout });
++
++    const option = listbox.locator(`li:has-text("${optionText}")`).first();
++    await option.scrollIntoViewIfNeeded();
++    await option.click();
++}
++
++async selectGiftWrappingOptionDynamic(optionText: string): Promise<void> {
++  const iframe = this.page.frameLocator('#content-iframe');
++  const option = optionText.trim().toLowerCase();
++
++  // Map JSON value → element ID
++  const optionMap: Record<string, string> = {
++    any: '#productInput-gift_wrapping_all',
++    none: '#productInput-gift_wrapping_any',
++    list: '#productInput-gift_wrapping_custom'
++  };
++
++  const selector = optionMap[option];
++  if (!selector) throw new Error(` Invalid gift wrapping option: "${optionText}"`);
++
++  const radio = iframe.locator(selector);
++
++  // Wait for it to appear
++  await radio.waitFor({ state: 'attached', timeout: 5000 });
++
++  // Check if disabled
++  if (await radio.isDisabled()) {
++    console.warn(` Option "${option}" is disabled, skipping selection.`);
++    return;
++  }
++
++  // Select only if not already checked
++  if (!(await radio.isChecked())) {
++    await radio.click({ force: true });
++    console.log(` Selected gift wrapping option: "${option}"`);
++  } else {
++    console.log(` Option "${option}" already selected.`);
++  }
++}
++
++
++
++
+ 
+   async collapseSideMenuOption(locator: Locator): Promise<void> {
+     try {
+diff --git a/pages/BigCommercePages/Customers/addCustomerPage.ts b/pages/BigCommercePages/Customers/addCustomerPage.ts
+index 320048d..eebd12b 100644
+--- a/pages/BigCommercePages/Customers/addCustomerPage.ts
++++ b/pages/BigCommercePages/Customers/addCustomerPage.ts
+@@ -253,6 +253,4 @@ export class AddCustomerPage extends Homepage {
+         throw error;
+     }
+ }
+-
+-
+ }
+\ No newline at end of file
+diff --git a/pages/BigCommercePages/Products/addProduct.ts b/pages/BigCommercePages/Products/addProduct.ts
+index 0b06cd7..0ccd07b 100644
+--- a/pages/BigCommercePages/Products/addProduct.ts
++++ b/pages/BigCommercePages/Products/addProduct.ts
+@@ -82,9 +82,10 @@ export class AddProductPage extends Homepage {
+ 		private shippingWeightInput: Locator;
+ 		private imageModalTitle: Locator;
+ 		private imageThumbPreview: Locator;
+-	enterUrlInput: Locator;
+-	AddImageButton: any;
+-	AssignandSaveBtn: Locator;
++		private enterUrlInput: Locator;
++		private AddImageButton: any;
++		private AssignandSaveBtn: Locator;
++		private saveButtonClck: any;
+ 
+ 		constructor(page: Page) {
+ 			 super(page);
+@@ -143,7 +144,7 @@ export class AddProductPage extends Homepage {
+ 			this.warrantyInfoInput = initLocator('//textarea[@id="productInput-warranty"]');
+ 			this.availabilityTextInput = initLocator('//input[@id="productInput-availability_text"]');
+ 			this.conditionDropdown = initLocator('//input[@id="productInput-condition"]');
+-			this.showConditionCheckbox = initLocator('//input[@id="productInput-is_condition_shown"]');
++			this.showConditionCheckbox = iframe.locator('//label[@for="productInput-is_condition_shown"]');
+ 			// Custom Fields
+ 			// Related Products
+ 			this.showRelatedProductsCheckbox = initLocator('label:has-text("Automatically show related products") input[type="checkbox"]');
+@@ -157,8 +158,8 @@ export class AddProductPage extends Homepage {
+ 			this.freeShippingCheckbox = initLocator('label:has-text("Free Shipping") input[type="checkbox"]');
+ 			// Purchasability
+ 			this.purchasabilityRadios = initLocator('section:has-text("Purchasability") input[type="radio"]');
+-			this.minPurchaseQtyInput = initLocator('input[placeholder*="Minimum Purchase Quantity"]');
+-			this.maxPurchaseQtyInput = initLocator('input[placeholder*="Maximum Purchase Quantity"]');
++			this.minPurchaseQtyInput = initLocator('//input[@id="productInput-min_purchase_quantity"]');
++			this.maxPurchaseQtyInput = initLocator('//input[@id="productInput-max_purchase_quantity"]');
+ 			// Gift Wrapping
+ 			this.giftWrappingRadios = initLocator('section:has-text("Gift Wrapping options") input[type="radio"]');
+ 			// Customs Information
+@@ -173,6 +174,7 @@ export class AddProductPage extends Homepage {
+ 			this.useMetaDescriptionCheckbox = initLocator('label:has-text("Use meta description") input[type="checkbox"]');
+ 			this.useThumbnailImageRadio = initLocator('label:has-text("Use thumbnail image") input[type="radio"]');
+ 			this.dontUseImageRadio = initLocator('label:has-text("Don\'t use an image") input[type="radio"]');
++			this.saveButtonClck = initLocator('//button[contains(@class,"main-button") and text()="Save"]');
+ 			}
+ 		
+ 			getCategoryCheckbox(category: string): Locator {
+@@ -224,45 +226,72 @@ async fillProductDetails(product: ProductData) {
+ 		await this.enterText(this.sortOrderInput, product.sortOrder);
+ 		await this.enterText(this.warrantyInfoInput, product.warrantyInfo);
+ 		await this.enterText(this.availabilityTextInput, product.availabilityText);
+-		await this.selectFromInputDropdownDynamic(this.conditionDropdown, product.condition);
++		await this.selectFromInputDropdownoverlay(this.conditionDropdown, product.condition); // ensure checkbox is rendered
+ 		if (product.visibleOnStorefront) {
+ 		if (!(await this.showConditionCheckbox.isChecked())) {
+-			await this.showConditionCheckbox.click();
++			await this.clickElement(this.showConditionCheckbox,"clicked the checkbox ");
+ 		}
+ 	} else {
+ 		if (await this.showConditionCheckbox.isChecked()) {
+-			await this.showConditionCheckbox.click();
++			await this.clickElement(this.showConditionCheckbox,"clicked the checkbox ");
+ 		}
+ 	}
+-		//await this.showConditionCheckbox.setChecked(product.showConditionOnStorefront);
+-		// Custom fields logic can be added here if needed
+-		//await this.showRelatedProductsCheckbox.setChecked(product.showRelatedProducts);
+-		await this.enterText(this.shippingWeightInput, product.weight);
+ 		await this.enterText(this.widthInput, product.dimensions.width);
+ 		await this.enterText(this.heightInput, product.dimensions.height);
+ 		await this.enterText(this.depthInput, product.dimensions.depth);
+ 		await this.enterText(this.fixedShippingPriceInput, product.fixedShippingPrice);
+-		await this.freeShippingCheckbox.setChecked(product.freeShipping);
+-		await this.purchasabilityRadios.nth(product.purchasability).check();
+ 		await this.enterText(this.minPurchaseQtyInput, product.minPurchaseQty);
+ 		await this.enterText(this.maxPurchaseQtyInput, product.maxPurchaseQty);
+-		await this.giftWrappingRadios.nth(product.giftWrapping).check();
+-		//await this.manageCustomsInfoCheckbox.setChecked(product.manageCustomsInfo);
+-		await this.enterText(this.pageTitleInput, product.pageTitle);
+-		await this.enterText(this.productUrlInput, product.productUrl);
++		await this.selectGiftWrappingOptionDynamic(product.giftWrappingOption);
+ 		await this.enterText(this.metaDescriptionInput, product.metaDescription);
+-		await this.objectTypeDropdown.selectOption({ label: product.objectType });
+-		await this.useProductNameCheckbox.setChecked(product.useProductName);
+-		await this.useMetaDescriptionCheckbox.setChecked(product.useMetaDescription);
+-		if (product.useThumbnailImage) {
+-			await this.useThumbnailImageRadio.check();
+-		} else {
+-			await this.dontUseImageRadio.check();
+-		}
++		await this.clickElement(this.saveButtonClck,"Product Saved");
+ 	} catch (error) {
+ 		console.error('Error filling product details:', error);
+ 		throw error;	
+ 	}
+ }
++async verifyProductExistsBySKU(sku: string) {
++    if (!sku) {
++        console.error("Error: SKU not provided. Did you create the product first?");
++        throw new Error("SKU not provided");
++    }
++
++    try {
++        await this.page.goto('https://your-site.com/admin/products'); // replace with actual URL
++        await this.page.waitForLoadState('networkidle');
++
++        const iframe = this.page.frameLocator('#content-iframe');
++
++        const searchInput = iframe.locator('//input[@placeholder="Search products"]');
++        await searchInput.waitFor({ state: 'visible', timeout: 10000 });
++        await searchInput.fill(sku);
++
++        await searchInput.press('Enter');
++        await this.page.waitForTimeout(2000); // wait for results to appear
+ 
++        // Locate all rows
++        const rowsLocator = iframe.locator('tr'); // adjust selector if needed
++        await expect(rowsLocator.first()).toBeVisible({ timeout: 10000 });
++
++        const rowCount = await rowsLocator.count();
++        console.log(`Found ${rowCount} rows for SKU search: ${sku}`);
++
++        let found = false;
++        for (let i = 0; i < rowCount; i++) {
++            const skuCell = rowsLocator.nth(i).locator('td:nth-child(2)'); // adjust column index for SKU
++            const skuText = (await skuCell.textContent())?.trim();
++            console.log(`Row ${i + 1} SKU: ${skuText}`);
++            if (skuText === sku) {
++                console.log(`Product SKU matched UI: ${skuText}`);
++                found = true;
++                break;
++            }
++        }
++        expect(found).toBeTruthy();
++
++    } catch (error) {
++        console.error(`Error verifying product for SKU ${sku}:`, error);
++        throw error;
++    }
++}
+ }
+diff --git a/pages/BigCommercePages/Products/productType.ts b/pages/BigCommercePages/Products/productType.ts
+index d12f241..174ad09 100644
+--- a/pages/BigCommercePages/Products/productType.ts
++++ b/pages/BigCommercePages/Products/productType.ts
+@@ -10,6 +10,7 @@ export type ProductCustomField = {
+ };
+ 
+ export type ProductData = {
++  giftWrappingOption: string;
+   productName: string;
+   sku: string;
+   defaultPrice: string;
+diff --git a/test-results/index.html b/test-results/index.html
+index b75f8d2..824beb6 100644
+--- a/test-results/index.html
++++ b/test-results/index.html
+@@ -73,4 +73,4 @@ Error generating stack: `+u.message+`
+     <div id='root'></div>
+   </body>
+ </html>
+-<script id="playwrightReportBase64" type="application/zip">data:application/zip;base64,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</script>
+\ No newline at end of file
++<script id="playwrightReportBase64" type="application/zip">data:application/zip;base64,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</script>
+\ No newline at end of file
+diff --git a/test-results/report.json b/test-results/report.json
+index b0a3f36..18c02d9 100644
+--- a/test-results/report.json
++++ b/test-results/report.json
+@@ -1,7 +1,7 @@
+ {
+   "config": {
+-    "configFile": "C:\\FinReconAutomation\\playwright.config.ts",
+-    "rootDir": "C:/FinReconAutomation/tests",
++    "configFile": "C:\\Big C automation\\FinReconProj\\playwright.config.ts",
++    "rootDir": "C:/Big C automation/FinReconProj/tests",
+     "forbidOnly": false,
+     "fullyParallel": true,
+     "globalSetup": null,
+@@ -45,7 +45,7 @@
+     "quiet": false,
+     "projects": [
+       {
+-        "outputDir": "C:/FinReconAutomation/test-results",
++        "outputDir": "C:/Big C automation/FinReconProj/test-results",
+         "repeatEach": 1,
+         "retries": 0,
+         "metadata": {
+@@ -53,7 +53,7 @@
+         },
+         "id": "existing-chrome",
+         "name": "existing-chrome",
+-        "testDir": "C:/FinReconAutomation/tests",
++        "testDir": "C:/Big C automation/FinReconProj/tests",
+         "testIgnore": [],
+         "testMatch": [
+           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+@@ -65,149 +65,25 @@
+     "updateSnapshots": "missing",
+     "updateSourceMethod": "3way",
+     "version": "1.55.0",
+-    "workers": 1,
++    "workers": 6,
+     "webServer": null
+   },
+   "suites": [
+     {
+-      "title": "BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts",
+-      "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
++      "title": "BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
++      "file": "BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts",
+       "column": 0,
+       "line": 0,
+       "specs": [],
+       "suites": [
+         {
+-          "title": "Standard Product Order Tests",
+-          "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
+-          "line": 13,
++          "title": "Create New Product",
++          "file": "BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts",
++          "line": 28,
+           "column": 6,
+-          "specs": [],
+-          "suites": [
++          "specs": [
+             {
+-              "title": "Order with Standard product - Fulfillment using Billing Address",
+-              "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
+-              "line": 15,
+-              "column": 14,
+-              "specs": [
+-                {
+-                  "title": "Execute: Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon",
+-                  "ok": false,
+-                  "tags": [],
+-                  "tests": [
+-                    {
+-                      "timeout": 60000,
+-                      "annotations": [
+-                        {
+-                          "type": "test-type",
+-                          "description": "E2E"
+-                        },
+-                        {
+-                          "type": "feature",
+-                          "description": "Order Creation"
+-                        }
+-                      ],
+-                      "expectedStatus": "passed",
+-                      "projectId": "existing-chrome",
+-                      "projectName": "existing-chrome",
+-                      "results": [
+-                        {
+-                          "workerIndex": 0,
+-                          "parallelIndex": 0,
+-                          "status": "failed",
+-                          "duration": 28000,
+-                          "error": {
+-                            "message": "Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?",
+-                            "stack": "Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:26:19)\n    at NodeBufferReader.checkOffset (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:17:14)\n    at NodeBufferReader.readData (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\NodeBufferReader.js:14:10)\n    at NodeBufferReader.readString (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:75:49)\n    at ZipEntries.isSignature (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:39:37)\n    at ZipEntries.readEndOfCentral (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:164:35)\n    at ZipEntries.load (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:255:14)\n    at C:\\FinReconAutomation\\node_modules\\jszip\\lib\\load.js:48:24\n    at XLSX.load (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:280:17)\n    at XLSX.readFile (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:55:24)\n    at ExcelReader.readWorkbook (C:\\FinReconAutomation\\utils\\excelReader.ts:151:13)\n    at ExcelReader.getAllTestCases (C:\\FinReconAutomation\\utils\\excelReader.ts:223:26)\n    at ExcelReader.fetchTestCaseDataByName (C:\\FinReconAutomation\\utils\\excelReader.ts:202:22)\n    at C:\\FinReconAutomation\\tests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32",
+-                            "location": {
+-                              "file": "C:\\FinReconAutomation\\utils\\excelReader.ts",
+-                              "column": 13,
+-                              "line": 151
+-                            },
+-                            "snippet": "\u001b[90m   at \u001b[39m..\\utils\\excelReader.ts:151\n\n\u001b[0m \u001b[90m 149 |\u001b[39m             \u001b[36mconst\u001b[39m filePath \u001b[33m=\u001b[39m path\u001b[33m.\u001b[39mjoin(__dirname\u001b[33m,\u001b[39m \u001b[32m'../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 150 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Attempting to load Excel file:'\u001b[39m\u001b[33m,\u001b[39m filePath)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 151 |\u001b[39m             \u001b[36mawait\u001b[39m workbook\u001b[33m.\u001b[39mxlsx\u001b[33m.\u001b[39mreadFile(filePath)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 152 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Excel file loaded successfully'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 153 |\u001b[39m         } \u001b[36mcatch\u001b[39m (err) {\n \u001b[90m 154 |\u001b[39m             console\u001b[33m.\u001b[39merror(\u001b[32m'Error loading Excel file:'\u001b[39m\u001b[33m,\u001b[39m err)\u001b[33m;\u001b[39m\u001b[0m"
+-                          },
+-                          "errors": [
+-                            {
+-                              "location": {
+-                                "file": "C:\\FinReconAutomation\\utils\\excelReader.ts",
+-                                "column": 13,
+-                                "line": 151
+-                              },
+-                              "message": "Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n\n\u001b[90m   at \u001b[39m..\\utils\\excelReader.ts:151\n\n\u001b[0m \u001b[90m 149 |\u001b[39m             \u001b[36mconst\u001b[39m filePath \u001b[33m=\u001b[39m path\u001b[33m.\u001b[39mjoin(__dirname\u001b[33m,\u001b[39m \u001b[32m'../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 150 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Attempting to load Excel file:'\u001b[39m\u001b[33m,\u001b[39m filePath)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 151 |\u001b[39m             \u001b[36mawait\u001b[39m workbook\u001b[33m.\u001b[39mxlsx\u001b[33m.\u001b[39mreadFile(filePath)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 152 |\u001b[39m             console\u001b[33m.\u001b[39mlog(\u001b[32m'Excel file loaded successfully'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 153 |\u001b[39m         } \u001b[36mcatch\u001b[39m (err) {\n \u001b[90m 154 |\u001b[39m             console\u001b[33m.\u001b[39merror(\u001b[32m'Error loading Excel file:'\u001b[39m\u001b[33m,\u001b[39m err)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at NodeBufferReader.checkIndex (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:26:19)\u001b[22m\n\u001b[2m    at NodeBufferReader.checkOffset (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:17:14)\u001b[22m\n\u001b[2m    at NodeBufferReader.readData (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\NodeBufferReader.js:14:10)\u001b[22m\n\u001b[2m    at NodeBufferReader.readString (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\reader\\DataReader.js:75:49)\u001b[22m\n\u001b[2m    at ZipEntries.isSignature (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:39:37)\u001b[22m\n\u001b[2m    at ZipEntries.readEndOfCentral (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:164:35)\u001b[22m\n\u001b[2m    at ZipEntries.load (C:\\FinReconAutomation\\node_modules\\jszip\\lib\\zipEntries.js:255:14)\u001b[22m\n\u001b[2m    at C:\\FinReconAutomation\\node_modules\\jszip\\lib\\load.js:48:24\u001b[22m\n\u001b[2m    at XLSX.load (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:280:17)\u001b[22m\n\u001b[2m    at XLSX.readFile (C:\\FinReconAutomation\\node_modules\\exceljs\\lib\\xlsx\\xlsx.js:55:24)\u001b[22m\n\u001b[2m    at ExcelReader.readWorkbook (C:\\FinReconAutomation\\utils\\excelReader.ts:151:13)\u001b[22m\n\u001b[2m    at ExcelReader.getAllTestCases (C:\\FinReconAutomation\\utils\\excelReader.ts:223:26)\u001b[22m\n\u001b[2m    at ExcelReader.fetchTestCaseDataByName (C:\\FinReconAutomation\\utils\\excelReader.ts:202:22)\u001b[22m\n\u001b[2m    at C:\\FinReconAutomation\\tests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32\u001b[22m"
+-                            }
+-                          ],
+-                          "stdout": [
+-                            {
+-                              "text": "Attempting to load Excel file: C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+-                            },
+-                            {
+-                              "text": "Updating test result for \"Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon\" in sheet \"Standard Product\"\n"
+-                            },
+-                            {
+-                              "text": "Attempting to load Excel file: C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx\n"
+-                            }
+-                          ],
+-                          "stderr": [
+-                            {
+-                              "text": "Error reading file C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.getAllTestCases \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:223:26\u001b[90m)\u001b[39m\n    at ExcelReader.fetchTestCaseDataByName \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:202:22\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+-                            },
+-                            {
+-                              "text": "Error loading Excel file: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.getAllTestCases \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:223:26\u001b[90m)\u001b[39m\n    at ExcelReader.fetchTestCaseDataByName \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:202:22\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:34:32\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+-                            },
+-                            {
+-                              "text": "Error reading file C:\\FinReconAutomation\\data\\BigCommerceData\\BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+-                            },
+-                            {
+-                              "text": "Error loading Excel file: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+-                            },
+-                            {
+-                              "text": "Error updating test results: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+-                            },
+-                            {
+-                              "text": "Error details: {\n  sheetName: \u001b[32m'Standard Product'\u001b[39m,\n  testCaseName: \u001b[32m'Standard_FulfillmentusingBillingAddress_CashonDelivery_NoDiscount_NoCoupon'\u001b[39m,\n  result: \u001b[32m'Failed'\u001b[39m,\n  error: \u001b[32m'End of data reached (data length = 0, asked index = 4). Corrupted zip ?'\u001b[39m\n}\n"
+-                            },
+-                            {
+-                              "text": "Failed to record test failure in Excel: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+-                            },
+-                            {
+-                              "text": "Excel Error: Error: End of data reached (data length = 0, asked index = 4). Corrupted zip ?\n    at NodeBufferReader.checkIndex \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:26:19\u001b[90m)\u001b[39m\n    at NodeBufferReader.checkOffset \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:17:14\u001b[90m)\u001b[39m\n    at NodeBufferReader.readData \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\NodeBufferReader.js:14:10\u001b[90m)\u001b[39m\n    at NodeBufferReader.readString \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\reader\\DataReader.js:75:49\u001b[90m)\u001b[39m\n    at ZipEntries.isSignature \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:39:37\u001b[90m)\u001b[39m\n    at ZipEntries.readEndOfCentral \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:164:35\u001b[90m)\u001b[39m\n    at ZipEntries.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\zipEntries.js:255:14\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mjszip\u001b[24m\\lib\\load.js:48:24\n\u001b[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)\u001b[39m\n    at XLSX.load \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:280:17\u001b[90m)\u001b[39m\n    at XLSX.readFile \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mexceljs\u001b[24m\\lib\\xlsx\\xlsx.js:55:24\u001b[90m)\u001b[39m\n    at ExcelReader.readWorkbook \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:151:13\u001b[90m)\u001b[39m\n    at ExcelReader.updateTestResult \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:271:34\u001b[90m)\u001b[39m\n    at ExcelReader.recordDetailedTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:470:9\u001b[90m)\u001b[39m\n    at ExcelReader.handleTestFailure \u001b[90m(C:\\FinReconAutomation\\\u001b[39mutils\\excelReader.ts:524:13\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mtests\\BigCommerceTests\\UITests\\OrdersTests\\createStandardProductOrder.spec.ts:181:45\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:309:9\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:326:11\n    at TimeoutManager.withRunnable \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\timeoutManager.js:67:14\u001b[90m)\u001b[39m\n    at TestInfoImpl._runWithTimeout \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\testInfo.js:324:7\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:307:7\n    at WorkerMain._runTest \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:282:5\u001b[90m)\u001b[39m\n    at WorkerMain.runTestGroup \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\worker\\workerMain.js:194:11\u001b[90m)\u001b[39m\n    at process.<anonymous> \u001b[90m(C:\\FinReconAutomation\\\u001b[39mnode_modules\\\u001b[4mplaywright\u001b[24m\\lib\\common\\process.js:65:22\u001b[90m)\u001b[39m\n"
+-                            }
+-                          ],
+-                          "retry": 0,
+-                          "startTime": "2025-09-27T20:34:04.066Z",
+-                          "annotations": [
+-                            {
+-                              "type": "test-type",
+-                              "description": "E2E"
+-                            },
+-                            {
+-                              "type": "feature",
+-                              "description": "Order Creation"
+-                            }
+-                          ],
+-                          "attachments": [
+-                            {
+-                              "name": "screenshot",
+-                              "contentType": "image/png",
+-                              "path": "C:\\FinReconAutomation\\test-results\\BigCommerceTests-UITests-O-01388-elivery-NoDiscount-NoCoupon-existing-chrome\\test-failed-1.png"
+-                            }
+-                          ],
+-                          "errorLocation": {
+-                            "file": "C:\\FinReconAutomation\\utils\\excelReader.ts",
+-                            "column": 13,
+-                            "line": 151
+-                          }
+-                        }
+-                      ],
+-                      "status": "unexpected"
+-                    }
+-                  ],
+-                  "id": "f25725089d33fc2f113d-faeb7cb5c7d00a328392",
+-                  "file": "BigCommerceTests/UITests/OrdersTests/createStandardProductOrder.spec.ts",
+-                  "line": 17,
+-                  "column": 17
+-                }
+-              ]
+-              "title": "Create customer with all fields",
++              "title": "Test Comptia",
+               "ok": false,
+               "tags": [],
+               "tests": [
+@@ -219,176 +95,215 @@
+                   "projectName": "existing-chrome",
+                   "results": [
+                     {
+-                      "workerIndex": 11,
++                      "workerIndex": 23,
+                       "parallelIndex": 0,
+-                      "status": "timedOut",
+-                      "duration": 30002,
++                      "status": "failed",
++                      "duration": 27761,
+                       "error": {
+-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
++                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m",
++                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:53:33\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:50:17",
++                        "location": {
++                          "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
++                          "column": 33,
++                          "line": 53
++                        },
++                        "snippet": "\u001b[0m \u001b[90m 51 |\u001b[39m                     \u001b[36mawait\u001b[39m homepage\u001b[33m.\u001b[39mnavigateToSideMenuOption(\u001b[32m'Products'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'All Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m                     \u001b[36mconst\u001b[39m url \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39murl()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m                     expect(url)\u001b[33m.\u001b[39mtoContain(\u001b[32m'/manage/Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m                     \u001b[36mawait\u001b[39m addProductPage\u001b[33m.\u001b[39mverifyProductExistsBySKU()\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m                 })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m             })\u001b[33m;\u001b[39m\u001b[0m"
+                       },
+                       "errors": [
+                         {
+-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
++                          "location": {
++                            "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
++                            "column": 33,
++                            "line": 53
++                          },
++                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m\n\n\u001b[0m \u001b[90m 51 |\u001b[39m                     \u001b[36mawait\u001b[39m homepage\u001b[33m.\u001b[39mnavigateToSideMenuOption(\u001b[32m'Products'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'All Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m                     \u001b[36mconst\u001b[39m url \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39murl()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m                     expect(url)\u001b[33m.\u001b[39mtoContain(\u001b[32m'/manage/Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m                     \u001b[36mawait\u001b[39m addProductPage\u001b[33m.\u001b[39mverifyProductExistsBySKU()\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m                 })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m             })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:53:33\u001b[22m\n\u001b[2m    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:50:17\u001b[22m"
+                         }
+                       ],
+                       "stdout": [
+                         {
+-                          "text": "Clicked on element: Side Menu Option: Customers\n"
++                          "text": "Clicked on element: Side Menu Option: Products\n"
++                        },
++                        {
++                          "text": "Clicked on element: Products Submenu Option: Add\n"
++                        },
++                        {
++                          "text": "Navigated to Products submenu option: Add\n"
++                        },
++                        {
++                          "text": "Entered text: Test Comptia into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-name\"]')\n"
+                         },
+                         {
+-                          "text": "Clicked on element: Customers submenu option: Add\n"
++                          "text": "Entered text: TW-1003 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sku\"]')\n"
+                         },
+                         {
+-                          "text": "Clicked on element: undefined\n"
++                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-price\"]')\n"
+                         },
+                         {
+-                          "text": "Clicked on element: undefined\n"
++                          "text": "Entered text: Physical into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-type\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: John into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"firstName\"]')\n"
++                          "text": "Entered text: 2.5 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-weight\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: Doe into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"lastName\"]')\n"
++                          "text": "Expanded parent category: VueEcom - Sandbox 3\n"
+                         },
+                         {
+-                          "text": "Entered text: Acme Inc into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"companyName\"]')\n"
++                          "text": "Checked child category: Exam Vouchers\n"
+                         },
+                         {
+-                          "text": "Entered text: johndoe1758625762190@gmail.com into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"emailAddress\"]')\n"
++                          "text": "Clicked on element: Add Image\n"
+                         },
+                         {
+-                          "text": "Clicked on element: undefined\n"
++                          "text": "Clicked on element: Add from URL\n"
+                         },
+                         {
+-                          "text": "Entered text: 1234567890 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"phoneNumber\"]')\n"
++                          "text": "Entered text: https://myitsuccess.com/wp-content/uploads/2024/08/Comptia-cloud-logo.jpg into element: locator('#content-iframe').contentFrame().locator('//input[@placeholder=\"https://www...\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: 10.00 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"storeCredit\"]')\n"
++                          "text": "Clicked on element: Add Image\n"
+                         },
+                         {
+-                          "text": "Entered text: TAX123 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Customer details\\']//..//..//input[@id=\"taxExemptCategory\"]')\n"
++                          "text": "Clicked on element: Assign and Save\n"
+                         },
+                         {
+-                          "text": "Entered text: 5000 into element: locator('#content-iframe').contentFrame().locator('//form-field[label[contains(normalize-space(.), \"Line of Credit\")]]//input')\n"
++                          "text": "Entered text: TW-1003 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-identifierSku\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: Jhon@53674 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Password\\']//..//..//input[@id=\"password\"]')\n"
++                          "text": "Entered text: MPN-12345 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-mpn\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: Jhon@53674 into element: locator('#content-iframe').contentFrame().locator('//fieldset//span[text()=\\'Password\\']//..//..//input[@name=\"passwordConfirm\"]')\n"
++                          "text": "Entered text: 123456789012 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-upc\"]')\n"
+                         },
+                         {
+-                          "text": "Clicked on element: undefined\n"
++                          "text": "Entered text: 9876543210987 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-gtin\"]')\n"
+                         },
+                         {
+-                          "text": "Clicked on element: undefined\n"
++                          "text": "Entered text: BPN-001 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-bpn\"]')\n"
+                         },
+                         {
+-                          "text": "Clicked on element: undefined\n"
++                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-defaultPrice\"]')\n"
+                         },
+                         {
+-                          "text": "Waited for element: locator('#content-iframe').contentFrame().locator('//h1[text()=\"Add address\"]')\n"
++                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-cost_price\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: John into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"firstName\"]')\n"
++                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-retail_price\"]')\n"
+                         },
+                         {
+-                          "text": "First name entered: Doe\n"
++                          "text": "Entered text: 49.99 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sale_price\"]')\n"
+                         },
+                         {
+-                          "text": "Xpath for  Last Name input: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"lastName\"]')\n"
++                          "text": "Entered text: widget, test, automation into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-search_keywords\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: Doe into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"lastName\"]')\n"
++                          "text": "Entered text: 1 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-sort_order\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: Acme Inc into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"company\"]')\n"
++                          "text": "Entered text: 1 year warranty included. into element: locator('#content-iframe').contentFrame().locator('//textarea[@id=\"productInput-warranty\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: 1234567890 into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"phoneNumber\"]')\n"
++                          "text": "Entered text: Ships in 24 hours. into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-availability_text\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: 123 Main Street into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"addressLine1\"]')\n"
++                          "text": "Clicked on element: clicked the checkbox \n"
+                         },
+                         {
+-                          "text": "Entered text: Suite 100 into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"addressLine2\"]')\n"
++                          "text": "Entered text: 10 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-width\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: New York into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"suburbOrCity\"]')\n"
++                          "text": "Entered text: 5 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-height\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: 10001 into element: locator('#content-iframe').contentFrame().locator('//add-customer-address//div//span//input[@name=\"zipOrPostcode\"]')\n"
++                          "text": "Entered text: 3 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-depth\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: PO12345 into element: locator('#content-iframe').contentFrame().locator('//label[normalize-space(text())=\"PO Number\"]/following-sibling::span//input')\n"
++                          "text": "Entered text: 5.00 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-fixed_cost_shipping_price\"]')\n"
+                         },
+                         {
+-                          "text": "Entered text: TX9999 into element: locator('#content-iframe').contentFrame().locator('//label[normalize-space(text())=\"Tax ID\"]/following-sibling::span//input')\n"
++                          "text": "Entered text: 1 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-min_purchase_quantity\"]')\n"
+                         },
+                         {
+-                          "text": "Selected radio option: Residential\n"
++                          "text": "Entered text: 10 into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-max_purchase_quantity\"]')\n"
+                         },
+                         {
+-                          "text": "Clicked on element: undefined\n"
++                          "text": " Option \"any\" already selected.\n"
+                         },
+                         {
+-                          "text": "Clicked on element: Side Menu Option: Customers\n"
++                          "text": "Entered text: Buy the best test widget for your automation needs. into element: locator('#content-iframe').contentFrame().locator('//input[@id=\"productInput-meta_description\"]')\n"
+                         },
+                         {
+-                          "text": "Clicked on element: Customers submenu option: All customers\n"
++                          "text": "Clicked on element: Product Saved\n"
+                         },
+                         {
+-                          "text": "Email found: johndoe1758625762190@gmail.com\n"
++                          "text": "Clicked on element: Side Menu Option: Products\n"
++                        }
++                      ],
++                      "stderr": [
++                        {
++                          "text": "Products submenu option not found: All Products\n"
+                         }
+                       ],
+-                      "stderr": [],
+                       "retry": 0,
+                       "steps": [
+                         {
+                           "title": "Bring page to front",
+-                          "duration": 13
++                          "duration": 147
+                         },
+                         {
+-                          "title": "Navigate to Add Customer page",
+-                          "duration": 1171
++                          "title": "Navigate to Add Product page",
++                          "duration": 1667
+                         },
+                         {
+-                          "title": "Fill Customer Details",
+-                          "duration": 27016
++                          "title": "Fill Product Details",
++                          "duration": 25354
+                         },
+                         {
+-                          "title": "Verify Customer",
+-                          "duration": 5092
++                          "title": "Verify Customer Exists By Email",
++                          "duration": 565,
++                          "error": {
++                            "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m",
++                            "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"/manage/Products\"\u001b[39m\nReceived string:    \u001b[31m\"https://store-5nfoomf2b4.mybigcommerce.com/manage/products/add\"\u001b[39m\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:53:33\n    at C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts:50:17",
++                            "location": {
++                              "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
++                              "column": 33,
++                              "line": 53
++                            },
++                            "snippet": "\u001b[0m \u001b[90m 51 |\u001b[39m                     \u001b[36mawait\u001b[39m homepage\u001b[33m.\u001b[39mnavigateToSideMenuOption(\u001b[32m'Products'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'All Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 52 |\u001b[39m                     \u001b[36mconst\u001b[39m url \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39murl()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m                     expect(url)\u001b[33m.\u001b[39mtoContain(\u001b[32m'/manage/Products'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m                     \u001b[36mawait\u001b[39m addProductPage\u001b[33m.\u001b[39mverifyProductExistsBySKU()\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m                 })\u001b[33m;\u001b[39m\n \u001b[90m 56 |\u001b[39m             })\u001b[33m;\u001b[39m\u001b[0m"
++                          }
+                         }
+                       ],
+-                      "startTime": "2025-09-23T11:09:19.862Z",
++                      "startTime": "2025-10-07T05:04:39.273Z",
+                       "annotations": [],
+                       "attachments": [
+                         {
+                           "name": "screenshot",
+                           "contentType": "image/png",
+-                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\test-finished-1.png"
++                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-439bf-te-New-Product-Test-Comptia-existing-chrome\\test-finished-1.png"
+                         },
+                         {
+                           "name": "error-context",
+                           "contentType": "text/markdown",
+-                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\error-context.md"
++                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-439bf-te-New-Product-Test-Comptia-existing-chrome\\error-context.md"
+                         },
+                         {
+                           "name": "trace",
+                           "contentType": "application/zip",
+-                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-C-007df-te-customer-with-all-fields-existing-chrome\\trace.zip"
++                          "path": "C:\\Big C automation\\FinReconProj\\test-results\\BigCommerceTests-UITests-P-439bf-te-New-Product-Test-Comptia-existing-chrome\\trace.zip"
+                         }
+-                      ]
++                      ],
++                      "errorLocation": {
++                        "file": "C:\\Big C automation\\FinReconProj\\tests\\BigCommerceTests\\UITests\\ProductsTests\\createNewProduct.spec.ts",
++                        "column": 33,
++                        "line": 53
++                      }
+                     }
+                   ],
+                   "status": "unexpected"
+                 }
+               ],
+-              "id": "2039b9334856eff2f7c8-98c20f515e41c0c0e7f3",
+-              "file": "BigCommerceTests/UITests/CustomerTests/createNewCustomerWithAddress.spec.ts",
+-              "line": 68,
++              "id": "ebdc4baa015ceb15ab76-bc37303248260fec4348",
++              "file": "BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts",
++              "line": 31,
+               "column": 17
+             }
+           ]
+@@ -398,15 +313,11 @@
+   ],
+   "errors": [],
+   "stats": {
+-    "startTime": "2025-09-27T20:34:00.501Z",
+-    "duration": 31685.025999999998,
+-    "expected": 0,
+-    "startTime": "2025-09-23T11:09:17.344Z",
+-    "duration": 37811.56300000101,
++    "startTime": "2025-10-07T05:04:35.576Z",
++    "duration": 38239.00900000334,
+     "expected": 0,
+     "skipped": 0,
+     "unexpected": 1,
+-    "unexpected": 1,
+     "flaky": 0
+   }
+ }
+\ No newline at end of file
+diff --git a/tests/BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts b/tests/BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts
+index 396b7d5..ea8a9f2 100644
+--- a/tests/BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts
++++ b/tests/BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts
+@@ -47,10 +47,11 @@ test.describe('Create New Product', () => {
+                 await test.step('Fill Product Details', async () => {
+                     await addProductPage.fillProductDetails(product);
+                 });
+-
+-                await test.step('Save Product', async () => {
+-                    await page.click('button:has-text("Save")');
+-                    await expect(page.locator('text=Product added successfully')).toBeVisible();
++                await test.step('Verify Customer Exists By Email', async () => {
++                    await homepage.navigateToSideMenuOption('Products', 'All Products');
++                    const url = await page.url();
++                    expect(url).toContain('/manage/Products');
++                    await addProductPage.verifyProductExistsBySKU();
+                 });
+             });
+         });
+-- 
+2.50.0.windows.1
+
+
+From 93fef4cc9bab3c15411e8de16fa7b55b5f766e21 Mon Sep 17 00:00:00 2001
+From: Likith G <likith.g@bpktechmail.com>
+Date: Tue, 7 Oct 2025 15:21:07 +0530
+Subject: [PATCH 2/2] minor change
+
+---
+ data/BigCommerceData/addProductData.json      |  4 +-
+ pages/BigCommercePages/Products/addProduct.ts | 48 +++++++++----------
+ .../ProductsTests/createNewProduct.spec.ts    |  6 +--
+ 3 files changed, 28 insertions(+), 30 deletions(-)
+
+diff --git a/data/BigCommerceData/addProductData.json b/data/BigCommerceData/addProductData.json
+index 99966b6..76cc4a4 100644
+--- a/data/BigCommerceData/addProductData.json
++++ b/data/BigCommerceData/addProductData.json
+@@ -1,7 +1,7 @@
+ [
+   {
+-    "productName": "Test Comptia",
+-    "sku": "TW-1003",
++    "productName": "Comptia Product 6 Voucher",
++    "sku": "CP-1006",
+     "defaultPrice": "49.99",
+     "productType": "Physical",
+     "brand": "WidgetCo",
+diff --git a/pages/BigCommercePages/Products/addProduct.ts b/pages/BigCommercePages/Products/addProduct.ts
+index 0ccd07b..c780aeb 100644
+--- a/pages/BigCommercePages/Products/addProduct.ts
++++ b/pages/BigCommercePages/Products/addProduct.ts
+@@ -86,6 +86,7 @@ export class AddProductPage extends Homepage {
+ 		private AddImageButton: any;
+ 		private AssignandSaveBtn: Locator;
+ 		private saveButtonClck: any;
++		private searchInputbox: any;
+ 
+ 		constructor(page: Page) {
+ 			 super(page);
+@@ -216,7 +217,7 @@ async fillProductDetails(product: ProductData) {
+ 		await this.enterText(this.upcInput, product.upc);
+ 		await this.enterText(this.gtinInput, product.gtin);
+ 		await this.enterText(this.bpnInput, product.bpn);
+-		await this.enterText(this.defaultPriceInclTaxInput, product.defaultPrice);
++		//await this.enterText(this.defaultPriceInclTaxInput, product.defaultPrice);
+ 		//await this.selectFromInputDropdownDynamic(this.taxClassDropdown, product.taxClass);
+ 		await this.showAdvancedPricingLink.click();
+ 		await this.enterText(this.costPriceInput, product.defaultPrice);
+@@ -257,37 +258,34 @@ async verifyProductExistsBySKU(sku: string) {
+     }
+ 
+     try {
+-        await this.page.goto('https://your-site.com/admin/products'); // replace with actual URL
+-        await this.page.waitForLoadState('networkidle');
+ 
+         const iframe = this.page.frameLocator('#content-iframe');
++		const searchInput = iframe.locator('//input[@placeholder="Search products"]');
+ 
+-        const searchInput = iframe.locator('//input[@placeholder="Search products"]');
+-        await searchInput.waitFor({ state: 'visible', timeout: 10000 });
+-        await searchInput.fill(sku);
++		
++
++		await searchInput.fill(sku); // actually enter the SKU
++		await searchInput.press('Enter');
+ 
+-        await searchInput.press('Enter');
+-        await this.page.waitForTimeout(2000); // wait for results to appear
++		const rowsLocator = iframe.locator('tbody tr'); // target only tbody rows
++		await expect(rowsLocator.first()).toBeVisible({ timeout: 10000 });
+ 
+-        // Locate all rows
+-        const rowsLocator = iframe.locator('tr'); // adjust selector if needed
+-        await expect(rowsLocator.first()).toBeVisible({ timeout: 10000 });
++		const rowCount = await rowsLocator.count();
++		console.log(`Found ${rowCount} rows for SKU search: ${sku}`);
+ 
+-        const rowCount = await rowsLocator.count();
+-        console.log(`Found ${rowCount} rows for SKU search: ${sku}`);
++		let found = false;
++		for (let i = 0; i < rowCount; i++) {
++			const skuCell = rowsLocator.nth(i).locator('td[data-testid="sku"] div'); // inner div text
++			const skuText = (await skuCell.textContent())?.trim();
++			console.log(`Row ${i + 1} SKU: ${skuText}`);
++			if (skuText === sku) {
++				console.log(`Product SKU matched UI: ${skuText}`);
++				found = true;
++				break; // stop after first match
++			}
++		}
++		expect(found).toBeTruthy();
+ 
+-        let found = false;
+-        for (let i = 0; i < rowCount; i++) {
+-            const skuCell = rowsLocator.nth(i).locator('td:nth-child(2)'); // adjust column index for SKU
+-            const skuText = (await skuCell.textContent())?.trim();
+-            console.log(`Row ${i + 1} SKU: ${skuText}`);
+-            if (skuText === sku) {
+-                console.log(`Product SKU matched UI: ${skuText}`);
+-                found = true;
+-                break;
+-            }
+-        }
+-        expect(found).toBeTruthy();
+ 
+     } catch (error) {
+         console.error(`Error verifying product for SKU ${sku}:`, error);
+diff --git a/tests/BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts b/tests/BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts
+index ea8a9f2..dc3fb5f 100644
+--- a/tests/BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts
++++ b/tests/BigCommerceTests/UITests/ProductsTests/createNewProduct.spec.ts
+@@ -47,11 +47,11 @@ test.describe('Create New Product', () => {
+                 await test.step('Fill Product Details', async () => {
+                     await addProductPage.fillProductDetails(product);
+                 });
+-                await test.step('Verify Customer Exists By Email', async () => {
++                await test.step('Verify Prodcut Exists By SKU', async () => {
+                     await homepage.navigateToSideMenuOption('Products', 'All Products');
+                     const url = await page.url();
+-                    expect(url).toContain('/manage/Products');
+-                    await addProductPage.verifyProductExistsBySKU();
++                    expect(url).toContain('/manage/products');
++                    await addProductPage.verifyProductExistsBySKU(product.sku);
+                 });
+             });
+         });
+-- 
+2.50.0.windows.1
+

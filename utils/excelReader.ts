@@ -70,63 +70,69 @@ export interface TestCaseSheet {
 }
 
 export class ExcelReader {
+
     /**
      * Log key test case info to console
      */
-        /**
-         * Update the BigC_OrderId for a test case in the Excel sheet
-         * @param sheetName Name of the worksheet
-         * @param testCaseName Name of the test case
-         * @param orderId The orderId to write
-         */
-        public async updateOrderId(sheetName: string, testCaseName: string, orderId: string): Promise<void> {
-            try {
-                const workbook = await this.readWorkbook();
-                const worksheet = workbook.getWorksheet(sheetName);
-                if (!worksheet) {
-                    throw new Error(`Worksheet ${sheetName} not found in the Excel file`);
-                }
-
-                // Find header columns
-                const headers: { [key: string]: number } = {};
-                worksheet.getRow(1).eachCell((cell, colNumber) => {
-                    headers[cell.value?.toString() || ''] = colNumber;
-                });
-
-                if (!headers['BigC_OrderId']) {
-                    throw new Error('BigC_OrderId column not found in the worksheet');
-                }
-                if (!headers['Test Case Name']) {
-                    throw new Error('Test Case Name column not found in the worksheet');
-                }
-
-                // Find the row for the test case
-                let foundRow: any = null;
-                worksheet.eachRow((row, rowNumber) => {
-                    if (rowNumber === 1) return; // Skip header
-                    const nameCell = row.getCell(headers['Test Case Name']);
-                    const cellValue = nameCell.value?.toString() || '';
-                    if (cellValue === testCaseName) {
-                        foundRow = row;
-                    }
-                });
-
-                if (!foundRow) {
-                    throw new Error(`Test case "${testCaseName}" not found in sheet "${sheetName}"`);
-                }
-
-                // Update the BigC_OrderId cell
-                foundRow.getCell(headers['BigC_OrderId']).value = orderId;
-
-                // Save the workbook
-                const filePath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
-                await workbook.xlsx.writeFile(filePath);
-                console.log(`BigC_OrderId updated for test case "${testCaseName}" in sheet "${sheetName}"`);
-            } catch (error) {
-                console.error('Error updating BigC_OrderId:', error);
-                throw error;
+    /**
+     * Read all product test cases from AddProductData.xlsx
+     * Supports multi-sheet, filters by 'Automation' column, parses nested categories/modifiers
+     * @param options Optional: { sheetNames?: string[], filterAutomation?: boolean }
+     */
+    /**
+     * Update the BigC_OrderId for a test case in the Excel sheet
+     * @param sheetName Name of the worksheet
+     * @param testCaseName Name of the test case
+     * @param orderId The orderId to write
+     */
+    public async updateOrderId(sheetName: string, testCaseName: string, orderId: string): Promise<void> {
+        try {
+            const workbook = await this.readWorkbook();
+            const worksheet = workbook.getWorksheet(sheetName);
+            if (!worksheet) {
+                throw new Error(`Worksheet ${sheetName} not found in the Excel file`);
             }
+
+            // Find header columns
+            const headers: { [key: string]: number } = {};
+            worksheet.getRow(1).eachCell((cell, colNumber) => {
+                headers[cell.value?.toString() || ''] = colNumber;
+            });
+
+            if (!headers['BigC_OrderId']) {
+                throw new Error('BigC_OrderId column not found in the worksheet');
+            }
+            if (!headers['Test Case Name']) {
+                throw new Error('Test Case Name column not found in the worksheet');
+            }
+
+            // Find the row for the test case
+            let foundRow: any = null;
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return; // Skip header
+                const nameCell = row.getCell(headers['Test Case Name']);
+                const cellValue = nameCell.value?.toString() || '';
+                if (cellValue === testCaseName) {
+                    foundRow = row;
+                }
+            });
+
+            if (!foundRow) {
+                throw new Error(`Test case "${testCaseName}" not found in sheet "${sheetName}"`);
+            }
+
+            // Update the BigC_OrderId cell
+            foundRow.getCell(headers['BigC_OrderId']).value = orderId;
+
+            // Save the workbook
+            const filePath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
+            await workbook.xlsx.writeFile(filePath);
+            console.log(`BigC_OrderId updated for test case "${testCaseName}" in sheet "${sheetName}"`);
+        } catch (error) {
+            console.error('Error updating BigC_OrderId:', error);
+            throw error;
         }
+    }
     public logTestCaseInfo(testCase: TestCase): void {
         console.log(`Executing Test Case: ${testCase['Test Case ID']}`);
         console.log(`Scenario: ${testCase['Test Scenario']}`);
@@ -146,10 +152,10 @@ export class ExcelReader {
 
     private async readWorkbook(): Promise<Excel.Workbook> {
         const workbook = new Excel.Workbook();
+        const resolvedPath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
         try {
-            const filePath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
-            console.log('Attempting to load Excel file:', filePath);
-            await workbook.xlsx.readFile(filePath);
+            console.log('Attempting to load Excel file:', resolvedPath);
+            await workbook.xlsx.readFile(resolvedPath);
             console.log('Excel file loaded successfully');
         } catch (err) {
             console.log('Error loading Excel file:', err);
@@ -198,28 +204,28 @@ export class ExcelReader {
         }
     }
 
-    
-public async fetchTestCaseDataByName(testCaseName: string, sheetName: string) {
-    const excelReader = ExcelReader.getInstance();
-    const allCases = await excelReader.getAllTestCases(sheetName);
-    const tc = allCases.find(tc => tc['Test Case Name'] === testCaseName);
-    if (!tc) throw new Error(`Test case '${testCaseName}' not found in Excel sheet '${sheetName}'`);
-    await this.logStep('Test Case Info', {
-        'ID': tc['Test Case ID'],
-        'Name': tc['Test Case Name'],
-        'Scenario': tc['Test Scenario'],
-        'Pre-Condition': tc['Pre-Condition'],
-        'Payment Method': tc['Payment Method'],
-        'Expected Result': tc['Expected Result']
-    });
-    return tc;
-}
 
-// Helper functions
-public async logStep(title: string, details?: any) {
-    console.log(`\n=== ${title} ===`);
-    if (details) console.table(details);
-}
+    public async fetchTestCaseDataByName(testCaseName: string, sheetName: string) {
+        const excelReader = ExcelReader.getInstance();
+        const allCases = await excelReader.getAllTestCases(sheetName);
+        const tc = allCases.find(tc => tc['Test Case Name'] === testCaseName);
+        if (!tc) throw new Error(`Test case '${testCaseName}' not found in Excel sheet '${sheetName}'`);
+        await this.logStep('Test Case Info', {
+            'ID': tc['Test Case ID'],
+            'Name': tc['Test Case Name'],
+            'Scenario': tc['Test Scenario'],
+            'Pre-Condition': tc['Pre-Condition'],
+            'Payment Method': tc['Payment Method'],
+            'Expected Result': tc['Expected Result']
+        });
+        return tc;
+    }
+
+    // Helper functions
+    public async logStep(title: string, details?: any) {
+        console.log(`\n=== ${title} ===`);
+        if (details) console.table(details);
+    }
 
     public async getAllTestCases(sheetName: string = 'Custom Product'): Promise<TestCase[]> {
         const workbook = await this.readWorkbook();
@@ -239,7 +245,24 @@ public async logStep(title: string, details?: any) {
 
             const testCase: any = {};
             Object.keys(headers).forEach(header => {
-                testCase[header] = row.getCell(headers[header]).value?.toString() || '';
+                const cellValue = row.getCell(headers[header]).value;
+                if (header === 'imageUrl') {
+                    if (cellValue === null || cellValue === undefined) {
+                        testCase[header] = '';
+                    } else if (typeof cellValue === 'object') {
+                        if ('text' in cellValue) {
+                            testCase[header] = cellValue.text;
+                        } else if ('hyperlink' in cellValue) {
+                            testCase[header] = cellValue.hyperlink;
+                        } else {
+                            testCase[header] = JSON.stringify(cellValue);
+                        }
+                    } else {
+                        testCase[header] = cellValue.toString();
+                    }
+                } else {
+                    testCase[header] = cellValue === null || cellValue === undefined ? '' : cellValue.toString();
+                }
             });
             testCases.push(testCase as TestCase);
         });
@@ -247,201 +270,261 @@ public async logStep(title: string, details?: any) {
         return testCases;
     }
 
-        /**
-         * Update test result with detailed execution information
-         * @param sheetName Name of the worksheet
-         * @param testCaseName Name of the test case
-         * @param result Test result (Passed/Failed)
-         * @param notes Basic execution notes
-         * @param failureInfo Optional failure information
-         */
-        public async updateTestResult(
-            sheetName: string, 
-            testCaseName: string, 
-            result: string, 
-            notes: string,
-            testType: string = 'default',
-            failureInfo?: {
-                failedStep?: string;
-                errorMessage?: string;
-                failureScreenshot?: string;
-                failureTimestamp?: string;
-            }
-        ): Promise<void> {
-            try {
-                console.log(`Updating test result for "${testCaseName}" in sheet "${sheetName}"`);
-                const workbook = await this.readWorkbook();
-                const worksheet = workbook.getWorksheet(sheetName);
-                if (!worksheet) {
-                    throw new Error(`Worksheet ${sheetName} not found in the Excel file`);
-                }
-
-                // Find header columns and handle common variations
-                const headers: { [key: string]: number } = {};
-                const columnMappings = {
-                    'Test Case Name': ['Test Case Name', 'TestCaseName', 'Test_Case_Name'],
-                    'Test_Result': testType === 'pearsonUI' ? ['Pearson_Test_Result', 'Test_Result', 'Test Result', 'TestResult', 'Result'] :
-                                   testType === 'db' ? ['DB_Test_Result', 'Test_Result', 'Test Result', 'TestResult', 'Result'] :
-                                   testType === 'bigcUI' ? ['BigC_Test_Result', 'Test_Result', 'Test Result', 'TestResult', 'Result'] :
-                                   ['Test_Result', 'Test Result', 'TestResult', 'Result'],
-                    'Execution_Notes': testType === 'pearsonUI' ? ['Pearson_Execution_Notes', 'Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes'] :
-                                       testType === 'db' ? ['DB_Execution_Notes', 'Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes'] :
-                                       testType === 'bigcUI' ? ['BigC_Execution_Notes', 'Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes'] :
-                                       ['Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes']
-                };
-
-                worksheet.getRow(1).eachCell((cell, colNumber) => {
-                    const headerName = cell.value?.toString() || '';
-                    console.log(`Found original header: "${headerName}" at column ${colNumber}`);
-                    
-                    // Store the original header
-                    headers[headerName] = colNumber;
-                    
-                    // Check if this header matches any of our expected variations
-                    for (const [key, variations] of Object.entries(columnMappings)) {
-                        if (variations.includes(headerName)) {
-                            headers[key] = colNumber; // Store with our standard key
-                            console.log(`Mapped "${headerName}" to standard header "${key}"`);
-                        }
-                    }
-                });
-
-                // Log all found headers for debugging
-                console.log('All found headers:', Object.keys(headers));
-
-                // Verify required columns exist with flexible matching
-                const requiredColumns = ['Test Case Name', 'Test_Result', 'Execution_Notes'];
-                for (const col of requiredColumns) {
-                    if (!(col in headers)) {
-                        throw new Error(`Required column "${col}" not found in worksheet. Available columns: ${Object.keys(headers).join(', ')}`);
-                    }
-                }
-
-                // Find the row for the test case
-                let foundRow: any = null;
-                let foundRowNumber = 0;
-                worksheet.eachRow((row, rowNumber) => {
-                    if (rowNumber === 1) return; // Skip header
-                    const nameCell = row.getCell(headers['Test Case Name']);
-                    const cellValue = nameCell.value?.toString() || '';
-                    if (cellValue === testCaseName) {
-                        foundRow = row;
-                        foundRowNumber = rowNumber;
-                        console.log(`Found matching test case at row ${rowNumber}`);
-                    }
-                });
-
-                if (!foundRow) {
-                    throw new Error(`Test case "${testCaseName}" not found in sheet "${sheetName}"`);
-                }
-
-                // Update result and notes with current timestamp
-                const timestamp = new Date().toISOString();
-                
-                // Debug current cell values before update
-                if (headers['Test_Result']) {
-                    const currentResult = foundRow.getCell(headers['Test_Result']).value;
-                    console.log(`Current Test_Result value: "${currentResult}"`);
-                    
-                    // Set the new result value
-                    foundRow.getCell(headers['Test_Result']).value = result;
-                    
-                    // Verify the update
-                    const newResult = foundRow.getCell(headers['Test_Result']).value;
-                    console.log(`Updated Test_Result from "${currentResult}" to "${newResult}" at row ${foundRowNumber}`);
-                }
-
-                if (headers['Execution_Notes']) {
-                    const currentNotes = foundRow.getCell(headers['Execution_Notes']).value;
-                    console.log(`Current Execution_Notes value: "${currentNotes}"`);
-                    
-                    // Format the notes based on test result
-                    let formattedNotes: string[];
-                    
-                    if (result === 'Failed' && failureInfo) {
-                        formattedNotes = [
-                            '=== Test Failure Details ===',
-                            `Failed Step: ${failureInfo.failedStep || 'Unknown'}`,
-                            `Error Message: ${failureInfo.errorMessage || 'No error message provided'}`,
-                            `Failure Timestamp: ${failureInfo.failureTimestamp || timestamp}`,
-                            `Failure Screenshot: ${failureInfo.failureScreenshot || 'Not available'}`,
-                            '',
-                            '=== Additional Notes ===',
-                            notes,
-                            '',
-                            `Status: ${result}`,
-                            `Last Updated: ${timestamp}`,
-                            '---'
-                        ];
-                    } else {
-                        formattedNotes = [
-                            notes,
-                            `Status: ${result}`,
-                            `Last Updated: ${timestamp}`,
-                            '---'
-                        ];
-                    }
-                    
-                    foundRow.getCell(headers['Execution_Notes']).value = formattedNotes;
-                    console.log(`Updated Execution_Notes at row ${foundRowNumber}`);
-                }
-
-                // Update last run date if the column exists
-                if (headers['Last_Run_Date'] || headers['LastRunDate']) {
-                    const lastRunColumn = headers['Last_Run_Date'] || headers['LastRunDate'];
-                    foundRow.getCell(lastRunColumn).value = timestamp;
-                    console.log(`Updated Last_Run_Date to "${timestamp}" at row ${foundRowNumber}`);
-                }
-
-                const filePath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
-                console.log(`Saving changes to Excel file: ${filePath}`);
-                
-                try {
-                    // Ensure the file isn't locked
-                    const fileHandle = await workbook.xlsx.writeFile(filePath);
-                    console.log('Successfully saved test results to Excel file');
-                    
-                    // Verify the write by reading back the updated cell
-                    const verifyWorkbook = await this.readWorkbook();
-                    const verifySheet = verifyWorkbook.getWorksheet(sheetName);
-                    const verifyRow = verifySheet?.getRow(foundRowNumber);
-                    const verifiedResult = verifyRow?.getCell(headers['Test_Result']).value;
-                    
-                    if (verifiedResult?.toString() !== result) {
-                        throw new Error(`Excel update verification failed. Expected "${result}" but found "${verifiedResult}"`);
-                    }
-                    console.log('Verified test result was correctly written to Excel');
-                    
-                } catch (writeError) {
-                    console.error('Error writing to Excel file:', writeError);
-                    console.error('File path:', filePath);
-                    console.error('Attempting to diagnose issue...');
-                    
-                    try {
-                        // Check if file exists and is writable
-                        const fs = require('fs');
-                        const stats = fs.statSync(filePath);
-                        console.error('File exists:', stats.isFile());
-                        console.error('File size:', stats.size);
-                        console.error('File permissions:', stats.mode.toString(8));
-                    } catch (statError) {
-                        console.error('Error checking file stats:', statError);
-                    }
-                    
-                    throw writeError;
-                }
-
-            } catch (error) {
-                console.error('Error updating test results:', error);
-                console.error('Error details:', {
-                    sheetName,
-                    testCaseName,
-                    result,
-                    error: error instanceof Error ? error.message : String(error)
-                });
-                throw error;
-            }
+    /**
+     * Update test result with detailed execution information
+     * @param sheetName Name of the worksheet
+     * @param testCaseName Name of the test case
+     * @param result Test result (Passed/Failed)
+     * @param notes Basic execution notes
+     * @param failureInfo Optional failure information
+     */
+    public async updateTestResult(
+        sheetName: string,
+        testCaseName: string,
+        result: string,
+        notes: string,
+        testType: string = 'default',
+        failureInfo?: {
+            failedStep?: string;
+            errorMessage?: string;
+            failureScreenshot?: string;
+            failureTimestamp?: string;
         }
+    ): Promise<void> {
+        try {
+            console.log(`Updating test result for "${testCaseName}" in sheet "${sheetName}"`);
+            const workbook = await this.readWorkbook();
+            const worksheet = workbook.getWorksheet(sheetName);
+            if (!worksheet) {
+                throw new Error(`Worksheet ${sheetName} not found in the Excel file`);
+            }
+
+            // Find header columns and handle common variations
+            const headers: { [key: string]: number } = {};
+            const columnMappings = {
+                'Test Case Name': ['Test Case Name', 'TestCaseName', 'Test_Case_Name'],
+                'Test_Result': testType === 'pearsonUI' ? ['Pearson_Test_Result', 'Test_Result', 'Test Result', 'TestResult', 'Result'] :
+                    testType === 'db' ? ['DB_Test_Result', 'Test_Result', 'Test Result', 'TestResult', 'Result'] :
+                        testType === 'bigcUI' ? ['BigC_Test_Result', 'Actual Test Result','Test_Result', 'Test Result', 'TestResult', 'Result'] :
+                            ['Test_Result', 'Test Result', 'TestResult', 'Result'],
+                'Execution_Notes': testType === 'pearsonUI' ? ['Pearson_Execution_Notes', 'Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes'] :
+                    testType === 'db' ? ['DB_Execution_Notes', 'Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes'] :
+                        testType === 'bigcUI' ? ['BigC_Execution_Notes', 'Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes'] :
+                            ['Execution_Notes', 'Execution Notes', 'ExecutionNotes', 'Notes']
+            };
+
+            worksheet.getRow(1).eachCell((cell, colNumber) => {
+                const headerName = cell.value?.toString() || '';
+                console.log(`Found original header: "${headerName}" at column ${colNumber}`);
+
+                // Store the original header
+                headers[headerName] = colNumber;
+
+                // Check if this header matches any of our expected variations
+                for (const [key, variations] of Object.entries(columnMappings)) {
+                    if (variations.includes(headerName)) {
+                        headers[key] = colNumber; // Store with our standard key
+                        console.log(`Mapped "${headerName}" to standard header "${key}"`);
+                    }
+                }
+            });
+
+            // Log all found headers for debugging
+            console.log('All found headers:', Object.keys(headers));
+
+            // Verify required columns exist with flexible matching
+            const requiredColumns = ['Test Case Name', 'Test_Result', 'Execution_Notes'];
+            for (const col of requiredColumns) {
+                if (!(col in headers)) {
+                    throw new Error(`Required column "${col}" not found in worksheet. Available columns: ${Object.keys(headers).join(', ')}`);
+                }
+            }
+
+            // Find the row for the test case
+            let foundRow: any = null;
+            let foundRowNumber = 0;
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return; // Skip header
+                const nameCell = row.getCell(headers['Test Case Name']);
+                const cellValue = nameCell.value?.toString() || '';
+                if (cellValue === testCaseName) {
+                    foundRow = row;
+                    foundRowNumber = rowNumber;
+                    console.log(`Found matching test case at row ${rowNumber}`);
+                }
+            });
+
+            if (!foundRow) {
+                throw new Error(`Test case "${testCaseName}" not found in sheet "${sheetName}"`);
+            }
+
+            // Update result and notes with current timestamp
+            const timestamp = new Date().toISOString();
+
+            // Debug current cell values before update
+            if (headers['Test_Result']) {
+                const currentResult = foundRow.getCell(headers['Test_Result']).value;
+                console.log(`Current Test_Result value: "${currentResult}"`);
+
+                // Set the new result value
+                foundRow.getCell(headers['Test_Result']).value = result;
+
+                // Verify the update
+                const newResult = foundRow.getCell(headers['Test_Result']).value;
+                console.log(`Updated Test_Result from "${currentResult}" to "${newResult}" at row ${foundRowNumber}`);
+            }
+
+            if (headers['Execution_Notes']) {
+                const currentNotes = foundRow.getCell(headers['Execution_Notes']).value;
+                console.log(`Current Execution_Notes value: "${currentNotes}"`);
+
+                // Format the notes based on test result
+                let formattedNotes: string[];
+
+                if (result === 'Failed' && failureInfo) {
+                    formattedNotes = [
+                        '=== Test Failure Details ===',
+                        `Failed Step: ${failureInfo.failedStep || 'Unknown'}`,
+                        `Error Message: ${failureInfo.errorMessage || 'No error message provided'}`,
+                        `Failure Timestamp: ${failureInfo.failureTimestamp || timestamp}`,
+                        `Failure Screenshot: ${failureInfo.failureScreenshot || 'Not available'}`,
+                        '',
+                        '=== Additional Notes ===',
+                        notes,
+                        '',
+                        `Status: ${result}`,
+                        `Last Updated: ${timestamp}`,
+                        '---'
+                    ];
+                } else {
+                    formattedNotes = [
+                        notes,
+                        `Status: ${result}`,
+                        `Last Updated: ${timestamp}`,
+                        '---'
+                    ];
+                }
+
+                foundRow.getCell(headers['Execution_Notes']).value = formattedNotes;
+                console.log(`Updated Execution_Notes at row ${foundRowNumber}`);
+            }
+
+            // Update last run date if the column exists
+            if (headers['Last_Run_Date'] || headers['LastRunDate']) {
+                const lastRunColumn = headers['Last_Run_Date'] || headers['LastRunDate'];
+                foundRow.getCell(lastRunColumn).value = timestamp;
+                console.log(`Updated Last_Run_Date to "${timestamp}" at row ${foundRowNumber}`);
+            }
+
+            const filePath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
+            console.log(`Saving changes to Excel file: ${filePath}`);
+
+            try {
+                // Ensure the file isn't locked
+                const fileHandle = await workbook.xlsx.writeFile(filePath);
+                console.log('Successfully saved test results to Excel file');
+
+                // Verify the write by reading back the updated cell
+                const verifyWorkbook = await this.readWorkbook();
+                const verifySheet = verifyWorkbook.getWorksheet(sheetName);
+                const verifyRow = verifySheet?.getRow(foundRowNumber);
+                const verifiedResult = verifyRow?.getCell(headers['Test_Result']).value;
+
+                if (verifiedResult?.toString() !== result) {
+                    throw new Error(`Excel update verification failed. Expected "${result}" but found "${verifiedResult}"`);
+                }
+                console.log('Verified test result was correctly written to Excel');
+
+            } catch (writeError) {
+                console.error('Error writing to Excel file:', writeError);
+                console.error('File path:', filePath);
+                console.error('Attempting to diagnose issue...');
+
+                try {
+                    // Check if file exists and is writable
+                    const fs = require('fs');
+                    const stats = fs.statSync(filePath);
+                    console.error('File exists:', stats.isFile());
+                    console.error('File size:', stats.size);
+                    console.error('File permissions:', stats.mode.toString(8));
+                } catch (statError) {
+                    console.error('Error checking file stats:', statError);
+                }
+
+                throw writeError;
+            }
+
+        } catch (error) {
+            console.error('Error updating test results:', error);
+            console.error('Error details:', {
+                sheetName,
+                testCaseName,
+                result,
+                error: error instanceof Error ? error.message : String(error)
+            });
+            throw error;
+        }
+    }
+
+    public async updateBigCProductTestResultWithExpected(
+        sheetName: string,
+        testCaseName: string,
+        screenshotPath: string | undefined,
+        result: string,
+        notes: string
+    ): Promise<void> {
+        try {
+            await this.updateTestResult(sheetName, testCaseName, result, notes, 'bigcUI');
+
+            const workbook = await this.readWorkbook();
+            const worksheet = workbook.getWorksheet(sheetName);
+            if (!worksheet) throw new Error(`Worksheet "${sheetName}" not found`);
+
+            // Find headers
+            const headerRow = worksheet.getRow(1);
+            const headers: { [key: string]: number } = {};
+            headerRow.eachCell((cell, colNumber) => {
+                headers[cell.value?.toString()?.trim() || ''] = colNumber;
+            });
+
+            // Find row by Test Case Name
+            let targetRowNum = -1;
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return;
+                const cellValue = row.getCell(headers['Test Case Name']).value?.toString()?.trim();
+                if (cellValue === testCaseName.trim()) {
+                    targetRowNum = rowNumber;
+                }
+            });
+
+            if (targetRowNum === -1) {
+                console.warn(`Test case "${testCaseName}" not found in "${sheetName}"`);
+                return;
+            }
+
+            const targetRow = worksheet.getRow(targetRowNum);
+
+            if (headers['Expected Test Result']) {
+                if (result === 'Passed') {
+                    targetRow.getCell(headers['Expected Test Result']).value = 'Passed';
+                    console.log(`Wrote "Passed" in Expected Test Result for ${testCaseName}`);
+                } else {
+                    targetRow.getCell(headers['Expected Test Result']).value = ''; // clear on fail
+                    console.log(`Cleared Expected Test Result for ${testCaseName}`);
+                }
+            }
+
+            const path = require('path');
+            const filePath = path.join(__dirname, '../data/BigCommerceData/BigC_Ecomm_TestCases_AutomationMasterSheet.xlsx');
+
+            targetRow.commit();
+            await workbook.xlsx.writeFile(filePath);
+            console.log(`Excel updated successfully for ${testCaseName}`);
+
+        } catch (err) {
+            console.error(`Error updating Expected Test Result for ${testCaseName}:`, err);
+        }
+    }
 
     /**
      * Record a detailed test failure in Excel with step, error, screenshot, and summary
